@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  VIEWER
+  CONTRIBUTOR
+  CEO
+  ADMIN
+}
+
+model User {
+  id            String        @id @default(uuid())
+  email         String        @unique
+  name          String
+  role          Role          @default(VIEWER)
+  avatarUrl     String?
+  department    String?
+  articles      Article[]     @relation("Author")
+  recognitionsSent     Recognition[] @relation("FromUser")
+  recognitionsReceived Recognition[] @relation("ToUser")
+  questions     Question[]
+  answers       Answer[]      @relation("CeoUser")
+  moderatedRecognitions Recognition[] @relation("Moderator")
+  moderatedQuestions    Question[]    @relation("QuestionModerator")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+}
+
+enum ArticleStatus {
+  DRAFT
+  SUBMITTED
+  PUBLISHED
+  ARCHIVED
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  articles    Article[]
+}
+
+model Article {
+  id          String        @id @default(uuid())
+  title       String
+  slug        String        @unique
+  excerpt     String
+  content     String        @db.Text
+  imageUrl    String?
+  status      ArticleStatus @default(DRAFT)
+  isFeatured  Boolean       @default(false)
+  viewCount   Int           @default(0)
+  publishedAt DateTime?
+  authorId    String
+  author      User          @relation("Author", fields: [authorId], references: [id])
+  categoryId  String
+  category    Category      @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+}
+
+enum RecognitionCategory {
+  TEAMWORK
+  INNOVATION
+  EXCELLENCE
+  LEADERSHIP
+}
+
+enum RecognitionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Recognition {
+  id          String              @id @default(uuid())
+  fromUserId  String
+  fromUser    User                @relation("FromUser", fields: [fromUserId], references: [id])
+  toUserId    String
+  toUser      User                @relation("ToUser", fields: [toUserId], references: [id])
+  message     String              @db.Text
+  category    RecognitionCategory @default(TEAMWORK)
+  status      RecognitionStatus   @default(PENDING)
+  moderatorId String?
+  moderator   User?               @relation("Moderator", fields: [moderatorId], references: [id])
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  deletedAt   DateTime?
+}
+
+enum QuestionStatus {
+  PENDING
+  MODERATED
+  ANSWERED
+  REJECTED
+}
+
+model Question {
+  id          String         @id @default(uuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  text        String         @db.Text
+  status      QuestionStatus @default(PENDING)
+  moderatorId String?
+  moderator   User?          @relation("QuestionModerator", fields: [moderatorId], references: [id])
+  answer      Answer?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?
+}
+
+model Answer {
+  id          String   @id @default(uuid())
+  questionId  String   @unique
+  question    Question @relation(fields: [questionId], references: [id])
+  ceoUserId   String
+  ceoUser     User     @relation("CeoUser", fields: [ceoUserId], references: [id])
+  answerText  String   @db.Text
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

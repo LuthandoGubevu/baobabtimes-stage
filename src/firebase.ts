@@ -1,0 +1,33 @@
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, getDocFromServer, doc } from 'firebase/firestore';
+import { getAnalytics } from 'firebase/analytics';
+import firebaseConfig from '../firebase-applet-config.json';
+
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+
+// Initialize Firestore with the provided database ID or default
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)' ? firebaseConfig.firestoreDatabaseId : undefined);
+
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+
+// Connection test to help diagnose "client is offline" errors
+if (typeof window !== 'undefined') {
+  const testConnection = async () => {
+    try {
+      // Attempt to fetch a non-existent document from a test collection
+      await getDocFromServer(doc(db, '_connection_test_', 'ping'));
+      console.log("Firestore connection successful.");
+    } catch (error: any) {
+      if (error.message && error.message.includes('the client is offline')) {
+        console.error("Firestore Error: The client is offline. This usually indicates an incorrect Firebase configuration (Project ID, API Key) or that the Firestore database has not been enabled in the Firebase Console.");
+      } else {
+        // Other errors (like permission denied) are expected if rules are tight, 
+        // but they still prove the client is "online".
+        console.log("Firestore reachability confirmed.");
+      }
+    }
+  };
+  testConnection();
+}

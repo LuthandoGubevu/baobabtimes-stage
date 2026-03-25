@@ -1,0 +1,157 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - displayName: string (required)
+    //   - email: string (required, format: email)
+    //   - photoURL: string (optional)
+    //   - role: string (required, enum: ['admin', 'editor', 'employee'])
+    //   - createdAt: timestamp (optional)
+    //
+    // Collection: articles
+    // Document ID: {articleId}
+    // Fields:
+    //   - title: string (required)
+    //   - content: string (required)
+    //   - authorId: string (required)
+    //   - authorName: string (optional)
+    //   - category: string (optional)
+    //   - status: string (required, enum: ['DRAFT', 'PUBLISHED', 'ARCHIVED'])
+    //   - featuredImage: string (optional)
+    //   - views: number (optional)
+    //   - isPinned: bool (optional)
+    //   - createdAt: timestamp (optional)
+    //   - updatedAt: timestamp (optional)
+    //
+    // Collection: recognitions
+    // Document ID: {recognitionId}
+    // Fields:
+    //   - fromId: string (required)
+    //   - fromName: string (optional)
+    //   - toId: string (required)
+    //   - toName: string (optional)
+    //   - content: string (required)
+    //   - status: string (required, enum: ['PENDING', 'APPROVED', 'REJECTED'])
+    //   - createdAt: timestamp (optional)
+    //
+    // Collection: ama_questions
+    // Document ID: {questionId}
+    // Fields:
+    //   - authorId: string (optional)
+    //   - authorName: string (optional)
+    //   - content: string (required)
+    //   - upvotes: number (optional)
+    //   - status: string (required, enum: ['PENDING', 'APPROVED', 'REJECTED', 'ANSWERED'])
+    //   - answer: string (optional)
+    //   - createdAt: timestamp (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (request.auth.token.email == "keeganbaobabb@gmail.com" ||
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+    }
+
+    function isEditor() {
+      return isAuthenticated() &&
+        (request.auth.token.email == "luthando@baobabbrands.com" || 
+         request.auth.token.email == "luthando@baobabbrands" ||
+         isAdmin() ||
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'editor'));
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['uid', 'displayName', 'email', 'photoURL', 'role', 'createdAt']) &&
+             data.uid is string &&
+             (data.email is string) &&
+             data.role in ['admin', 'editor', 'employee'];
+    }
+
+    function isValidArticle(data) {
+      return hasRequiredFields(['title', 'content', 'authorId', 'status']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.content is string && data.content.size() > 0 &&
+             data.status in ['DRAFT', 'PUBLISHED', 'ARCHIVED'];
+    }
+
+    function isValidRecognition(data) {
+      return hasRequiredFields(['fromId', 'toId', 'content', 'status']) &&
+             data.content is string && data.content.size() > 0 && data.content.size() < 1000 &&
+             data.status in ['PENDING', 'APPROVED', 'REJECTED'];
+    }
+
+    function isValidAmaQuestion(data) {
+      return hasRequiredFields(['content', 'status']) &&
+             data.content is string && data.content.size() > 0 && data.content.size() < 1000 &&
+             data.status in ['PENDING', 'APPROVED', 'REJECTED', 'ANSWERED'];
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && ((isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin());
+    }
+
+    match /articles/{articleId} {
+      allow read: if isAuthenticated() && (resource.data.status == 'PUBLISHED' || isOwner(resource.data.authorId) || isEditor());
+      allow create: if isAuthenticated() && isValidArticle(request.resource.data) && (request.resource.data.authorId == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() && isValidArticle(request.resource.data) && (isOwner(resource.data.authorId) || isEditor());
+      allow delete: if isAuthenticated() && (isOwner(resource.data.authorId) || isAdmin());
+    }
+
+    match /recognitions/{recognitionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidRecognition(request.resource.data) && request.resource.data.fromId == request.auth.uid;
+      allow update: if isAuthenticated() && isValidRecognition(request.resource.data) && (isOwner(resource.data.fromId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /ama_questions/{questionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidAmaQuestion(request.resource.data) && (request.resource.data.authorId == request.auth.uid || !('authorId' in request.resource.data));
+      allow update: if isAuthenticated() && isValidAmaQuestion(request.resource.data) && (isOwner(resource.data.authorId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+  }
+}

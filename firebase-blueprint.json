@@ -1,0 +1,84 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "editor", "employee"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["displayName", "email", "role"]
+    },
+    "Article": {
+      "title": "Article",
+      "description": "News articles and company updates",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "category": { "type": "string" },
+        "status": { "type": "string", "enum": ["DRAFT", "PUBLISHED", "ARCHIVED"] },
+        "featuredImage": { "type": "string" },
+        "views": { "type": "integer" },
+        "isPinned": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "authorId", "status"]
+    },
+    "Recognition": {
+      "title": "Recognition",
+      "description": "Peer-to-peer recognition messages",
+      "type": "object",
+      "properties": {
+        "fromId": { "type": "string" },
+        "fromName": { "type": "string" },
+        "toId": { "type": "string" },
+        "toName": { "type": "string" },
+        "content": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fromId", "toId", "content", "status"]
+    },
+    "AmaQuestion": {
+      "title": "AMA Question",
+      "description": "Questions for the CEO",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "content": { "type": "string" },
+        "upvotes": { "type": "integer" },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED", "ANSWERED"] },
+        "answer": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["content", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/articles/{articleId}": {
+      "schema": "Article",
+      "description": "Published and draft articles"
+    },
+    "/recognitions/{recognitionId}": {
+      "schema": "Recognition",
+      "description": "Employee recognitions"
+    },
+    "/ama_questions/{questionId}": {
+      "schema": "AmaQuestion",
+      "description": "CEO AMA questions"
+    }
+  }
+}
