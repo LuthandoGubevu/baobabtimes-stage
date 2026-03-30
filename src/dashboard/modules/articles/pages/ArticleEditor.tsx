@@ -15,7 +15,13 @@ import { motion } from 'motion/react';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp, collection } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { useAuth } from '@/hooks/useAuth';
+import { activityService } from '@/features/notifications/services/activityService';
 import { cn } from '@/lib/utils';
+import { ImageUpload } from '@/dashboard/components/ImageUpload';
+import { toast, Toaster } from 'sonner';
+import { handleFirestoreError, OperationType } from '@/lib/firestore-errors';
+
+import { CATEGORIES } from '@/constants/categories';
 
 export const ArticleEditor = () => {
   const { id } = useParams();
@@ -23,60 +29,120 @@ export const ArticleEditor = () => {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [category, setCategory] = useState('Company News');
+  const [excerpt, setExcerpt] = useState('');
+  const [category, setCategory] = useState(CATEGORIES[0].name);
+  const [imageUrl, setImageUrl] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!id);
 
   useEffect(() => {
     if (id) {
       const fetchArticle = async () => {
-        const docRef = doc(db, 'articles', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setTitle(data.title);
-          setContent(data.content);
-          setCategory(data.category || 'Company News');
+        setIsLoading(true);
+        try {
+          const docRef = doc(db, 'articles', id);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setTitle(data.title || '');
+            setContent(data.content || '');
+            setExcerpt(data.excerpt || '');
+            setCategory(data.category || 'Company News');
+            setImageUrl(data.imageUrl || '');
+          } else {
+            toast.error('Article not found.');
+            navigate('/dashboard/articles');
+          }
+        } catch (err) {
+          console.error("Error fetching article:", err);
+          toast.error('Failed to load article.');
+        } finally {
+          setIsLoading(false);
         }
       };
       fetchArticle();
     }
-  }, [id]);
+  }, [id, navigate]);
 
   const handleSave = async (status: 'DRAFT' | 'PUBLISHED') => {
-    if (!user) return;
+    if (!user) {
+      toast.error('You must be logged in to save an article.');
+      return;
+    }
     if (!title.trim() || !content.trim()) {
-      alert('Please provide a title and content.');
+      toast.error('Please provide a title and content.');
       return;
     }
 
     setIsSaving(true);
+    const path = id ? `articles/${id}` : 'articles';
+    let articleId = id;
     try {
       const articleData = {
         title,
         content,
+        excerpt,
         category,
+        imageUrl,
         status,
         updatedAt: serverTimestamp(),
+        publishedAt: status === 'PUBLISHED' ? serverTimestamp() : null,
       };
 
       if (id) {
-        await updateDoc(doc(db, 'articles', id), articleData);
+        try {
+          await updateDoc(doc(db, 'articles', id), articleData);
+        } catch (err) {
+          handleFirestoreError(err, OperationType.UPDATE, path);
+        }
       } else {
         const newId = doc(collection(db, 'articles')).id;
-        await setDoc(doc(db, 'articles', newId), {
-          ...articleData,
-          authorId: user.uid,
-          authorName: user.displayName,
-          views: 0,
-          createdAt: serverTimestamp(),
-        });
-        navigate(`/dashboard/articles/${newId}/edit`, { replace: true });
+        articleId = newId;
+        try {
+          await setDoc(doc(db, 'articles', newId), {
+            ...articleData,
+            author: {
+              id: user.uid,
+              name: user.displayName || 'Anonymous',
+              avatar: user.photoURL || '',
+              role: 'Contributor' // Default role
+            },
+            authorId: user.uid,
+            authorName: user.displayName || 'Anonymous',
+            views: 0,
+            createdAt: serverTimestamp(),
+          });
+        } catch (err) {
+          handleFirestoreError(err, OperationType.CREATE, `articles/${newId}`);
+        }
       }
-      alert(`Article ${status === 'PUBLISHED' ? 'published' : 'saved as draft'} successfully!`);
+
+      toast.success(`Article ${status === 'PUBLISHED' ? 'published' : 'saved as draft'} successfully!`);
+      
+      // Create activity if published
+      if (status === 'PUBLISHED') {
+        activityService.createActivity({
+          type: 'article_published',
+          title: `New article published: ${title}`,
+          message: excerpt || content.substring(0, 100) + '...',
+          entityId: articleId,
+          entitySlug: title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
+          isPublic: true,
+          metadata: {
+            category,
+            authorName: user.displayName || 'Anonymous'
+          }
+        });
+      }
+
+      // Redirect back to list after a short delay to show the toast
+      setTimeout(() => {
+        navigate('/dashboard/articles');
+      }, 1500);
     } catch (error) {
       console.error("Error saving article:", error);
-      alert('Failed to save article.');
+      toast.error('Failed to save article. Please check your permissions.');
     } finally {
       setIsSaving(false);
     }
@@ -84,6 +150,15 @@ export const ArticleEditor = () => {
 
   return (
     <div className="fixed inset-0 bg-white z-[60] flex flex-col">
+      <Toaster position="top-center" richColors />
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-[70] flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-12 h-12 border-4 border-stone-200 border-t-stone-900 rounded-full animate-spin" />
+            <p className="text-sm font-bold text-stone-900 uppercase tracking-widest">Loading Article...</p>
+          </div>
+        </div>
+      )}
       {/* Editor Header */}
       <header className="h-16 border-b border-zinc-100 px-6 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-20">
         <div className="flex items-center space-x-4">
@@ -146,6 +221,13 @@ export const ArticleEditor = () => {
             
             <div className="prose prose-zinc prose-lg max-w-none">
               <textarea
+                placeholder="Article excerpt (brief summary)..."
+                className="w-full bg-transparent text-lg text-zinc-500 italic placeholder:text-zinc-200 border-none focus:ring-0 resize-none mb-4"
+                rows={3}
+                value={excerpt}
+                onChange={(e) => setExcerpt(e.target.value)}
+              />
+              <textarea
                 placeholder="Start writing your story..."
                 className="w-full bg-transparent text-xl text-zinc-700 placeholder:text-zinc-200 border-none focus:ring-0 resize-none min-h-[500px]"
                 value={content}
@@ -163,14 +245,10 @@ export const ArticleEditor = () => {
         >
           <div className="p-6 space-y-8 w-[320px]">
             <section className="space-y-4">
-              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center">
-                <ImageIcon size={14} className="mr-2" />
-                Featured Image
-              </h3>
-              <div className="aspect-video bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center text-zinc-400 hover:bg-zinc-100 hover:border-zinc-300 transition-all cursor-pointer group">
-                <Plus size={24} className="mb-2 group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold">Upload Image</span>
-              </div>
+              <ImageUpload 
+                value={imageUrl}
+                onChange={setImageUrl}
+              />
             </section>
 
             <section className="space-y-4">
@@ -186,10 +264,11 @@ export const ArticleEditor = () => {
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
                   >
-                    <option>Company News</option>
-                    <option>Employee Spotlight</option>
-                    <option>Strategy</option>
-                    <option>Culture</option>
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat.slug} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

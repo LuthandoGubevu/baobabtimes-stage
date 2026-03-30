@@ -2,6 +2,9 @@ import { useArticles } from "../hooks/useArticles";
 import ArticleCard from "../components/ArticleCard";
 import { Search, Filter } from "lucide-react";
 import { useState } from "react";
+import { cn } from "../../../utils/cn";
+
+import { CATEGORIES } from "../../../constants/categories";
 
 /**
  * ArticlesPage component for displaying the article feed
@@ -9,10 +12,13 @@ import { useState } from "react";
 export default function ArticlesPage() {
   const { data: articles, isLoading, error } = useArticles();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
-  const filteredArticles = Array.isArray(articles) ? articles.filter(article => 
-    article.title.toLowerCase().includes(searchQuery.toLowerCase())
-  ) : [];
+  const filteredArticles = Array.isArray(articles) ? articles.filter(article => {
+    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || article.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  }) : [];
 
   return (
     <div className="space-y-12">
@@ -44,10 +50,16 @@ export default function ArticlesPage() {
 
       {/* Categories */}
       <div className="flex flex-wrap gap-2">
-        {["All", "Company News", "HR", "Engineering", "Product", "Culture"].map((cat) => (
+        {["All", ...CATEGORIES.map(c => c.name)].map((cat) => (
           <button 
             key={cat}
-            className="px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-full border border-stone-200 hover:bg-stone-900 hover:text-white transition-all"
+            onClick={() => setSelectedCategory(cat)}
+            className={cn(
+              "px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-full border transition-all",
+              selectedCategory === cat 
+                ? "bg-stone-900 text-white border-stone-900" 
+                : "border-stone-200 text-stone-500 hover:bg-stone-900 hover:text-white"
+            )}
           >
             {cat}
           </button>
@@ -62,7 +74,7 @@ export default function ArticlesPage() {
       ) : filteredArticles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredArticles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
+            <ArticleCard key={article.id} article={article} className="" />
           ))}
         </div>
       ) : (

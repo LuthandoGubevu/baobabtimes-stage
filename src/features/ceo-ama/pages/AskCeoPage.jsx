@@ -123,7 +123,7 @@ export default function AskCeoPage() {
               <div>
                 <h4 className="text-sm font-bold text-amber-900 mb-1">How it works</h4>
                 <p className="text-xs text-amber-800 leading-relaxed">
-                  Questions are collected weekly. The CEO answers the top-voted or most relevant questions every Friday.
+                  The CEO will Answer any question you may have here
                 </p>
               </div>
             </div>

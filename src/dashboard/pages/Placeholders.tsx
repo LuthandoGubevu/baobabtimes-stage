@@ -5,4 +5,3 @@ export const RecognitionModeration = () => <div className="p-8">Recognition Mode
 export const CeoAmaModeration = () => <div className="p-8">CEO AMA Moderation Placeholder</div>;
 export const MediaLibrary = () => <div className="p-8">Media Library Placeholder</div>;
 export const UserManagement = () => <div className="p-8">User Management Placeholder</div>;
-export const SettingsPage = () => <div className="p-8">Settings Page Placeholder</div>;

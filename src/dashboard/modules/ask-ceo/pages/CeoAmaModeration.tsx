@@ -18,6 +18,7 @@ import {
 import { StatusBadge } from '@/dashboard/components/StatusBadge';
 import { EmptyState } from '@/dashboard/components/EmptyState';
 import { cn } from '@/lib/utils';
+import { activityService } from '@/features/notifications/services/activityService';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { handleFirestoreError, OperationType } from '@/lib/firestore-errors';
@@ -54,6 +55,23 @@ export const CeoAmaModeration = () => {
       if (answer) updateData.answer = answer;
       
       await updateDoc(doc(db, 'ama_questions', id), updateData);
+      
+      // Create activity if answered
+      if (status === 'ANSWERED') {
+        activityService.createActivity({
+          type: 'ceo_message_published', // Reusing this type for CEO responses
+          title: `CEO answered a question`,
+          message: answer || 'The CEO has provided an answer to an employee question.',
+          entityId: id,
+          url: '/ask-ceo',
+          isPublic: true,
+          metadata: {
+            category: 'Ask the CEO',
+            authorName: 'CEO'
+          }
+        });
+      }
+
       setAnsweringId(null);
       setAnswerText('');
     } catch (error) {

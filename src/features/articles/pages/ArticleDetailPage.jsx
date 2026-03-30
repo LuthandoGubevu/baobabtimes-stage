@@ -34,7 +34,7 @@ export default function ArticleDetailPage() {
       <header className="mb-12">
         <div className="flex items-center space-x-4 mb-6">
           <span className="px-3 py-1 bg-stone-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-full">
-            {category}
+            {category === "From the Desk" ? "👉 From the Desk" : category}
           </span>
           <span className="text-stone-400 text-xs font-medium">
             {formatDate(createdAt)}

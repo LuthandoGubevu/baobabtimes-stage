@@ -18,9 +18,9 @@ export default function ProtectedRoute({ children, role }) {
 
   if (!user) return <Navigate to="/login" />;
   
-  if (role === "ADMIN" && user.role !== "admin") return <Navigate to="/" />;
-  if (role === "EDITOR" && user.role !== "editor" && user.role !== "admin") return <Navigate to="/" />;
-  if (role === "EMPLOYEE" && !user.role) return <Navigate to="/" />;
+  if (role === "CEO_ONLY" && user.role !== "ceo") return <Navigate to="/" />;
+  if (role === "ADMIN_OR_CEO" && user.role !== "admin" && user.role !== "ceo") return <Navigate to="/" />;
+  if (role === "LOGGED_IN" && !user) return <Navigate to="/login" />;
   
   return children;
 }

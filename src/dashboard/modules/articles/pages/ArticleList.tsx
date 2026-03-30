@@ -20,6 +20,13 @@ interface Article {
   id: string;
   title: string;
   authorName: string;
+  authorId?: string;
+  author?: {
+    id: string;
+    name: string;
+    avatar?: string;
+    role?: string;
+  };
   category: string;
   status: 'PUBLISHED' | 'DRAFT' | 'ARCHIVED';
   createdAt: any;
@@ -207,7 +214,19 @@ export const ArticleList = () => {
                         <span className="text-xs text-zinc-400 mt-0.5">ID: {article.id}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-zinc-600">{article.authorName}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-6 h-6 rounded-full bg-zinc-100 overflow-hidden border border-zinc-200">
+                          <img 
+                            src={article.author?.avatar || `https://i.pravatar.cc/150?u=${article.author?.id || article.authorId}`} 
+                            alt={article.author?.name || article.authorName} 
+                            className="w-full h-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                        <span className="text-sm text-zinc-600">{article.author?.name || article.authorName || "Anonymous"}</span>
+                      </div>
+                    </td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-1 bg-zinc-100 text-zinc-600 rounded-md text-[10px] font-bold uppercase tracking-wider">
                         {article.category}

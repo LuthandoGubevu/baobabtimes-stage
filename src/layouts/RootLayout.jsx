@@ -1,5 +1,6 @@
 import { Outlet, Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { NotificationBell } from "../features/notifications/components/NotificationBell";
 import { 
   Home, 
   Newspaper, 
@@ -20,7 +21,7 @@ import { cn } from "../utils/cn";
  * RootLayout component with common navigation
  */
 export default function RootLayout() {
-  const { user, logout, isAdmin, isCEO, isContributor } = useAuth();
+  const { user, logout, isAdmin, isCEO, hasDashboardAccess } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -35,11 +36,6 @@ export default function RootLayout() {
     { label: "Recognition", path: "/recognition", icon: Award },
     { label: "Ask the CEO", path: "/ask-ceo", icon: MessageSquare },
   ];
-
-  const dashboardItems = [];
-  if (isContributor) dashboardItems.push({ label: "Contributor", path: "/contributor", icon: LayoutDashboard });
-  if (isCEO) dashboardItems.push({ label: "CEO Panel", path: "/ceo-panel", icon: ShieldCheck });
-  if (isAdmin) dashboardItems.push({ label: "Admin", path: "/admin", icon: Settings });
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans">
@@ -78,32 +74,50 @@ export default function RootLayout() {
 
             {/* User Actions */}
             <div className="hidden md:flex items-center space-x-4">
-              {dashboardItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider border border-stone-900 rounded-full hover:bg-stone-900 hover:text-white transition-all"
-                >
-                  {item.label}
-                </Link>
-              ))}
+              <NotificationBell isPublicOnly={!user} />
+              
               {user ? (
-                <div className="flex items-center space-x-3 pl-4 border-l border-stone-200">
-                  <div className="text-right">
-                    <p className="text-sm font-semibold">{user.displayName || user.email}</p>
-                    <p className="text-xs text-stone-500">{user.role}</p>
+                <div className="flex items-center space-x-4 pl-4 border-l border-stone-200">
+                  {hasDashboardAccess && (
+                    <>
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center space-x-2 px-4 py-2 bg-stone-900 text-white text-sm font-bold rounded-full hover:bg-stone-800 transition-all shadow-lg shadow-stone-200"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        <span>Dashboard</span>
+                      </Link>
+                      
+                      <Link
+                        to="/dashboard/settings"
+                        className="p-2 text-stone-500 hover:text-stone-900 transition-colors"
+                        title="Settings"
+                      >
+                        <Settings className="w-5 h-5" />
+                      </Link>
+                    </>
+                  )}
+                  
+                  <div className="h-8 w-px bg-stone-100 mx-2" />
+
+                  <div className="flex items-center space-x-3">
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">{user.displayName || user.email}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400">{user.role}</p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="p-2 text-stone-500 hover:text-red-600 transition-colors"
+                      title="Logout"
+                    >
+                      <LogOut className="w-5 h-5" />
+                    </button>
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="p-2 text-stone-500 hover:text-stone-900 transition-colors"
-                  >
-                    <LogOut className="w-5 h-5" />
-                  </button>
                 </div>
               ) : (
                 <Link
                   to="/login"
-                  className="px-4 py-2 bg-stone-900 text-white text-sm font-medium rounded-lg hover:bg-stone-800 transition-colors"
+                  className="px-6 py-2 bg-stone-900 text-white text-sm font-bold rounded-full hover:bg-stone-800 transition-all shadow-lg shadow-stone-200"
                 >
                   Login
                 </Link>
@@ -111,7 +125,8 @@ export default function RootLayout() {
             </div>
 
             {/* Mobile Menu Toggle */}
-            <div className="md:hidden flex items-center">
+            <div className="md:hidden flex items-center space-x-2">
+              <NotificationBell isPublicOnly={!user} />
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="p-2 text-stone-500 hover:text-stone-900"
@@ -142,25 +157,45 @@ export default function RootLayout() {
               </NavLink>
             ))}
             <hr className="border-stone-100" />
-            {dashboardItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
+            {user ? (
+              <>
+                {hasDashboardAccess && (
+                  <>
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center space-x-3 p-3 rounded-lg text-base font-bold text-stone-900 bg-stone-50"
+                    >
+                      <LayoutDashboard className="w-5 h-5" />
+                      <span>Go to Dashboard</span>
+                    </Link>
+                    <Link
+                      to="/dashboard/settings"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center space-x-3 p-3 rounded-lg text-base font-medium text-stone-900 hover:bg-stone-50"
+                    >
+                      <Settings className="w-5 h-5" />
+                      <span>Settings</span>
+                    </Link>
+                  </>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-3 p-3 rounded-lg text-base font-medium text-red-600 hover:bg-red-50"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center space-x-3 p-3 rounded-lg text-base font-medium text-stone-500 hover:bg-stone-50"
+                className="flex items-center space-x-3 p-3 rounded-lg text-base font-bold text-white bg-stone-900"
               >
-                <item.icon className="w-5 h-5" />
-                <span>{item.label} Dashboard</span>
-              </NavLink>
-            ))}
-            {user && (
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center space-x-3 p-3 rounded-lg text-base font-medium text-red-600 hover:bg-red-50"
-              >
-                <LogOut className="w-5 h-5" />
-                <span>Logout</span>
-              </button>
+                <User className="w-5 h-5" />
+                <span>Login</span>
+              </Link>
             )}
           </div>
         )}

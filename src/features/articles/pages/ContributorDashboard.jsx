@@ -29,7 +29,18 @@ export default function ContributorDashboard() {
   });
 
   const columns = [
-    { key: "title", label: "Title" },
+    { 
+      key: "title", 
+      label: "Title",
+      render: (title, article) => (
+        <Link 
+          to={`/posts/${article.slug || article.id}`} 
+          className="font-serif font-bold text-stone-900 hover:text-stone-600 transition-colors"
+        >
+          {title}
+        </Link>
+      )
+    },
     { key: "category", label: "Category" },
     { 
       key: "status", 

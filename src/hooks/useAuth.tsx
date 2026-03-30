@@ -9,7 +9,7 @@ import {
   createUserWithEmailAndPassword,
   updateProfile
 } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 
@@ -18,7 +18,25 @@ interface AuthUser {
   displayName: string | null;
   email: string | null;
   photoURL: string | null;
-  role: 'admin' | 'editor' | 'employee';
+  role: 'admin' | 'ceo' | 'user';
+  fullName?: string;
+  phone?: string;
+  jobTitle?: string;
+  department?: string;
+  bio?: string;
+  preferences?: {
+    theme?: 'light' | 'dark' | 'system';
+    language?: string;
+    timezone?: string;
+    landingPage?: string;
+  };
+  notifications?: {
+    emailOnRecognition?: boolean;
+    emailOnArticle?: boolean;
+    ceoUpdates?: boolean;
+    systemAlerts?: boolean;
+  };
+  updatedAt?: string;
 }
 
 interface AuthContextType {
@@ -31,9 +49,9 @@ interface AuthContextType {
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  isEditor: boolean;
   isCEO: boolean;
-  isContributor: boolean;
+  hasDashboardAccess: boolean;
+  canManageArticles: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -44,55 +62,87 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    let unsubscribeDoc: (() => void) | null = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       setError(null);
+      
       if (firebaseUser) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          
-          if (userDoc.exists()) {
-            setUser(userDoc.data() as AuthUser);
-          } else {
-            // Create new user profile
-            const isAdminEmail = firebaseUser.email === "keeganbaobabb@gmail.com";
-            const isEditorEmail = firebaseUser.email === "luthando@baobabbrands.com" || firebaseUser.email === "luthando@baobabbrands";
-            
-            const newUser: AuthUser = {
-              uid: firebaseUser.uid,
-              displayName: firebaseUser.displayName,
-              email: firebaseUser.email || "unknown@baobabbrands.com",
-              photoURL: firebaseUser.photoURL,
-              role: isAdminEmail ? 'admin' : (isEditorEmail ? 'editor' : 'employee'),
-            };
-            
-            try {
-              await setDoc(doc(db, 'users', firebaseUser.uid), {
-                ...newUser,
-                createdAt: serverTimestamp()
-              });
-              setUser(newUser);
-            } catch (error) {
-              handleFirestoreError(error, OperationType.WRITE, `users/${firebaseUser.uid}`);
+        // Set up real-time listener for the user document
+        unsubscribeDoc = onSnapshot(
+          doc(db, 'users', firebaseUser.uid),
+          async (userDoc) => {
+            if (userDoc.exists()) {
+              const userData = userDoc.data() as AuthUser;
+              
+              // Repair logic: Ensure CEO role is set for the specific email
+              if (firebaseUser.email === "grant@baobabbrands.com" && userData.role !== 'ceo') {
+                console.log("Repairing CEO role for:", firebaseUser.email);
+                await setDoc(doc(db, 'users', firebaseUser.uid), {
+                  ...userData,
+                  role: 'ceo'
+                }, { merge: true });
+                return;
+              }
+
+              // Repair logic: Ensure Admin role is set for the specific email
+              if (firebaseUser.email === "keeganbaobabb@gmail.com" && userData.role !== 'admin') {
+                console.log("Repairing Admin role for:", firebaseUser.email);
+                await setDoc(doc(db, 'users', firebaseUser.uid), {
+                  ...userData,
+                  role: 'admin'
+                }, { merge: true });
+                return;
+              }
+
+              setUser(userData);
+              setLoading(false);
+            } else {
+              // Handle new user creation
+              initializeNewUser(firebaseUser);
             }
+          },
+          (err) => {
+            console.error("Firestore listener error:", err);
+            handleFirestoreError(err, OperationType.GET, `users/${firebaseUser.uid}`);
+            setLoading(false);
           }
-        } catch (err: any) {
-          console.error("Auth initialization error:", err);
-          // If it's a JSON string from handleFirestoreError, try to parse it or just show the message
-          let msg = err.message;
-          try {
-            const parsed = JSON.parse(err.message);
-            msg = parsed.error || msg;
-          } catch (e) {}
-          setError(msg || "Failed to load user profile");
-        }
+        );
       } else {
+        if (unsubscribeDoc) unsubscribeDoc();
         setUser(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeDoc) unsubscribeDoc();
+    };
   }, []);
+
+  const initializeNewUser = async (firebaseUser: FirebaseUser) => {
+    const isAdminEmail = firebaseUser.email === "keeganbaobabb@gmail.com";
+    const isCeoEmail = firebaseUser.email === "grant@baobabbrands.com";
+    
+    const newUser: AuthUser = {
+      uid: firebaseUser.uid,
+      displayName: firebaseUser.displayName,
+      email: firebaseUser.email || "unknown@baobabbrands.com",
+      photoURL: firebaseUser.photoURL,
+      role: isAdminEmail ? 'admin' : (isCeoEmail ? 'ceo' : 'user'),
+    };
+    
+    try {
+      await setDoc(doc(db, 'users', firebaseUser.uid), {
+        ...newUser,
+        createdAt: serverTimestamp()
+      });
+      // setUser is handled by onSnapshot
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, `users/${firebaseUser.uid}`);
+    }
+  };
 
   const login = async () => {
     const provider = new GoogleAuthProvider();
@@ -110,14 +160,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // The onAuthStateChanged listener will handle the Firestore document creation
     // but we might need to ensure the displayName is available immediately
     const isAdminEmail = email === "keeganbaobabb@gmail.com";
-    const isEditorEmail = email === "luthando@baobabbrands.com" || email === "luthando@baobabbrands";
+    const isCeoEmail = email === "grant@baobabbrands.com";
     
     const newUser: AuthUser = {
       uid: userCredential.user.uid,
       displayName,
       email,
       photoURL: null,
-      role: isAdminEmail ? 'admin' : (isEditorEmail ? 'editor' : 'employee'),
+      role: isAdminEmail ? 'admin' : (isCeoEmail ? 'ceo' : 'user'),
     };
     
     try {
@@ -145,9 +195,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     isAuthenticated: !!user,
     isAdmin: user?.role === "admin",
-    isEditor: user?.role === "editor" || user?.role === "admin",
-    isCEO: user?.role === "admin", // CEO uses admin role for now
-    isContributor: user?.role === "editor" || user?.role === "admin",
+    isCEO: user?.role === "ceo",
+    hasDashboardAccess: user?.role === "admin" || user?.role === "ceo",
+    canManageArticles: user?.role === "admin" || user?.role === "ceo",
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

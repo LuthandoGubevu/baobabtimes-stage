@@ -3,7 +3,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCreateArticle } from "../hooks/useArticles";
+import { useAuth } from "../../../hooks/useAuth";
 import { ArrowLeft, Save, Send, Image as ImageIcon, AlertCircle } from "lucide-react";
+
+import { CATEGORIES } from "../../../constants/categories";
 
 const articleSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -20,6 +23,7 @@ type ArticleFormValues = z.infer<typeof articleSchema>;
  */
 export default function CreateArticlePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const createArticle = useCreateArticle();
   
   const {
@@ -31,7 +35,7 @@ export default function CreateArticlePage() {
     resolver: zodResolver(articleSchema),
     defaultValues: {
       title: "",
-      category: "Company News",
+      category: CATEGORIES[0].name,
       excerpt: "",
       content: "",
       imageUrl: ""
@@ -40,7 +44,19 @@ export default function CreateArticlePage() {
 
   const onSubmit = async (data: ArticleFormValues, status: "DRAFT" | "PUBLISHED" = "PUBLISHED") => {
     try {
-      await createArticle.mutateAsync({ ...data, status });
+      await createArticle.mutateAsync({ 
+        ...data, 
+        status,
+        author: {
+          id: user?.uid,
+          name: user?.displayName || "Anonymous",
+          avatar: user?.photoURL || "",
+          role: "Contributor" // Default role, could be dynamic based on user profile
+        },
+        authorId: user?.uid, // Keep for legacy/querying
+        authorName: user?.displayName || "Anonymous", // Keep for legacy/querying
+        slug: data.title.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "")
+      });
       navigate("/contributor");
     } catch (err) {
       console.error("Failed to create article", err);
@@ -109,11 +125,11 @@ export default function CreateArticlePage() {
                 {...register("category")}
                 className="w-full p-3 bg-stone-50 border border-stone-100 rounded-xl text-sm focus:outline-none"
               >
-                <option value="Company News">Company News</option>
-                <option value="HR">HR</option>
-                <option value="Engineering">Engineering</option>
-                <option value="Product">Product</option>
-                <option value="Culture">Culture</option>
+                {CATEGORIES.map((cat) => (
+                  <option key={cat.slug} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
             </div>
 

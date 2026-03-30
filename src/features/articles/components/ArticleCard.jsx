@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { cn } from "../../../utils/cn";
+import AuthorMeta from "./AuthorMeta";
 
 /**
  * ArticleCard component for displaying article summaries
@@ -9,7 +10,7 @@ import { cn } from "../../../utils/cn";
  * @param {string} props.className
  */
 export default function ArticleCard({ article, className }) {
-  const { id, title, category, authorName, authorId, createdAt, imageUrl, excerpt } = article;
+  const { id, title, slug, category, author, authorName, authorId, createdAt, imageUrl, excerpt } = article;
 
   const formatDate = (date) => {
     if (!date) return "Draft";
@@ -17,9 +18,14 @@ export default function ArticleCard({ article, className }) {
     return format(new Date(date), "MMM d, yyyy");
   };
 
+  const articleSlug = slug || id;
+
+  // Use the new author object or fallback to existing authorName/authorId
+  const authorData = author || { id: authorId, name: authorName };
+
   return (
     <Link 
-      to={`/articles/${id}`}
+      to={`/posts/${articleSlug}`}
       className={cn(
         "group block bg-white rounded-2xl overflow-hidden border border-stone-200 hover:border-stone-400 transition-all duration-300",
         className
@@ -36,7 +42,7 @@ export default function ArticleCard({ article, className }) {
       <div className="p-5">
         <div className="flex items-center justify-between mb-3">
           <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400 px-2 py-0.5 bg-stone-50 rounded border border-stone-100">
-            {category}
+            {category === "From the Desk" ? "👉 From the Desk" : category}
           </span>
           <span className="text-[10px] text-stone-400 font-medium">
             {formatDate(createdAt)}
@@ -50,11 +56,8 @@ export default function ArticleCard({ article, className }) {
             {excerpt}
           </p>
         )}
-        <div className="flex items-center space-x-2 pt-4 border-t border-stone-50">
-          <div className="w-6 h-6 rounded-full bg-stone-200 overflow-hidden">
-            <img src={`https://i.pravatar.cc/150?u=${authorId || id}`} alt={authorName} referrerPolicy="no-referrer" />
-          </div>
-          <span className="text-xs font-semibold text-stone-600">{authorName || "Anonymous"}</span>
+        <div className="pt-4 border-t border-stone-50">
+          <AuthorMeta author={authorData} size="sm" />
         </div>
       </div>
     </Link>

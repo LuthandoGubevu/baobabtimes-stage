@@ -5,11 +5,36 @@
       "description": "User profile information",
       "type": "object",
       "properties": {
+        "uid": { "type": "string" },
+        "fullName": { "type": "string" },
         "displayName": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "photoURL": { "type": "string" },
-        "role": { "type": "string", "enum": ["admin", "editor", "employee"] },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "phone": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "department": { "type": "string" },
+        "bio": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "ceo", "user"] },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "theme": { "type": "string", "enum": ["light", "dark", "system"] },
+            "language": { "type": "string" },
+            "timezone": { "type": "string" },
+            "landingPage": { "type": "string" }
+          }
+        },
+        "notifications": {
+          "type": "object",
+          "properties": {
+            "emailOnRecognition": { "type": "boolean" },
+            "emailOnArticle": { "type": "boolean" },
+            "ceoUpdates": { "type": "boolean" },
+            "systemAlerts": { "type": "boolean" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["displayName", "email", "role"]
     },
@@ -39,10 +64,16 @@
       "properties": {
         "fromId": { "type": "string" },
         "fromName": { "type": "string" },
+        "fromAvatar": { "type": "string" },
         "toId": { "type": "string" },
         "toName": { "type": "string" },
+        "toAvatar": { "type": "string" },
         "content": { "type": "string" },
+        "category": { "type": "string" },
+        "categories": { "type": "array", "items": { "type": "string" } },
+        "dateString": { "type": "string" },
         "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED"] },
+        "isAnonymous": { "type": "boolean" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["fromId", "toId", "content", "status"]
@@ -61,6 +92,46 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["content", "status"]
+    },
+    "CeoMessage": {
+      "title": "CEO Message",
+      "description": "Direct messages from the CEO",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "authorId": { "type": "string" },
+        "status": { "type": "string", "enum": ["DRAFT", "PUBLISHED"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content", "authorId", "status"]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "Platform-wide activity feed items",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["article_published", "recognition_posted", "ceo_message_published", "announcement_published", "spotlight_published"] },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "entityId": { "type": "string" },
+        "entitySlug": { "type": "string" },
+        "url": { "type": "string" },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "category": { "type": "string" },
+            "authorName": { "type": "string" },
+            "recognitionValue": { "type": "string" },
+            "fromName": { "type": "string" },
+            "toName": { "type": "string" }
+          }
+        },
+        "isPublic": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "title", "isPublic", "createdAt"]
     }
   },
   "firestore": {
@@ -79,6 +150,14 @@
     "/ama_questions/{questionId}": {
       "schema": "AmaQuestion",
       "description": "CEO AMA questions"
+    },
+    "/ceo_messages/{messageId}": {
+      "schema": "CeoMessage",
+      "description": "CEO messages"
+    },
+    "/activity/{activityId}": {
+      "schema": "Activity",
+      "description": "Recent platform activity"
     }
   }
 }

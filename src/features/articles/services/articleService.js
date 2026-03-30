@@ -6,8 +6,12 @@ import {
   getDoc, 
   doc, 
   addDoc, 
+  setDoc,
+  updateDoc,
+  writeBatch,
   serverTimestamp, 
-  orderBy 
+  orderBy,
+  limit
 } from "firebase/firestore";
 import { db } from "../../../firebase";
 import { handleFirestoreError, OperationType } from "../../../lib/firestore-errors";
@@ -56,7 +60,7 @@ export const articleService = {
   },
 
   /**
-   * Create a new article draft
+   * Create a new article
    * @param {Object} data 
    * @returns {Promise<Object>}
    */
@@ -65,7 +69,7 @@ export const articleService = {
     try {
       const docRef = await addDoc(collection(db, path), {
         ...data,
-        status: "DRAFT",
+        status: data.status || "DRAFT",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -73,6 +77,149 @@ export const articleService = {
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, path);
       throw error;
+    }
+  },
+
+  /**
+   * Publish a CEO message and deactivate the previous one
+   * @param {string} id 
+   * @param {Object} data 
+   * @param {Object} user 
+   */
+  publishCeoMessage: async (id, data, user) => {
+    const path = "articles";
+    try {
+      const batch = writeBatch(db);
+      
+      // 1. Find the currently active CEO message
+      const activeQuery = query(
+        collection(db, path),
+        where("category", "==", "From the CEO"),
+        where("isHomepageActive", "==", true)
+      );
+      const activeSnapshot = await getDocs(activeQuery);
+      
+      // 2. Deactivate existing active messages
+      activeSnapshot.forEach((activeDoc) => {
+        if (activeDoc.id !== id) {
+          batch.update(activeDoc.ref, { 
+            isHomepageActive: false,
+            updatedAt: serverTimestamp()
+          });
+        }
+      });
+
+      // 3. Prepare the new/updated message
+      const messageData = {
+        ...data,
+        category: "From the CEO",
+        contentType: "from_ceo",
+        status: "PUBLISHED",
+        isHomepageActive: true,
+        publishedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      if (id) {
+        batch.update(doc(db, path, id), messageData);
+      } else {
+        const newDocRef = doc(collection(db, path));
+        batch.set(newDocRef, {
+          ...messageData,
+          author: {
+            id: user.uid,
+            name: user.displayName || "CEO",
+            avatar: user.photoURL || "",
+            role: "CEO"
+          },
+          authorId: user.uid,
+          authorName: user.displayName || "CEO",
+          views: 0,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      await batch.commit();
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+      throw error;
+    }
+  },
+
+  /**
+   * Archive a CEO message (remove from homepage)
+   * @param {string} id 
+   */
+  archiveCeoMessage: async (id) => {
+    const path = `articles/${id}`;
+    try {
+      await updateDoc(doc(db, "articles", id), {
+        status: "ARCHIVED",
+        isHomepageActive: false,
+        archivedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch a single article by Slug
+   * @param {string} slug 
+   * @returns {Promise<Object>}
+   */
+  getArticleBySlug: async (slug) => {
+    const path = "articles";
+    try {
+      const q = query(collection(db, path), where("slug", "==", slug));
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
+      }
+      return null;
+    } catch (error) {
+      handleFirestoreError(error, OperationType.GET, path);
+      return null;
+    }
+  },
+
+  /**
+   * Fetch the active CEO article for the homepage
+   * @returns {Promise<Object>}
+   */
+  getLatestCeoArticle: async () => {
+    const path = "articles";
+    try {
+      // Query specifically for the active homepage message
+      const q = query(
+        collection(db, path),
+        where("category", "==", "From the CEO"),
+        where("isHomepageActive", "==", true),
+        limit(1)
+      );
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
+      }
+
+      // Fallback: Get the latest published if no "active" flag is found
+      const fallbackQ = query(
+        collection(db, path),
+        where("category", "==", "From the CEO"),
+        where("status", "==", "PUBLISHED"),
+        orderBy("publishedAt", "desc"),
+        limit(1)
+      );
+      const fallbackSnapshot = await getDocs(fallbackQ);
+      return !fallbackSnapshot.empty ? { id: fallbackSnapshot.docs[0].id, ...fallbackSnapshot.docs[0].data() } : null;
+    } catch (error) {
+      console.error("Error fetching CEO article:", error);
+      return null;
     }
   }
 };

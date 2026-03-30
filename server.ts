@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import articlesRouter from "./src/backend/modules/articles/articles.routes";
+import mediaRouter from "./src/backend/modules/media/media.routes.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,12 @@ async function startServer() {
 
   // Articles Module
   app.use("/api/articles", articlesRouter);
+
+  // Media Module
+  app.use("/api/media", mediaRouter);
+
+  // Serve uploads statically
+  app.use("/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
 
   // Recognition API (to be moved to modules/recognition/recognition.routes.ts)
   app.get("/api/recognition", (req, res) => {

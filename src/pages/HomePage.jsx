@@ -1,0 +1,200 @@
+import { Link } from "react-router-dom";
+import { useArticles } from "../features/articles/hooks/useArticles";
+import { useQuery } from "@tanstack/react-query";
+import { recognitionService } from "../features/recognition/services/recognitionService";
+import ArticleCard from "../features/articles/components/ArticleCard";
+import FromTheCeoSection from "../features/articles/components/FromTheCeoSection";
+
+/**
+ * HomePage component
+ * Displays the Hero, CEO Spotlight, and Featured Articles
+ */
+export default function HomePage() {
+  const { data: articles, isLoading } = useArticles();
+  
+  const { data: recognitions, isLoading: isLoadingRecognitions } = useQuery({
+    queryKey: ["recognitions"],
+    queryFn: recognitionService.getApprovedRecognitions
+  });
+
+  const recentPraise = Array.isArray(recognitions) ? recognitions.slice(0, 3) : [];
+  
+  // Filter out CEO articles from the featured stories section
+  const featuredArticles = Array.isArray(articles) 
+    ? articles
+        .filter(article => article.category !== "From the CEO")
+        .slice(0, 4) 
+    : [];
+
+  return (
+    <div className="space-y-24">
+      {/* Hero Section */}
+      <section className="text-center py-24 bg-stone-900 text-white rounded-[2rem] overflow-hidden relative shadow-2xl">
+        <div className="absolute inset-0 opacity-30 bg-[url('https://picsum.photos/seed/baobab/1920/1080')] bg-cover bg-center scale-105"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-stone-900/40 to-stone-900/80"></div>
+        <div className="relative z-10 max-w-3xl mx-auto px-6">
+          <div className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-8 animate-fade-in">
+            Established 2026
+          </div>
+          <h1 className="text-6xl md:text-8xl font-serif font-bold mb-8 leading-[0.9] tracking-tighter">
+            The Baobab <br />
+            <span className="italic text-stone-400">Times</span>
+          </h1>
+          <p className="text-xl text-stone-300 font-light mb-10 max-w-2xl mx-auto leading-relaxed">
+            Reimagining internal communication through editorial excellence, 
+            strategic clarity, and deep employee engagement.
+          </p>
+          <div className="flex flex-wrap justify-center gap-6">
+            <Link 
+              to="/articles" 
+              className="px-10 py-4 bg-white text-stone-900 font-bold rounded-full hover:bg-stone-200 transition-all transform hover:scale-105 shadow-xl"
+            >
+              Read Latest News
+            </Link>
+            <Link 
+              to="/recognition" 
+              className="px-10 py-4 bg-transparent border-2 border-white/30 text-white font-bold rounded-full hover:bg-white/10 transition-all backdrop-blur-sm"
+            >
+              Recognize a Peer
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* From The CEO Section */}
+      <FromTheCeoSection />
+
+      {/* Main Content Grid */}
+      <section className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-16">
+        {/* Featured Stories Section */}
+        <div className="space-y-12">
+          <div className="flex justify-between items-end border-b border-stone-200 pb-8">
+            <div className="space-y-2">
+              <h2 className="text-5xl font-serif font-bold italic tracking-tight">Featured Stories</h2>
+              <p className="text-stone-400 text-lg font-light">Hand-picked insights from across the organization.</p>
+            </div>
+            <Link 
+              to="/articles" 
+              className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 hover:text-stone-900 transition-colors border-b border-stone-200 hover:border-stone-900 pb-2 mb-1"
+            >
+              View All
+            </Link>
+          </div>
+          
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="animate-pulse space-y-4">
+                  <div className="aspect-[16/10] bg-stone-100 rounded-2xl"></div>
+                  <div className="h-4 bg-stone-100 rounded w-1/4"></div>
+                  <div className="h-6 bg-stone-100 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : featuredArticles.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+              {featuredArticles.map((article) => (
+                <ArticleCard key={article.id} article={article} />
+              ))}
+            </div>
+          ) : (
+            <div className="py-20 text-center bg-stone-50 rounded-3xl border border-dashed border-stone-200">
+              <p className="text-stone-400 font-serif italic">No featured articles available at this time.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar */}
+        <aside className="space-y-12">
+          {/* Recognition Widget */}
+          <div className="bg-stone-100 p-8 rounded-[2rem] border border-stone-200/50 shadow-sm">
+            <h2 className="text-2xl font-serif font-bold mb-6 flex items-center">
+              <span className="w-8 h-8 bg-stone-900 text-white rounded-lg flex items-center justify-center text-sm mr-3">★</span>
+              Recent Praise
+            </h2>
+            <div className="space-y-6">
+              {isLoadingRecognitions ? (
+                [1, 2, 3].map((i) => (
+                  <div key={i} className="animate-pulse bg-white p-5 rounded-2xl border border-stone-200/30">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-stone-200"></div>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-stone-200 rounded w-24"></div>
+                        <div className="h-2 bg-stone-100 rounded w-16"></div>
+                      </div>
+                    </div>
+                    <div className="h-10 bg-stone-50 rounded w-full"></div>
+                  </div>
+                ))
+              ) : recentPraise.length > 0 ? (
+                recentPraise.map((rec) => (
+                  <div key={rec.id} className="bg-white p-5 rounded-2xl shadow-sm border border-stone-200/30 hover:shadow-md transition-shadow cursor-default">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-stone-200 overflow-hidden border border-stone-100">
+                        {rec.isAnonymous ? (
+                          <div className="w-full h-full bg-stone-200 flex items-center justify-center">
+                            <span className="text-stone-400 text-[10px] font-bold">?</span>
+                          </div>
+                        ) : (
+                          <img 
+                            src={rec.fromAvatar || `https://i.pravatar.cc/150?u=${rec.fromName}`} 
+                            alt={rec.fromName} 
+                            referrerPolicy="no-referrer" 
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-stone-900">
+                          {rec.fromName || (rec.isAnonymous ? "Anonymous" : "Someone")}
+                        </p>
+                        <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+                          To: {rec.toName}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-stone-600 italic leading-relaxed line-clamp-3">
+                      "{rec.content}"
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="py-10 text-center bg-white/50 rounded-2xl border border-dashed border-stone-200">
+                  <p className="text-stone-400 text-sm font-serif italic">No recent praise yet.</p>
+                </div>
+              )}
+            </div>
+            <Link 
+              to="/recognition"
+              className="w-full mt-8 py-4 bg-stone-900 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-stone-800 transition-all text-center block shadow-lg shadow-stone-900/10"
+            >
+              See All Recognition
+            </Link>
+          </div>
+
+          {/* Ask CEO Widget */}
+          <div className="bg-stone-900 text-white p-8 rounded-[2rem] shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+            <h2 className="text-2xl font-serif font-bold mb-3 relative z-10">Ask the CEO</h2>
+            <p className="text-stone-400 text-sm mb-8 leading-relaxed relative z-10">
+              Have a question for our leadership? Get direct answers and strategic clarity here.
+            </p>
+            <div className="space-y-4 relative z-10">
+              <div className="p-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
+                <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Latest Answer:</p>
+                <p className="text-sm font-serif font-bold leading-snug">
+                  "What is our policy on remote work for the next quarter?"
+                </p>
+              </div>
+            </div>
+            <Link 
+              to="/ask-ceo"
+              className="w-full mt-8 py-4 bg-white text-stone-900 text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-stone-100 transition-all text-center block shadow-xl"
+            >
+              Ask a Question
+            </Link>
+          </div>
+        </aside>
+      </section>
+    </div>
+  );
+}

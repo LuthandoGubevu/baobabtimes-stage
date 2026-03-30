@@ -11,7 +11,7 @@ service cloud.firestore {
     //   - displayName: string (required)
     //   - email: string (required, format: email)
     //   - photoURL: string (optional)
-    //   - role: string (required, enum: ['admin', 'editor', 'employee'])
+    //   - role: string (required, enum: ['admin', 'editor', 'employee', 'ceo'])
     //   - createdAt: timestamp (optional)
     //
     // Collection: articles
@@ -51,6 +51,16 @@ service cloud.firestore {
     //   - answer: string (optional)
     //   - createdAt: timestamp (optional)
     //
+    // Collection: ceo_messages
+    // Document ID: {messageId}
+    // Fields:
+    //   - title: string (required)
+    //   - content: string (required)
+    //   - authorId: string (required)
+    //   - status: string (required, enum: ['DRAFT', 'PUBLISHED'])
+    //   - createdAt: timestamp (optional)
+    //   - updatedAt: timestamp (optional)
+    //
     // ===============================================================
 
     // ===============================================================
@@ -58,7 +68,7 @@ service cloud.firestore {
     // ===============================================================
     
     function isAuthenticated() {
-      return request.auth != null;
+      return request.auth != null && request.auth.uid != null;
     }
 
     function isOwner(userId) {
@@ -72,13 +82,15 @@ service cloud.firestore {
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
     }
 
-    function isEditor() {
+    function isCEO() {
       return isAuthenticated() &&
-        (request.auth.token.email == "luthando@baobabbrands.com" || 
-         request.auth.token.email == "luthando@baobabbrands" ||
-         isAdmin() ||
+        (request.auth.token.email == "grant@baobabbrands.com" ||
          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'editor'));
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ceo'));
+    }
+
+    function hasDashboardAccess() {
+      return isAdmin() || isCEO();
     }
 
     function isValidEmail(email) {
@@ -98,10 +110,12 @@ service cloud.firestore {
     // ===============================================================
 
     function isValidUser(data) {
-      return hasOnlyAllowedFields(['uid', 'displayName', 'email', 'photoURL', 'role', 'createdAt']) &&
+      return hasOnlyAllowedFields(['uid', 'displayName', 'email', 'photoURL', 'role', 'createdAt', 'fullName', 'phone', 'jobTitle', 'department', 'bio', 'preferences', 'notifications', 'updatedAt']) &&
              data.uid is string &&
              (data.email is string) &&
-             data.role in ['admin', 'editor', 'employee'];
+             data.role in ['admin', 'ceo', 'user'] &&
+             (!('preferences' in data) || data.preferences is map) &&
+             (!('notifications' in data) || data.notifications is map);
     }
 
     function isValidArticle(data) {
@@ -113,14 +127,39 @@ service cloud.firestore {
 
     function isValidRecognition(data) {
       return hasRequiredFields(['fromId', 'toId', 'content', 'status']) &&
-             data.content is string && data.content.size() > 0 && data.content.size() < 1000 &&
-             data.status in ['PENDING', 'APPROVED', 'REJECTED'];
+             data.content is string && data.content.size() > 0 && data.content.size() < 2000 &&
+             data.status in ['PENDING', 'APPROVED', 'REJECTED'] &&
+             (!('categories' in data) || data.categories is list) &&
+             (!('fromName' in data) || data.fromName is string) &&
+             (!('toName' in data) || data.toName is string) &&
+             (!('dateString' in data) || data.dateString is string) &&
+             (!('isAnonymous' in data) || data.isAnonymous is bool);
     }
 
     function isValidAmaQuestion(data) {
       return hasRequiredFields(['content', 'status']) &&
              data.content is string && data.content.size() > 0 && data.content.size() < 1000 &&
-             data.status in ['PENDING', 'APPROVED', 'REJECTED', 'ANSWERED'];
+             data.status in ['PENDING', 'APPROVED', 'REJECTED', 'ANSWERED'] &&
+             (!('answer' in data) || data.answer is string);
+    }
+
+    function isValidCeoMessage(data) {
+      return hasRequiredFields(['title', 'content', 'authorId', 'status']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.content is string && data.content.size() > 0 &&
+             data.status in ['DRAFT', 'PUBLISHED'];
+    }
+
+    function isValidActivity(data) {
+      return hasRequiredFields(['type', 'title', 'isPublic', 'createdAt']) &&
+             data.type is string &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 500 &&
+             data.isPublic is bool &&
+             (!('message' in data) || data.message is string) &&
+             (!('entityId' in data) || data.entityId is string) &&
+             (!('entitySlug' in data) || data.entitySlug is string) &&
+             (!('url' in data) || data.url is string) &&
+             (!('metadata' in data) || data.metadata is map);
     }
 
     // ===============================================================
@@ -134,10 +173,10 @@ service cloud.firestore {
     }
 
     match /articles/{articleId} {
-      allow read: if isAuthenticated() && (resource.data.status == 'PUBLISHED' || isOwner(resource.data.authorId) || isEditor());
-      allow create: if isAuthenticated() && isValidArticle(request.resource.data) && (request.resource.data.authorId == request.auth.uid || isAdmin());
-      allow update: if isAuthenticated() && isValidArticle(request.resource.data) && (isOwner(resource.data.authorId) || isEditor());
-      allow delete: if isAuthenticated() && (isOwner(resource.data.authorId) || isAdmin());
+      allow read: if isAuthenticated() && (resource.data.status == 'PUBLISHED' || isOwner(resource.data.authorId) || hasDashboardAccess());
+      allow create: if hasDashboardAccess() && isValidArticle(request.resource.data) && (request.resource.data.authorId == request.auth.uid || isAdmin());
+      allow update: if hasDashboardAccess() && isValidArticle(request.resource.data) && (isOwner(resource.data.authorId) || isAdmin());
+      allow delete: if isAdmin() || (isCEO() && isOwner(resource.data.authorId));
     }
 
     match /recognitions/{recognitionId} {
@@ -150,7 +189,21 @@ service cloud.firestore {
     match /ama_questions/{questionId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidAmaQuestion(request.resource.data) && (request.resource.data.authorId == request.auth.uid || !('authorId' in request.resource.data));
-      allow update: if isAuthenticated() && isValidAmaQuestion(request.resource.data) && (isOwner(resource.data.authorId) || isAdmin());
+      allow update: if isAuthenticated() && isValidAmaQuestion(request.resource.data) && (isOwner(resource.data.authorId) || isAdmin() || isCEO());
+      allow delete: if isAdmin();
+    }
+
+    match /ceo_messages/{messageId} {
+      allow read: if isAuthenticated() && (resource.data.status == 'PUBLISHED' || isCEO());
+      allow create: if isCEO() && isValidCeoMessage(request.resource.data);
+      allow update: if isCEO() && isValidCeoMessage(request.resource.data);
+      allow delete: if isCEO();
+    }
+
+    match /activity/{activityId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidActivity(request.resource.data);
+      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
   }

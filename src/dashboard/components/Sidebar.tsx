@@ -24,24 +24,25 @@ const navSections = [
   {
     label: 'Publishing',
     items: [
-      { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
-      { name: 'Articles', path: '/dashboard/articles', icon: FileText },
-      { name: 'Curation', path: '/dashboard/curation', icon: Layout },
-      { name: 'Media Library', path: '/dashboard/media', icon: ImageIcon },
+      { name: 'Overview', path: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'ceo'] },
+      { name: 'Articles', path: '/dashboard/articles', icon: FileText, roles: ['admin', 'ceo'] },
+      { name: 'Curation', path: '/dashboard/curation', icon: Layout, roles: ['admin', 'ceo'] },
+      { name: 'Media Library', path: '/dashboard/media', icon: ImageIcon, roles: ['admin', 'ceo'] },
+      { name: 'From the CEO', path: '/dashboard/from-the-ceo', icon: User, roles: ['ceo'] },
     ]
   },
   {
     label: 'Engagement',
     items: [
-      { name: 'Recognition', path: '/dashboard/recognition', icon: Award },
-      { name: 'Ask the CEO', path: '/dashboard/ask-ceo', icon: MessageSquare },
+      { name: 'Recognition', path: '/dashboard/recognition', icon: Award, roles: ['admin', 'ceo'] },
+      { name: 'Ask the CEO', path: '/dashboard/ask-ceo', icon: MessageSquare, roles: ['ceo'] },
     ]
   },
   {
     label: 'System',
     items: [
-      { name: 'Users', path: '/dashboard/users', icon: Users },
-      { name: 'Settings', path: '/dashboard/settings', icon: Settings },
+      { name: 'Users', path: '/dashboard/users', icon: Users, roles: ['admin', 'ceo'] },
+      { name: 'Settings', path: '/dashboard/settings', icon: Settings, roles: ['admin', 'ceo'] },
     ]
   }
 ];
@@ -61,6 +62,13 @@ export const Sidebar = () => {
       console.error('Logout failed:', error);
     }
   };
+
+  const filteredSections = navSections.map(section => ({
+    ...section,
+    items: section.items.filter(item => 
+      !item.roles || (user?.role && item.roles.includes(user.role))
+    )
+  })).filter(section => section.items.length > 0);
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-zinc-950 text-zinc-400 border-r border-zinc-800">
@@ -83,13 +91,22 @@ export const Sidebar = () => {
       </div>
 
       <div className="px-4 mb-6">
-        <div className={cn(
-          "flex items-center p-3 bg-zinc-900/50 rounded-2xl border border-zinc-800/50 overflow-hidden",
-          isCollapsed ? "justify-center" : "space-x-3"
-        )}>
-          <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 border border-zinc-700 overflow-hidden">
+        <Link 
+          to="/dashboard/settings"
+          className={cn(
+            "flex items-center p-3 bg-zinc-900/50 rounded-2xl border border-zinc-800/50 overflow-hidden transition-colors hover:bg-zinc-900 hover:border-zinc-700 group",
+            isCollapsed ? "justify-center" : "space-x-3"
+          )}
+        >
+          <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 border border-zinc-700 overflow-hidden group-hover:border-zinc-600 transition-colors">
             {user?.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName || ''} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              <img 
+                src={`${user.photoURL}${user.photoURL.includes('?') ? '&' : '?'}v=${user.updatedAt || Date.now()}`} 
+                key={user.photoURL}
+                alt={user.displayName || ''} 
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover" 
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-zinc-500">
                 <User size={20} />
@@ -98,15 +115,15 @@ export const Sidebar = () => {
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-white truncate">{user?.displayName || 'User'}</p>
+              <p className="text-sm font-bold text-white truncate group-hover:text-zinc-200 transition-colors">{user?.displayName || 'User'}</p>
               <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 truncate">{user?.role || 'Employee'}</p>
             </div>
           )}
-        </div>
+        </Link>
       </div>
 
       <nav className="flex-1 px-4 space-y-8 mt-4 overflow-y-auto">
-        {navSections.map((section) => (
+        {filteredSections.map((section) => (
           <div key={section.label} className="space-y-2">
             {!isCollapsed && (
               <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-zinc-600">

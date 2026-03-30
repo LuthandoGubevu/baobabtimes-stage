@@ -36,6 +36,8 @@ export function useCreateArticle() {
     mutationFn: articleService.createArticle,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["ceo", "articles"] });
+      queryClient.invalidateQueries({ queryKey: ["article", "latest-ceo"] });
     },
   });
 }
