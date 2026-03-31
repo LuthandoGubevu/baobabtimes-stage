@@ -67,26 +67,38 @@ service cloud.firestore {
     // Helper Functions
     // ===============================================================
     
-    function isAuthenticated() {
+    function isSignedIn() {
       return request.auth != null && request.auth.uid != null;
     }
 
+    function isAuthenticated() {
+      return isSignedIn();
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+      return isSignedIn() && request.auth.uid == userId;
     }
 
     function isAdmin() {
-      return isAuthenticated() &&
-        (request.auth.token.email == "keeganbaobabb@gmail.com" ||
+      return isSignedIn() &&
+        (request.auth.token.get('email', '') == "keeganbaobabb@gmail.com" ||
          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
     }
 
     function isCEO() {
-      return isAuthenticated() &&
-        (request.auth.token.email == "grant@baobabbrands.com" ||
+      return isSignedIn() &&
+        (request.auth.token.get('email', '') == "grant@baobabbrands.com" ||
          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ceo'));
+    }
+
+    function isArticleAuthor(articleData) {
+      return isSignedIn() && request.auth.uid == articleData.authorId;
     }
 
     function hasDashboardAccess() {
@@ -113,7 +125,7 @@ service cloud.firestore {
       return hasOnlyAllowedFields(['uid', 'displayName', 'email', 'photoURL', 'role', 'createdAt', 'fullName', 'phone', 'jobTitle', 'department', 'bio', 'preferences', 'notifications', 'updatedAt']) &&
              data.uid is string &&
              (data.email is string) &&
-             data.role in ['admin', 'ceo', 'user'] &&
+             data.role in ['admin', 'ceo', 'user', 'employee', 'editor'] &&
              (!('preferences' in data) || data.preferences is map) &&
              (!('notifications' in data) || data.notifications is map);
     }
@@ -169,13 +181,20 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create: if isOwner(userId) && isValidUser(request.resource.data);
-      allow update: if isAuthenticated() && isValidUser(request.resource.data) && ((isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin());
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && (
+        (isOwner(userId) && (
+          request.resource.data.role == resource.data.role || 
+          (request.auth.token.get('email', '') == "grant@baobabbrands.com" && request.resource.data.role == "ceo") ||
+          (request.auth.token.get('email', '') == "keeganbaobabb@gmail.com" && request.resource.data.role == "admin")
+        )) || 
+        isAdmin()
+      );
     }
 
     match /articles/{articleId} {
-      allow read: if isAuthenticated() && (resource.data.status == 'PUBLISHED' || isOwner(resource.data.authorId) || hasDashboardAccess());
+      allow read: if isSignedIn() && (resource.data.status == 'PUBLISHED' || isOwner(resource.data.authorId) || hasDashboardAccess());
       allow create: if hasDashboardAccess() && isValidArticle(request.resource.data) && (request.resource.data.authorId == request.auth.uid || isAdmin());
-      allow update: if hasDashboardAccess() && isValidArticle(request.resource.data) && (isOwner(resource.data.authorId) || isAdmin());
+      allow update: if hasDashboardAccess() && isValidArticle(request.resource.data) && (isOwner(resource.data.authorId) || isAdmin() || isCEO());
       allow delete: if isAdmin() || (isCEO() && isOwner(resource.data.authorId));
     }
 
@@ -201,7 +220,7 @@ service cloud.firestore {
     }
 
     match /activity/{activityId} {
-      allow read: if true;
+      allow read: if isAuthenticated() || (resource != null && resource.data.get('isPublic', false) == true);
       allow create: if isAuthenticated() && isValidActivity(request.resource.data);
       allow update: if isAdmin();
       allow delete: if isAdmin();

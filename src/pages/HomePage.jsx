@@ -30,7 +30,7 @@ export default function HomePage() {
     <div className="space-y-24">
       {/* Hero Section */}
       <section className="text-center py-24 bg-stone-900 text-white rounded-[2rem] overflow-hidden relative shadow-2xl">
-        <div className="absolute inset-0 opacity-30 bg-[url('https://picsum.photos/seed/baobab/1920/1080')] bg-cover bg-center scale-105"></div>
+        <div className="absolute inset-0 opacity-30 bg-[url('/staff-image.jpg')] bg-cover bg-center scale-105"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-stone-900/40 to-stone-900/80"></div>
         <div className="relative z-10 max-w-3xl mx-auto px-6">
           <div className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-8 animate-fade-in">

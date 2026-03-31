@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import { motion } from 'motion/react';
-import { Search, HelpCircle, User as UserIcon, ChevronRight } from 'lucide-react';
+import { Search, HelpCircle, User as UserIcon, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 
@@ -45,7 +45,15 @@ export const DashboardLayout = () => {
             ))}
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
+            <Link 
+              to="/"
+              className="hidden sm:flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors group"
+            >
+              <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+              <span>Back to Website</span>
+            </Link>
+            
             <div className="relative hidden md:block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
               <input 

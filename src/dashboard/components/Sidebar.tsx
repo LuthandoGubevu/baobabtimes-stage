@@ -14,7 +14,8 @@ import {
   X,
   LogOut,
   Layout,
-  User
+  User,
+  ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -90,7 +91,20 @@ export const Sidebar = () => {
         </button>
       </div>
 
-      <div className="px-4 mb-6">
+      <div className="px-4 mb-6 space-y-2">
+        <Link 
+          to="/"
+          className={cn(
+            "flex items-center px-3 py-2 rounded-lg transition-all duration-200 group text-zinc-500 hover:text-white hover:bg-zinc-900 border border-zinc-800/50 hover:border-zinc-700",
+            isCollapsed ? "justify-center" : "space-x-3"
+          )}
+        >
+          <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
+          {!isCollapsed && (
+            <span className="text-xs font-bold uppercase tracking-widest">Back to Website</span>
+          )}
+        </Link>
+
         <Link 
           to="/dashboard/settings"
           className={cn(
