@@ -221,5 +221,26 @@ export const articleService = {
       console.error("Error fetching CEO article:", error);
       return null;
     }
+  },
+
+  /**
+   * Fetch all published CEO articles for the archive
+   * @returns {Promise<Array>}
+   */
+  getCeoArticles: async () => {
+    const path = "articles";
+    try {
+      const q = query(
+        collection(db, path),
+        where("category", "==", "From the CEO"),
+        where("status", "==", "PUBLISHED"),
+        orderBy("publishedAt", "desc")
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.LIST, path);
+      return [];
+    }
   }
 };

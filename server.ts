@@ -54,6 +54,17 @@ async function startServer() {
 
   // --- VITE MIDDLEWARE ---
 
+  // Global Error Handler (ensure JSON for API errors)
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error(err.stack);
+    if (req.path.startsWith("/api/")) {
+      return res.status(err.status || 500).json({
+        error: err.message || "Internal Server Error",
+      });
+    }
+    next(err);
+  });
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },

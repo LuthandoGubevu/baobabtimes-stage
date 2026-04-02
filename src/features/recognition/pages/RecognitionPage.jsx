@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { Award, Heart, Star, Plus, Loader2, MessageSquare } from "lucide-react";
+import { Plus, MessageSquare } from "lucide-react";
 import RecognitionCard from "../components/RecognitionCard";
 import RecognitionModal from "../components/RecognitionModal";
+import RecognitionSummaryCard from "../components/RecognitionSummaryCard";
+import SpotlightSection from "../components/SpotlightSection";
 import { recognitionService } from "../services/recognitionService";
 import { useQuery } from "@tanstack/react-query";
+import { RECOGNITION_VALUES } from "../constants/recognitionValues";
 
 export default function RecognitionPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,18 +21,14 @@ export default function RecognitionPage() {
   });
 
   const { 
-    data: stats = { Innovation: 0, Impact: 0, Heart: 0, total: 0 },
+    data: stats = {},
     isLoading: isLoadingStats
   } = useQuery({
     queryKey: ["recognition-stats"],
     queryFn: recognitionService.getRecognitionStats
   });
 
-  const statCards = [
-    { label: "Innovation", value: stats.Innovation, icon: Star, color: "text-amber-500", bg: "bg-amber-50" },
-    { label: "Impact", value: stats.Impact, icon: Heart, color: "text-red-500", bg: "bg-red-50" },
-    { label: "Heart", value: stats.Heart, icon: Award, color: "text-blue-500", bg: "bg-blue-50" },
-  ];
+  const recognitionValues = Object.keys(RECOGNITION_VALUES);
 
   return (
     <div className="space-y-12 pb-20">
@@ -51,21 +50,33 @@ export default function RecognitionPage() {
         </button>
       </header>
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {statCards.map((stat) => (
-          <div key={stat.label} className="bg-white p-8 rounded-[2.5rem] border border-stone-200 shadow-sm flex items-center space-x-6">
-            <div className={`w-16 h-16 ${stat.bg} rounded-3xl flex items-center justify-center`}>
-              <stat.icon className={`w-8 h-8 ${stat.color}`} />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-1">{stat.label}</p>
-              <p className="text-3xl font-serif font-bold">
-                {isLoadingStats ? "..." : stat.value}
-              </p>
-            </div>
+      {/* Spotlight Section - Celebrating Top Performers */}
+      <SpotlightSection />
+
+      {/* Stats Section - Responsive Grid on Desktop, Horizontal Scroll on Mobile/Tablet */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400">Value Summary</h2>
+          <div className="h-px flex-grow mx-6 bg-stone-100" />
+        </div>
+        
+        {/* Horizontal Scroll for Mobile/Tablet, Grid for Desktop */}
+        <div className="relative group">
+          <div className="flex lg:grid lg:grid-cols-5 items-center space-x-3 lg:space-x-0 lg:gap-4 overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth">
+            {recognitionValues.map((value) => (
+              <RecognitionSummaryCard 
+                key={value} 
+                label={value} 
+                count={stats[value] || 0} 
+                isLoading={isLoadingStats}
+                className="lg:min-w-0" // Allow shrinking in grid
+              />
+            ))}
           </div>
-        ))}
+          
+          {/* Optional: Subtle fade indicators for scroll on mobile */}
+          <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-[#fcfcfb] to-transparent pointer-events-none lg:hidden" />
+        </div>
       </div>
 
       {/* Recognition Feed */}

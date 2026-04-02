@@ -1,11 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { collection, addDoc, serverTimestamp, query, orderBy, getDocs, where } from "firebase/firestore";
-import { db } from "../../../firebase";
 import { useAuth } from "../../../hooks/useAuth";
 import CeoQuestionCard from "../components/CeoQuestionCard";
 import { Send, Info, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { handleFirestoreError, OperationType } from "../../../lib/firestore-errors";
+import { amaService } from "../services/amaService";
 
 /**
  * AskCeoPage component for displaying the CEO AMA section
@@ -17,40 +15,11 @@ export default function AskCeoPage() {
 
   const { data: questions, isLoading, error } = useQuery({
     queryKey: ["ceo-questions"],
-    queryFn: async () => {
-      try {
-        // Fetch all questions and filter in memory to avoid index requirement
-        const q = query(
-          collection(db, "ama_questions"),
-          orderBy("createdAt", "desc")
-        );
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs
-          .map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }))
-          .filter(q => ["APPROVED", "ANSWERED"].includes(q.status));
-      } catch (err) {
-        handleFirestoreError(err, OperationType.LIST, "ama_questions");
-        return [];
-      }
-    }
+    queryFn: amaService.getQuestions
   });
 
   const mutation = useMutation({
-    mutationFn: async (newQuestion) => {
-      try {
-        return await addDoc(collection(db, "ama_questions"), {
-          ...newQuestion,
-          createdAt: serverTimestamp(),
-          upvotes: 0,
-          status: "PENDING"
-        });
-      } catch (err) {
-        handleFirestoreError(err, OperationType.CREATE, "ama_questions");
-      }
-    },
+    mutationFn: amaService.submitQuestion,
     onSuccess: () => {
       setQuestionText("");
       queryClient.invalidateQueries({ queryKey: ["ceo-questions"] });

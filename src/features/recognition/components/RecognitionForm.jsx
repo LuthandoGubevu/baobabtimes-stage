@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { cn } from '../../../utils/cn';
+import { RECOGNITION_VALUES } from '../constants/recognitionValues';
 
-const VALUES = [
-  "Smart", "Communication", "Impact", "Transforming", "Innovation",
-  "Courage", "Passion", "Authentic", "Selflessness", "Heart"
-];
+const VALUES = Object.keys(RECOGNITION_VALUES);
 
 /**
  * RecognitionForm component matching the editorial/corporate style
@@ -66,29 +64,49 @@ export default function RecognitionForm({ onSubmit, isSubmitting }) {
           <label className="w-full md:w-56 pt-2 font-bold text-sm uppercase tracking-tight leading-tight">
             Please tick the relevant box.
           </label>
-          <div className="flex-1 space-y-3 pt-1">
-            {VALUES.map(val => (
-              <label key={val} className="flex items-center space-x-3 cursor-pointer group w-fit">
-                <div className="relative flex items-center justify-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.values.includes(val)}
-                    onChange={() => handleCheckboxChange(val)}
-                    className="peer appearance-none w-4 h-4 border border-stone-400 rounded-sm checked:bg-black checked:border-black transition-all cursor-pointer"
-                  />
-                  <svg 
-                    className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor" 
-                    strokeWidth="4"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span className="text-sm font-medium text-stone-600 group-hover:text-black transition-colors">{val}</span>
-              </label>
-            ))}
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            {VALUES.map(val => {
+              const config = RECOGNITION_VALUES[val];
+              const Icon = config.icon;
+              const isChecked = formData.values.includes(val);
+              
+              return (
+                <label key={val} className="flex items-center space-x-3 cursor-pointer group w-full">
+                  <div className="relative flex items-center justify-center">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => handleCheckboxChange(val)}
+                      className={cn(
+                        "peer appearance-none w-5 h-5 border border-stone-300 rounded-md transition-all cursor-pointer",
+                        isChecked ? "bg-stone-900 border-stone-900" : "bg-white hover:border-stone-400"
+                      )}
+                    />
+                    <svg 
+                      className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor" 
+                      strokeWidth="4"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className={cn(
+                    "flex items-center space-x-2 px-3 py-1.5 rounded-xl border transition-all flex-1",
+                    isChecked ? cn(config.bg, config.border) : "bg-transparent border-transparent grayscale opacity-60 group-hover:opacity-100 group-hover:grayscale-0"
+                  )}>
+                    <Icon className={cn("w-4 h-4", isChecked ? config.color : "text-stone-400")} />
+                    <span className={cn(
+                      "text-xs font-bold uppercase tracking-widest",
+                      isChecked ? "text-stone-900" : "text-stone-500"
+                    )}>
+                      {val}
+                    </span>
+                  </div>
+                </label>
+              );
+            })}
           </div>
         </div>
 

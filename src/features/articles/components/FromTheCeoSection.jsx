@@ -62,6 +62,12 @@ export default function FromTheCeoSection() {
             <h2 className="text-4xl font-serif font-bold italic tracking-tight text-stone-900">From The CEO</h2>
             <p className="text-stone-400 text-sm">Direct leadership insights and strategic updates.</p>
           </div>
+          <Link 
+            to="/from-the-ceo" 
+            className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 hover:text-stone-900 transition-colors border-b border-stone-200 hover:border-stone-900 pb-2 mb-1"
+          >
+            View Past Articles
+          </Link>
         </div>
         
         <div className="flex items-center justify-between">

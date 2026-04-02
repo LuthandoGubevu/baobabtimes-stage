@@ -1,6 +1,11 @@
 import { format } from "date-fns";
-import { Award, Heart, Star } from "lucide-react";
+import { Award } from "lucide-react";
 import { cn } from "../../../utils/cn";
+import { RecognitionBadge } from "./RecognitionBadge";
+import { LikeButton } from "./LikeButton";
+import { getRecognitionValue } from "../constants/recognitionValues";
+import { useAuth } from "../../../hooks/useAuth";
+import { recognitionService } from "../services/recognitionService";
 
 /**
  * RecognitionCard component for displaying peer recognition
@@ -9,27 +14,39 @@ import { cn } from "../../../utils/cn";
  * @param {string} props.className
  */
 export default function RecognitionCard({ recognition, className }) {
-  const { id, fromName, fromAvatar, toName, toAvatar, content, createdAt, category, categories, isAnonymous, dateString } = recognition;
+  const { user } = useAuth();
+  const { 
+    id, 
+    fromName, 
+    fromAvatar, 
+    toName, 
+    toAvatar, 
+    content, 
+    createdAt, 
+    category, 
+    categories, 
+    isAnonymous, 
+    dateString,
+    likes = 0,
+    likedBy = []
+  } = recognition;
 
   const displayCategories = categories || (category ? [category] : []);
-
-  const icons = {
-    "Teamwork": Heart,
-    "Innovation": Star,
-    "Excellence": Award,
-    "Smart": Star,
-    "Communication": Award,
-    "Impact": Heart,
-    "Transforming": Star,
-    "Courage": Award,
-    "Passion": Heart,
-    "Authentic": Award,
-    "Selflessness": Heart,
-    "Heart": Heart,
-  };
   
-  // Use the first category's icon or default to Award
-  const Icon = icons[displayCategories[0]] || Award;
+  // Use the first category's config or default
+  const primaryValue = displayCategories[0] || "Excellence";
+  const config = getRecognitionValue(primaryValue);
+  const Icon = config.icon;
+
+  const isLiked = user ? likedBy.includes(user.uid) : false;
+
+  const handleLike = async () => {
+    if (!user) {
+      console.warn("User must be logged in to like.");
+      return;
+    }
+    await recognitionService.toggleLike(id, user.uid, isLiked);
+  };
 
   const formatDate = (date) => {
     if (dateString) return dateString;
@@ -40,12 +57,15 @@ export default function RecognitionCard({ recognition, className }) {
 
   return (
     <div className={cn(
-      "bg-white p-8 rounded-[2.5rem] border border-stone-200 shadow-sm hover:shadow-xl transition-all duration-500 group relative overflow-hidden",
+      "bg-white p-8 rounded-[2.5rem] border border-stone-200 shadow-sm hover:shadow-xl transition-all duration-500 group relative overflow-hidden flex flex-col h-full",
       className
     )}>
       {/* Category Icon Background Decoration */}
-      <div className="absolute -top-4 -right-4 w-24 h-24 bg-stone-50 rounded-full flex items-center justify-center opacity-50 group-hover:scale-110 transition-transform duration-500">
-        <Icon className="w-12 h-12 text-stone-100" />
+      <div className={cn(
+        "absolute -top-4 -right-4 w-24 h-24 rounded-full flex items-center justify-center opacity-30 group-hover:scale-110 transition-transform duration-500",
+        config.bg
+      )}>
+        <Icon className={cn("w-12 h-12", config.color)} />
       </div>
 
       <div className="flex items-center justify-between mb-8 relative z-10">
@@ -72,9 +92,10 @@ export default function RecognitionCard({ recognition, className }) {
           </div>
         </div>
 
-        <div className="w-10 h-10 rounded-2xl bg-stone-900 flex items-center justify-center text-white shadow-lg rotate-3 group-hover:rotate-0 transition-transform duration-300">
-          <Icon className="w-5 h-5" />
-        </div>
+        <RecognitionBadge 
+          value={primaryValue} 
+          className="rotate-3 group-hover:rotate-0" 
+        />
 
         <div className="flex items-center space-x-4 text-right">
           <div className="flex flex-col items-end">
@@ -92,21 +113,37 @@ export default function RecognitionCard({ recognition, className }) {
         </div>
       </div>
       
-      <div className="bg-stone-50/50 p-6 rounded-3xl border border-stone-100 italic text-stone-700 text-base leading-relaxed mb-6 relative z-10 font-serif">
+      <div className="bg-stone-50/50 p-6 rounded-3xl border border-stone-100 italic text-stone-700 text-base leading-relaxed mb-6 relative z-10 font-serif flex-grow">
         <span className="text-stone-300 text-4xl absolute -top-2 -left-1 font-serif opacity-50">"</span>
         {content}
         <span className="text-stone-300 text-4xl absolute -bottom-6 -right-1 font-serif opacity-50">"</span>
       </div>
       
-      <div className="flex flex-wrap gap-2 mb-4 relative z-10">
-        {displayCategories.map((cat, idx) => (
-          <span key={idx} className="px-3 py-1 bg-stone-100 text-stone-600 rounded-full text-[10px] font-bold uppercase tracking-widest border border-stone-200">
-            {cat}
-          </span>
-        ))}
+      <div className="flex flex-wrap gap-2 mb-6 relative z-10">
+        {displayCategories.map((cat, idx) => {
+          const catConfig = getRecognitionValue(cat);
+          return (
+            <span 
+              key={idx} 
+              className={cn(
+                "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-colors",
+                catConfig.bg,
+                catConfig.color,
+                catConfig.border
+              )}
+            >
+              {cat}
+            </span>
+          );
+        })}
       </div>
 
-      <div className="flex justify-end items-center relative z-10">
+      <div className="flex justify-between items-center relative z-10 pt-4 border-t border-stone-100">
+        <LikeButton 
+          initialLiked={isLiked} 
+          initialCount={likes} 
+          onLike={handleLike}
+        />
         <span className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
           {formatDate(createdAt)}
         </span>

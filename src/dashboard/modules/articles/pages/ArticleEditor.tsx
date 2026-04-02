@@ -31,7 +31,7 @@ export const ArticleEditor = () => {
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0].name);
-  const [imageUrl, setImageUrl] = useState('');
+  const [featuredImage, setFeaturedImage] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(!!id);
@@ -49,7 +49,7 @@ export const ArticleEditor = () => {
             setContent(data.content || '');
             setExcerpt(data.excerpt || '');
             setCategory(data.category || 'Company News');
-            setImageUrl(data.imageUrl || '');
+            setFeaturedImage(data.featuredImage || data.imageUrl || '');
           } else {
             toast.error('Article not found.');
             navigate('/dashboard/articles');
@@ -84,7 +84,7 @@ export const ArticleEditor = () => {
         content,
         excerpt,
         category,
-        imageUrl,
+        featuredImage,
         status,
         updatedAt: serverTimestamp(),
         publishedAt: status === 'PUBLISHED' ? serverTimestamp() : null,
@@ -246,8 +246,8 @@ export const ArticleEditor = () => {
           <div className="p-6 space-y-8 w-[320px]">
             <section className="space-y-4">
               <ImageUpload 
-                value={imageUrl}
-                onChange={setImageUrl}
+                value={featuredImage}
+                onChange={setFeaturedImage}
               />
             </section>
 

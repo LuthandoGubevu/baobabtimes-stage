@@ -60,7 +60,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ isPublicOnly
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute right-0 mt-2 w-[380px] bg-white rounded-xl shadow-2xl border border-zinc-200 z-[100] overflow-hidden"
+            className="fixed sm:absolute top-20 sm:top-full left-4 right-4 sm:left-auto sm:right-0 sm:mt-2 sm:w-[380px] bg-white rounded-xl shadow-2xl border border-zinc-200 z-[100] overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 bg-zinc-50/50">

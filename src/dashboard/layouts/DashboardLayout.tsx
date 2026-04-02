@@ -26,7 +26,7 @@ export const DashboardLayout = () => {
     <div className="flex min-h-screen bg-zinc-50 text-zinc-900">
       <Sidebar />
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 border-b border-zinc-200 bg-white/80 backdrop-blur-md sticky top-0 z-20 flex items-center px-8 justify-between">
+        <header className="h-16 border-b border-zinc-200 bg-white/80 backdrop-blur-md sticky top-0 z-20 flex items-center px-4 sm:px-8 justify-between">
           <nav className="flex items-center space-x-2 text-sm text-zinc-500 overflow-hidden">
             {breadcrumbs.map((crumb, index) => (
               <React.Fragment key={crumb.path}>
@@ -45,7 +45,7 @@ export const DashboardLayout = () => {
             ))}
           </nav>
 
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2 sm:space-x-6">
             <Link 
               to="/"
               className="hidden sm:flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-colors group"
@@ -63,10 +63,10 @@ export const DashboardLayout = () => {
               />
             </div>
             <NotificationBell />
-            <button className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-500 transition-colors">
+            <button className="hidden sm:block p-2 rounded-lg hover:bg-zinc-100 text-zinc-500 transition-colors">
               <HelpCircle size={18} />
             </button>
-            <div className="h-6 w-px bg-zinc-200 mx-1" />
+            <div className="hidden sm:block h-6 w-px bg-zinc-200 mx-1" />
             <Link 
               to="/dashboard/settings"
               className="flex items-center space-x-2 p-1 rounded-lg hover:bg-zinc-100 transition-colors"
@@ -91,7 +91,7 @@ export const DashboardLayout = () => {
             </Link>
           </div>
         </header>
-        <div className="p-8 max-w-7xl mx-auto w-full">
+        <div className="p-4 sm:p-8 max-w-7xl mx-auto w-full">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

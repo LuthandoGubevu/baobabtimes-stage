@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { Upload, X, Image as ImageIcon, Loader2, Link as LinkIcon } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Loader2, Link as LinkIcon, AlertCircle } from "lucide-react";
+import { auth } from "@/firebase";
 import { cn } from "../../lib/utils";
 
 interface ImageUploadProps {
@@ -20,7 +21,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, class
     if (!file) return;
 
     // Validation
-    if (file.size > 5 * 1024 * 1024) {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
       setError("File is too large. Maximum size is 5MB.");
       return;
     }
@@ -35,26 +37,44 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, class
     setIsUploading(true);
 
     try {
+      if (!auth.currentUser) {
+        throw new Error("Unauthorized. Please sign in to upload images.");
+      }
+
+      const token = await auth.currentUser.getIdToken();
       const formData = new FormData();
       formData.append("image", file);
 
       const response = await fetch("/api/media/upload", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error("Upload failed");
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Non-JSON response:", text);
+        throw new Error("Server returned an invalid response format.");
       }
 
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to upload image.");
+      }
+
       onChange(data.url);
       setUrlValue(data.url);
-    } catch (err) {
-      setError("Failed to upload image. Please try again.");
-      console.error(err);
+      setError(null);
+    } catch (err: any) {
+      console.error("Upload error:", err);
+      setError(err.message || "Failed to upload image. Please try again.");
     } finally {
       setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 

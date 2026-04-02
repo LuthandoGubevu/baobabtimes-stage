@@ -27,8 +27,6 @@ const navSections = [
     items: [
       { name: 'Overview', path: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'ceo'] },
       { name: 'Articles', path: '/dashboard/articles', icon: FileText, roles: ['admin', 'ceo'] },
-      { name: 'Curation', path: '/dashboard/curation', icon: Layout, roles: ['admin', 'ceo'] },
-      { name: 'Media Library', path: '/dashboard/media', icon: ImageIcon, roles: ['admin', 'ceo'] },
       { name: 'From the CEO', path: '/dashboard/from-the-ceo', icon: User, roles: ['ceo'] },
     ]
   },

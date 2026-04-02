@@ -17,6 +17,7 @@ export default function RecognitionModal({ isOpen, onClose }) {
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["recognitions"] });
       queryClient.invalidateQueries({ queryKey: ["recognition-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["recognition-spotlight"] });
       
       // Create activity
       activityService.createActivity({

@@ -14,12 +14,18 @@ import PostDetailPage from "./features/articles/pages/PostDetailPage";
 import ArticlesPage from "./features/articles/pages/ArticlesPage";
 import RecognitionPage from "./features/recognition/pages/RecognitionPage";
 import AskCeoPage from "./features/ceo-ama/pages/AskCeoPage";
+import CeoArchivePage from "./features/articles/pages/CeoArchivePage";
 import AdminDashboard from "./features/admin/pages/AdminDashboard";
 import ContributorDashboard from "./features/articles/pages/ContributorDashboard";
 import CreateArticlePage from "./features/articles/pages/CreateArticlePage";
 import CeoPanel from "./features/ceo-ama/pages/CeoPanel";
 import LoginPage from "./features/auth/pages/LoginPage";
 import ProtectedRoute from "./features/auth/components/ProtectedRoute";
+import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
+import HelpPage from "./pages/HelpPage";
+import GuidelinesPage from "./pages/GuidelinesPage";
+import ContactPage from "./pages/ContactPage";
 
 // Dashboard Imports
 import { DashboardLayout } from './dashboard/layouts/DashboardLayout';
@@ -28,7 +34,6 @@ import { ArticleList } from './dashboard/modules/articles/pages/ArticleList';
 import { ArticleEditor } from './dashboard/modules/articles/pages/ArticleEditor';
 import { RecognitionModeration } from './dashboard/modules/recognition/pages/RecognitionModeration';
 import { CeoAmaModeration } from './dashboard/modules/ask-ceo/pages/CeoAmaModeration';
-import { HomepageCuration } from './dashboard/modules/curation/pages/HomepageCuration';
 import { CeoMessageList } from './dashboard/modules/from-the-ceo/pages/CeoMessageList';
 import { CeoMessageEditor } from './dashboard/modules/from-the-ceo/pages/CeoMessageEditor';
 import { SettingsPage } from './dashboard/modules/settings/pages/SettingsPage';
@@ -38,7 +43,6 @@ import { SecuritySettings } from './dashboard/modules/settings/components/Securi
 import { NotificationSettings } from './dashboard/modules/settings/components/NotificationSettings';
 import { 
   CategoryList, 
-  MediaLibrary, 
   UserManagement
 } from './dashboard/pages/Placeholders';
 
@@ -66,6 +70,12 @@ export default function App() {
                 <Route path="posts/:slug" element={<PostDetailPage />} />
                 <Route path="recognition" element={<RecognitionPage />} />
                 <Route path="ask-ceo" element={<AskCeoPage />} />
+                <Route path="from-the-ceo" element={<CeoArchivePage />} />
+                <Route path="privacy" element={<PrivacyPage />} />
+                <Route path="terms" element={<TermsPage />} />
+                <Route path="help" element={<HelpPage />} />
+                <Route path="guidelines" element={<GuidelinesPage />} />
+                <Route path="contact" element={<ContactPage />} />
                 <Route path="login" element={<LoginPage />} />
                 
                 {/* Protected Routes */}
@@ -117,11 +127,6 @@ export default function App() {
                     <CategoryList />
                   </ProtectedRoute>
                 } />
-                <Route path="curation" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <HomepageCuration />
-                  </ProtectedRoute>
-                } />
                 <Route path="from-the-ceo" element={
                   <ProtectedRoute role="CEO_ONLY">
                     <CeoMessageList />
@@ -150,11 +155,6 @@ export default function App() {
                 <Route path="ask-ceo/:id/answer" element={
                   <ProtectedRoute role="CEO_ONLY">
                     <CeoAmaModeration />
-                  </ProtectedRoute>
-                } />
-                <Route path="media" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <MediaLibrary />
                   </ProtectedRoute>
                 } />
                 <Route path="users" element={
