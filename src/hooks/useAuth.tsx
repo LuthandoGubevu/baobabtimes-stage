@@ -52,6 +52,9 @@ interface AuthContextType {
   isCEO: boolean;
   hasDashboardAccess: boolean;
   canManageArticles: boolean;
+  showLoginModal: boolean;
+  setShowLoginModal: (show: boolean) => void;
+  executeProtectedAction: (action: () => void) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -60,6 +63,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (user && pendingAction) {
+      pendingAction();
+      setPendingAction(null);
+    }
+  }, [user, pendingAction]);
 
   useEffect(() => {
     let unsubscribeDoc: (() => void) | null = null;
@@ -185,6 +197,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signOut(auth);
   };
 
+  const executeProtectedAction = (action: () => void) => {
+    if (user) {
+      action();
+    } else {
+      setPendingAction(() => action);
+      setShowLoginModal(true);
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -198,6 +219,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isCEO: user?.role === "ceo",
     hasDashboardAccess: user?.role === "admin" || user?.role === "ceo",
     canManageArticles: user?.role === "admin" || user?.role === "ceo",
+    showLoginModal,
+    setShowLoginModal,
+    executeProtectedAction,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

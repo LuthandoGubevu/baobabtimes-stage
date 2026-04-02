@@ -1,10 +1,22 @@
-import React from "react";
-import { Mail, Phone, MapPin, MessageSquare, Globe, Users } from "lucide-react";
+import React, { useState } from "react";
+import { Mail, Phone, MapPin, MessageSquare, Globe, Users, X, Send, Loader2 } from "lucide-react";
+import { db, auth } from "../firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "motion/react";
 
 /**
  * ContactPage component displaying the Internal Comms Team contact details.
  */
 export default function ContactPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    category: "TEAM_MILESTONE"
+  });
+
   const team = [
     {
       name: "Harvey de Wit",
@@ -33,6 +45,34 @@ export default function ContactPage() {
   ];
 
   const officeAddress = "Baobab House, Triple Point, St Helena Road, Beacon Bay, East London, South Africa";
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!auth.currentUser) {
+      toast.error("Please log in to submit a story idea.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await addDoc(collection(db, "story_ideas"), {
+        ...formData,
+        authorId: auth.currentUser.uid,
+        authorName: auth.currentUser.displayName || "Anonymous",
+        authorEmail: auth.currentUser.email,
+        status: "PENDING",
+        createdAt: serverTimestamp()
+      });
+      toast.success("Story idea submitted successfully! Our team will review it soon.");
+      setIsModalOpen(false);
+      setFormData({ title: "", description: "", category: "TEAM_MILESTONE" });
+    } catch (error) {
+      console.error("Error submitting story idea:", error);
+      toast.error("Failed to submit story idea. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-stone-50 pb-20">
@@ -154,12 +194,107 @@ export default function ContactPage() {
                 Whether it's a team milestone, an innovative project, or a recognition for a colleague, we want to hear about it.
               </p>
             </div>
-            <button className="w-full sm:w-auto px-10 py-4 bg-white text-stone-900 font-bold rounded-2xl hover:bg-stone-100 transition-all shadow-lg flex items-center justify-center space-x-2 group">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="w-full sm:w-auto px-10 py-4 bg-white text-stone-900 font-bold rounded-2xl hover:bg-stone-100 transition-all shadow-lg flex items-center justify-center space-x-2 group"
+            >
               <span>Submit a Story Idea</span>
             </button>
           </div>
         </div>
       </div>
+
+      {/* Submission Modal */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsModalOpen(false)}
+              className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl overflow-hidden"
+            >
+              <div className="p-8 sm:p-12 space-y-8">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-2">
+                    <h2 className="text-3xl font-serif font-bold italic text-stone-900">Share Your Idea</h2>
+                    <p className="text-stone-500 text-sm">Tell us about something great happening in your world.</p>
+                  </div>
+                  <button 
+                    onClick={() => setIsModalOpen(false)}
+                    className="p-2 hover:bg-stone-100 rounded-full transition-colors"
+                  >
+                    <X size={24} className="text-stone-400" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Category</label>
+                    <select 
+                      required
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      className="w-full px-6 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-stone-900 transition-all"
+                    >
+                      <option value="TEAM_MILESTONE">Team Milestone</option>
+                      <option value="INNOVATIVE_PROJECT">Innovative Project</option>
+                      <option value="RECOGNITION">Recognition Spotlight</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Title</label>
+                    <input 
+                      required
+                      type="text"
+                      placeholder="What's the headline?"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      className="w-full px-6 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-stone-900 transition-all"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-stone-400">Description</label>
+                    <textarea 
+                      required
+                      rows={4}
+                      placeholder="Give us the details..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      className="w-full px-6 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-stone-900 transition-all resize-none"
+                    />
+                  </div>
+
+                  <button 
+                    disabled={isSubmitting}
+                    type="submit"
+                    className="w-full py-5 bg-stone-900 text-white font-bold rounded-2xl hover:bg-stone-800 transition-all shadow-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="animate-spin" size={20} />
+                    ) : (
+                      <>
+                        <span>Submit Idea</span>
+                        <Send size={18} />
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

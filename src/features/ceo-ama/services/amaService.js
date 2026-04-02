@@ -8,7 +8,8 @@ import {
   doc, 
   serverTimestamp,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  where
 } from "firebase/firestore";
 import { db } from "../../../firebase";
 import { handleFirestoreError, OperationType } from "../../../lib/firestore-errors";
@@ -23,7 +24,7 @@ export const amaService = {
     try {
       const q = query(
         collection(db, path),
-        orderBy("createdAt", "desc")
+        where("status", "in", ["APPROVED", "ANSWERED"])
       );
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs
@@ -31,7 +32,11 @@ export const amaService = {
           id: doc.id,
           ...doc.data()
         }))
-        .filter(q => ["APPROVED", "ANSWERED"].includes(q.status));
+        .sort((a, b) => {
+          const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+          const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+          return dateB.getTime() - dateA.getTime();
+        });
     } catch (err) {
       handleFirestoreError(err, OperationType.LIST, path);
       return [];

@@ -161,12 +161,16 @@ export const recognitionService = {
     try {
       const q = query(
         collection(db, path), 
-        orderBy("createdAt", "desc")
+        where("status", "==", "APPROVED")
       );
       const snapshot = await getDocs(q);
       return snapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(rec => rec.status === "APPROVED");
+        .sort((a, b) => {
+          const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+          const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+          return dateB.getTime() - dateA.getTime();
+        });
     } catch (error) {
       handleFirestoreError(error, OperationType.LIST, path);
       return [];

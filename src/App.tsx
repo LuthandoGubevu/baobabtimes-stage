@@ -21,6 +21,7 @@ import CreateArticlePage from "./features/articles/pages/CreateArticlePage";
 import CeoPanel from "./features/ceo-ama/pages/CeoPanel";
 import LoginPage from "./features/auth/pages/LoginPage";
 import ProtectedRoute from "./features/auth/components/ProtectedRoute";
+import LoginModal from "./features/auth/components/LoginModal";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import HelpPage from "./pages/HelpPage";
@@ -36,6 +37,7 @@ import { RecognitionModeration } from './dashboard/modules/recognition/pages/Rec
 import { CeoAmaModeration } from './dashboard/modules/ask-ceo/pages/CeoAmaModeration';
 import { CeoMessageList } from './dashboard/modules/from-the-ceo/pages/CeoMessageList';
 import { CeoMessageEditor } from './dashboard/modules/from-the-ceo/pages/CeoMessageEditor';
+import { StoryIdeaModeration } from './dashboard/modules/story-ideas/pages/StoryIdeaModeration';
 import { SettingsPage } from './dashboard/modules/settings/pages/SettingsPage';
 import { ProfileSettings } from './dashboard/modules/settings/components/ProfileSettings';
 import { AccountSettings } from './dashboard/modules/settings/components/AccountSettings';
@@ -61,6 +63,7 @@ export default function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          <LoginModal />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<RootLayout />}>
@@ -155,6 +158,11 @@ export default function App() {
                 <Route path="ask-ceo/:id/answer" element={
                   <ProtectedRoute role="CEO_ONLY">
                     <CeoAmaModeration />
+                  </ProtectedRoute>
+                } />
+                <Route path="story-ideas" element={
+                  <ProtectedRoute role="ADMIN_OR_CEO">
+                    <StoryIdeaModeration />
                   </ProtectedRoute>
                 } />
                 <Route path="users" element={

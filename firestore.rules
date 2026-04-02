@@ -207,6 +207,17 @@ service cloud.firestore {
              (!('metadata' in data) || data.metadata is map);
     }
 
+    function isValidStoryIdea(data) {
+      return hasRequiredFields(['authorId', 'title', 'description', 'status', 'createdAt']) &&
+             data.authorId is string &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.description is string && data.description.size() > 0 && data.description.size() < 2000 &&
+             data.status in ['PENDING', 'REVIEWED', 'ARCHIVED'] &&
+             (!('authorName' in data) || data.authorName is string) &&
+             (!('authorEmail' in data) || data.authorEmail is string) &&
+             (!('category' in data) || data.category in ['TEAM_MILESTONE', 'INNOVATIVE_PROJECT', 'RECOGNITION', 'OTHER']);
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -225,13 +236,15 @@ service cloud.firestore {
     }
 
     match /articles/{articleId} {
-      allow read: if isSignedIn() && (resource.data.status == 'PUBLISHED' || isOwner(resource.data.authorId) || hasDashboardAccess());
+      allow read: if resource.data.status == 'PUBLISHED';
+      allow read: if isSignedIn() && (isOwner(resource.data.authorId) || hasDashboardAccess());
       allow create: if hasDashboardAccess() && isValidArticle(request.resource.data) && (request.resource.data.authorId == request.auth.uid || isAdmin());
       allow update: if hasDashboardAccess() && isValidArticle(request.resource.data) && (isOwner(resource.data.authorId) || isAdmin() || isCEO());
       allow delete: if isAdmin() || (isCEO() && isOwner(resource.data.authorId));
     }
 
     match /recognitions/{recognitionId} {
+      allow read: if resource.data.status == 'APPROVED';
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidRecognition(request.resource.data) && request.resource.data.fromId == request.auth.uid;
       allow update: if isAuthenticated() && isValidRecognition(request.resource.data) && (isOwner(resource.data.fromId) || isAdmin());
@@ -239,6 +252,7 @@ service cloud.firestore {
     }
 
     match /ama_questions/{questionId} {
+      allow read: if resource.data.status in ['ANSWERED', 'APPROVED'];
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidAmaQuestion(request.resource.data) && (request.resource.data.authorId == request.auth.uid || !('authorId' in request.resource.data));
       allow update: if isAuthenticated() && (
@@ -263,10 +277,17 @@ service cloud.firestore {
     }
 
     match /user_stats/{userId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       // Only allow creation/update via the app's logic (which uses transactions)
       // We allow the user to update their own stats or recipient stats during a recognition post
       allow create, update: if isAuthenticated() && isValidUserStats(request.resource.data);
+    }
+
+    match /story_ideas/{ideaId} {
+      allow read: if hasDashboardAccess() || (isAuthenticated() && isOwner(resource.data.authorId));
+      allow create: if isAuthenticated() && isValidStoryIdea(request.resource.data) && request.resource.data.authorId == request.auth.uid;
+      allow update: if hasDashboardAccess() && isValidStoryIdea(request.resource.data);
+      allow delete: if isAdmin();
     }
   }
 }

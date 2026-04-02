@@ -23,26 +23,37 @@ export const activityService = {
    */
   async getRecentActivity(isPublicOnly: boolean = false, limitCount: number = 10): Promise<Activity[]> {
     try {
-      let q = query(
-        collection(db, COLLECTION_NAME),
-        orderBy('createdAt', 'desc'),
-        limit(limitCount)
-      );
-
+      let q;
       if (isPublicOnly) {
         q = query(
           collection(db, COLLECTION_NAME),
-          where('isPublic', '==', true),
+          where('isPublic', '==', true)
+        );
+      } else {
+        q = query(
+          collection(db, COLLECTION_NAME),
           orderBy('createdAt', 'desc'),
           limit(limitCount)
         );
       }
 
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      let activities = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as Activity[];
+
+      if (isPublicOnly) {
+        activities = activities
+          .sort((a, b) => {
+            const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+            const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+            return dateB.getTime() - dateA.getTime();
+          })
+          .slice(0, limitCount);
+      }
+
+      return activities;
     } catch (error) {
       handleFirestoreError(error, OperationType.GET, COLLECTION_NAME);
       return [];
@@ -57,26 +68,36 @@ export const activityService = {
     isPublicOnly: boolean = false,
     limitCount: number = 10
   ) {
-    let q = query(
-      collection(db, COLLECTION_NAME),
-      orderBy('createdAt', 'desc'),
-      limit(limitCount)
-    );
-
+    let q;
     if (isPublicOnly) {
       q = query(
         collection(db, COLLECTION_NAME),
-        where('isPublic', '==', true),
+        where('isPublic', '==', true)
+      );
+    } else {
+      q = query(
+        collection(db, COLLECTION_NAME),
         orderBy('createdAt', 'desc'),
         limit(limitCount)
       );
     }
 
     return onSnapshot(q, (snapshot) => {
-      const activities = snapshot.docs.map(doc => ({
+      let activities = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as Activity[];
+
+      if (isPublicOnly) {
+        activities = activities
+          .sort((a, b) => {
+            const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+            const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+            return dateB.getTime() - dateA.getTime();
+          })
+          .slice(0, limitCount);
+      }
+
       callback(activities);
     }, (error) => {
       handleFirestoreError(error, OperationType.GET, COLLECTION_NAME);

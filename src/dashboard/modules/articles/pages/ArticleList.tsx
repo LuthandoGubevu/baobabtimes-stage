@@ -15,6 +15,7 @@ import { StatusBadge } from '@/dashboard/components/StatusBadge';
 import { EmptyState } from '@/dashboard/components/EmptyState';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface Article {
   id: string;
@@ -58,11 +59,13 @@ export const ArticleList = () => {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this article?')) {
+    if (window.confirm('Are you sure you want to permanently delete this article? This action cannot be undone.')) {
       try {
         await deleteDoc(doc(db, 'articles', id));
+        toast.success('Article deleted permanently.');
       } catch (error) {
         console.error("Error deleting article:", error);
+        toast.error('Failed to delete article.');
       }
     }
   };

@@ -10,13 +10,15 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  Loader2
+  Loader2,
+  Trash2
 } from 'lucide-react';
 import { StatusBadge } from '@/dashboard/components/StatusBadge';
 import { EmptyState } from '@/dashboard/components/EmptyState';
 import { cn } from '@/lib/utils';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
+import { toast } from 'sonner';
 
 export const RecognitionModeration = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,9 +45,22 @@ export const RecognitionModeration = () => {
         status,
         updatedAt: new Date()
       });
+      toast.success(`Recognition ${status.toLowerCase()} successfully.`);
     } catch (error) {
       console.error('Error updating recognition status:', error);
-      alert('Failed to update status');
+      toast.error('Failed to update status');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to permanently delete this recognition? This action cannot be undone.')) {
+      try {
+        await deleteDoc(doc(db, 'recognitions', id));
+        toast.success('Recognition deleted permanently.');
+      } catch (error) {
+        console.error('Error deleting recognition:', error);
+        toast.error('Failed to delete recognition.');
+      }
     }
   };
 
@@ -109,7 +124,16 @@ export const RecognitionModeration = () => {
                       <span className="text-xs text-zinc-400">to {rec.to}</span>
                     </div>
                   </div>
-                  <StatusBadge status={rec.status as any} />
+                  <div className="flex items-center space-x-2">
+                    <StatusBadge status={rec.status as any} />
+                    <button 
+                      onClick={() => handleDelete(rec.id)}
+                      className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-red-600 transition-colors"
+                      title="Delete Recognition"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 italic text-sm text-zinc-600 leading-relaxed">

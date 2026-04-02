@@ -24,15 +24,18 @@ export const articleService = {
   getPublishedArticles: async () => {
     const path = "articles";
     try {
-      // Fetch all articles and filter in memory to avoid index requirement
       const q = query(
         collection(db, path), 
-        orderBy("createdAt", "desc")
+        where("status", "==", "PUBLISHED")
       );
       const snapshot = await getDocs(q);
       return snapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(article => article.status === "PUBLISHED");
+        .sort((a, b) => {
+          const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+          const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+          return dateB.getTime() - dateA.getTime();
+        });
     } catch (error) {
       handleFirestoreError(error, OperationType.LIST, path);
       return [];
@@ -173,7 +176,11 @@ export const articleService = {
   getArticleBySlug: async (slug) => {
     const path = "articles";
     try {
-      const q = query(collection(db, path), where("slug", "==", slug));
+      const q = query(
+        collection(db, path), 
+        where("slug", "==", slug),
+        where("status", "==", "PUBLISHED")
+      );
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
         const doc = snapshot.docs[0];
@@ -197,6 +204,7 @@ export const articleService = {
       const q = query(
         collection(db, path),
         where("category", "==", "From the CEO"),
+        where("status", "==", "PUBLISHED"),
         where("isHomepageActive", "==", true),
         limit(1)
       );
@@ -211,12 +219,17 @@ export const articleService = {
       const fallbackQ = query(
         collection(db, path),
         where("category", "==", "From the CEO"),
-        where("status", "==", "PUBLISHED"),
-        orderBy("publishedAt", "desc"),
-        limit(1)
+        where("status", "==", "PUBLISHED")
       );
       const fallbackSnapshot = await getDocs(fallbackQ);
-      return !fallbackSnapshot.empty ? { id: fallbackSnapshot.docs[0].id, ...fallbackSnapshot.docs[0].data() } : null;
+      const articles = fallbackSnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => {
+          const dateA = a.publishedAt?.toDate?.() || new Date(a.publishedAt || 0);
+          const dateB = b.publishedAt?.toDate?.() || new Date(b.publishedAt || 0);
+          return dateB.getTime() - dateA.getTime();
+        });
+      return articles.length > 0 ? articles[0] : null;
     } catch (error) {
       console.error("Error fetching CEO article:", error);
       return null;
@@ -233,11 +246,16 @@ export const articleService = {
       const q = query(
         collection(db, path),
         where("category", "==", "From the CEO"),
-        where("status", "==", "PUBLISHED"),
-        orderBy("publishedAt", "desc")
+        where("status", "==", "PUBLISHED")
       );
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => {
+          const dateA = a.publishedAt?.toDate?.() || new Date(a.publishedAt || 0);
+          const dateB = b.publishedAt?.toDate?.() || new Date(b.publishedAt || 0);
+          return dateB.getTime() - dateA.getTime();
+        });
     } catch (error) {
       handleFirestoreError(error, OperationType.LIST, path);
       return [];

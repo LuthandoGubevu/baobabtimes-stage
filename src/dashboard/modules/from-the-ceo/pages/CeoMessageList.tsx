@@ -59,10 +59,10 @@ export const CeoMessageList = () => {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this CEO message?')) {
+    if (window.confirm('Are you sure you want to permanently delete this CEO message? This action cannot be undone.')) {
       try {
         await deleteDoc(doc(db, 'articles', id));
-        toast.success('Message deleted successfully.');
+        toast.success('Message deleted permanently.');
       } catch (error) {
         console.error("Error deleting message:", error);
         toast.error('Failed to delete message.');

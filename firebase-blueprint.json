@@ -132,6 +132,22 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["type", "title", "isPublic", "createdAt"]
+    },
+    "StoryIdea": {
+      "title": "Story Idea",
+      "description": "Submitted story ideas from employees",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorEmail": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string", "enum": ["TEAM_MILESTONE", "INNOVATIVE_PROJECT", "RECOGNITION", "OTHER"] },
+        "status": { "type": "string", "enum": ["PENDING", "REVIEWED", "ARCHIVED"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorId", "title", "description", "status", "createdAt"]
     }
   },
   "firestore": {
@@ -158,6 +174,10 @@
     "/activity/{activityId}": {
       "schema": "Activity",
       "description": "Recent platform activity"
+    },
+    "/story_ideas/{ideaId}": {
+      "schema": "StoryIdea",
+      "description": "Submitted story ideas"
     }
   }
 }

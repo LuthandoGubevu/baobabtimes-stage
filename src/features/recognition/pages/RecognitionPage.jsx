@@ -7,9 +7,11 @@ import SpotlightSection from "../components/SpotlightSection";
 import { recognitionService } from "../services/recognitionService";
 import { useQuery } from "@tanstack/react-query";
 import { RECOGNITION_VALUES } from "../constants/recognitionValues";
+import { useAuth } from "../../../hooks/useAuth";
 
 export default function RecognitionPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { executeProtectedAction } = useAuth();
 
   const { 
     data: recognitions = [], 
@@ -42,7 +44,7 @@ export default function RecognitionPage() {
         </div>
         
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => executeProtectedAction(() => setIsModalOpen(true))}
           className="flex items-center space-x-2 px-6 py-3 bg-stone-900 text-white font-bold rounded-full hover:bg-stone-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
         >
           <Plus className="w-5 h-5" />
@@ -122,7 +124,7 @@ export default function RecognitionPage() {
               <p className="text-stone-500 max-w-xs mx-auto">Be the first to celebrate a colleague's contribution to the team!</p>
             </div>
             <button 
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => executeProtectedAction(() => setIsModalOpen(true))}
               className="inline-flex items-center space-x-2 text-stone-900 font-bold hover:underline"
             >
               <Plus className="w-4 h-4" />

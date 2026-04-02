@@ -13,7 +13,8 @@ import {
   Send,
   User,
   ShieldCheck,
-  Loader2
+  Loader2,
+  Trash2
 } from 'lucide-react';
 import { StatusBadge } from '@/dashboard/components/StatusBadge';
 import { EmptyState } from '@/dashboard/components/EmptyState';
@@ -22,6 +23,7 @@ import { activityService } from '@/features/notifications/services/activityServi
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { handleFirestoreError, OperationType } from '@/lib/firestore-errors';
+import { toast } from 'sonner';
 
 export const CeoAmaModeration = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,8 +76,22 @@ export const CeoAmaModeration = () => {
 
       setAnsweringId(null);
       setAnswerText('');
+      toast.success(`Question ${status.toLowerCase()} successfully.`);
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `ama_questions/${id}`);
+      toast.error('Failed to update status');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to permanently delete this question? This action cannot be undone.')) {
+      try {
+        await deleteDoc(doc(db, 'ama_questions', id));
+        toast.success('Question deleted permanently.');
+      } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `ama_questions/${id}`);
+        toast.error('Failed to delete question.');
+      }
     }
   };
 
@@ -138,7 +154,16 @@ export const CeoAmaModeration = () => {
                       <span className="text-xs text-zinc-400">{q.upvotes || 0} Upvotes</span>
                     </div>
                   </div>
-                  <StatusBadge status={q.status as any} />
+                  <div className="flex items-center space-x-2">
+                    <StatusBadge status={q.status as any} />
+                    <button 
+                      onClick={() => handleDelete(q.id)}
+                      className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-red-600 transition-colors"
+                      title="Delete Question"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="bg-zinc-50 p-6 rounded-xl border border-zinc-100 italic text-lg font-serif font-bold text-zinc-900 leading-relaxed">

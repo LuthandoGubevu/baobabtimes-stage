@@ -10,7 +10,7 @@ import { amaService } from "../services/amaService";
  */
 export default function AskCeoPage() {
   const [questionText, setQuestionText] = useState("");
-  const { user } = useAuth();
+  const { user, executeProtectedAction } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: questions, isLoading, error } = useQuery({
@@ -30,15 +30,13 @@ export default function AskCeoPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!questionText.trim()) return;
-    if (!user) {
-      alert("Please log in to submit a question.");
-      return;
-    }
-
-    mutation.mutate({
-      content: questionText,
-      authorId: user.uid,
-      authorName: user.displayName || user.email,
+    
+    executeProtectedAction(() => {
+      mutation.mutate({
+        content: questionText,
+        authorId: user.uid,
+        authorName: user.displayName || user.email,
+      });
     });
   };
 

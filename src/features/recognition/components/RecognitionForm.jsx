@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '../../../utils/cn';
 import { RECOGNITION_VALUES } from '../constants/recognitionValues';
+import { useAuth } from '../../../hooks/useAuth';
 
 const VALUES = Object.keys(RECOGNITION_VALUES);
 
@@ -11,13 +12,20 @@ const VALUES = Object.keys(RECOGNITION_VALUES);
  * @param {boolean} props.isSubmitting - Loading state
  */
 export default function RecognitionForm({ onSubmit, isSubmitting }) {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     to: "",
     values: [],
     thankYouFor: "",
-    from: "",
+    from: user?.displayName || user?.fullName || "",
     date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })
   });
+
+  useEffect(() => {
+    if (user && !formData.from) {
+      setFormData(prev => ({ ...prev, from: user.displayName || user.fullName || "" }));
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
