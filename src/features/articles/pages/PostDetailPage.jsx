@@ -103,21 +103,9 @@ export default function PostDetailPage() {
       </div>
 
       {/* Content Section */}
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-12">
-          {/* Author Sidebar */}
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 space-y-6">
-              <AuthorMeta author={authorData} size="lg" showAvatar={true} className="flex-col space-x-0 space-y-4 items-start" />
-              <div className="pt-6 border-t border-stone-100">
-                <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-stone-400 mb-2">Published</p>
-                <p className="text-sm font-medium text-stone-600">{formatDate(createdAt)}</p>
-              </div>
-            </div>
-          </aside>
-
-          {/* Article Body */}
-          <div className="prose prose-stone max-w-none">
+      <div className="max-w-3xl mx-auto px-4">
+        {/* Article Body */}
+        <div className="prose prose-stone max-w-none">
             {/* Intro/Excerpt */}
             {excerpt && (
               <p className="text-xl md:text-2xl font-medium text-sky-500 leading-relaxed mb-8">
@@ -157,7 +145,6 @@ export default function PostDetailPage() {
                 <span>17 March - 20 April 2026</span>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </article>
