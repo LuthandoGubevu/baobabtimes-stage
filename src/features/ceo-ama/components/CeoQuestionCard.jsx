@@ -1,7 +1,8 @@
 import { format } from "date-fns";
-import { MessageSquare, CheckCircle2, Clock } from "lucide-react";
+import { MessageSquare, CheckCircle2, Clock, User } from "lucide-react";
 import { cn } from "../../../utils/cn";
 import ReactionRow from "./ReactionRow";
+import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
 
 /**
  * CeoQuestionCard component for displaying Ask the CEO questions
@@ -70,9 +71,7 @@ export default function CeoQuestionCard({ question, className }) {
               CEO Answer
             </div>
             <div className="flex items-start space-x-4">
-              <div className="w-10 h-10 rounded-full bg-stone-900 overflow-hidden border-2 border-white shadow-lg shrink-0">
-                <img src="https://i.pravatar.cc/150?u=ceo" alt="CEO" referrerPolicy="no-referrer" />
-              </div>
+              <AvatarPlaceholder name="CEO" size="sm" icon={User} />
               <div className="flex-1">
                 <p className="text-sm text-stone-700 leading-relaxed italic">
                   "{answer}"

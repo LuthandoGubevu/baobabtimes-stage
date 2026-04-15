@@ -3,6 +3,8 @@ import { Upload, X, Image as ImageIcon, Loader2, Link as LinkIcon, AlertCircle }
 import { auth } from "@/firebase";
 import { cn } from "../../lib/utils";
 
+import { ImagePlaceholder } from "@/components/ui/GenericPlaceholder";
+
 interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
@@ -141,12 +143,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, class
             </div>
           ) : value ? (
             <>
-              <img
-                src={value}
-                alt="Featured preview"
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
+              <ImagePlaceholder className="w-full h-full" />
               <div className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-3">
                 <button
                   type="button"

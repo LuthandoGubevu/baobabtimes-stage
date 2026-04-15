@@ -16,6 +16,8 @@ import { collection, query, where, onSnapshot, doc, updateDoc, orderBy, limit, g
 import { db } from '@/firebase';
 import { handleFirestoreError, OperationType } from '@/lib/firestore-errors';
 
+import { ImagePlaceholder } from '@/components/ui/GenericPlaceholder';
+
 export const HomepageCuration = () => {
   const [pinnedArticles, setPinnedArticles] = useState<any[]>([]);
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -143,12 +145,7 @@ export const HomepageCuration = () => {
                       <GripVertical size={20} />
                     </div>
                     <div className="w-24 h-16 rounded-lg overflow-hidden bg-zinc-200 flex-shrink-0">
-                      <img 
-                        src={item.featuredImage || `https://picsum.photos/seed/${item.id}/800/400`} 
-                        alt={item.title} 
-                        className="w-full h-full object-cover" 
-                        referrerPolicy="no-referrer"
-                      />
+                      <ImagePlaceholder className="w-full h-full" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-1">

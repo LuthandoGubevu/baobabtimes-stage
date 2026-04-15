@@ -22,6 +22,7 @@ import CeoPanel from "./features/ceo-ama/pages/CeoPanel";
 import LoginPage from "./features/auth/pages/LoginPage";
 import ProtectedRoute from "./features/auth/components/ProtectedRoute";
 import LoginModal from "./features/auth/components/LoginModal";
+import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import HelpPage from "./pages/HelpPage";
@@ -64,6 +65,7 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <LoginModal />
+          <PWAInstallPrompt />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<RootLayout />}>

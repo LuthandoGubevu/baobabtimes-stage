@@ -6,6 +6,7 @@ import { Loader2, Calendar, MessageCircle, ChevronRight, Home } from "lucide-rea
 import ReactMarkdown from "react-markdown";
 import { useEffect } from "react";
 import AuthorMeta from "../components/AuthorMeta";
+import { ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
 
 export default function PostDetailPage() {
   const { slug } = useParams();
@@ -73,8 +74,8 @@ export default function PostDetailPage() {
       <div className="max-w-4xl mx-auto px-4 mb-12">
         <div className="aspect-[21/9] w-full bg-stone-100 rounded-2xl overflow-hidden mb-8 shadow-sm">
           <img 
-            src={imageUrl || `https://picsum.photos/seed/post-${article.id}/1200/600`} 
-            alt={title}
+            src="/staff-image.jpg" 
+            alt={title} 
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
@@ -121,8 +122,8 @@ export default function PostDetailPage() {
                   h3: ({node, ...props}) => <h3 className="text-2xl font-serif font-bold mt-8 mb-4 text-stone-900" {...props} />,
                   p: ({node, ...props}) => <p className="mb-6" {...props} />,
                   img: ({node, ...props}) => (
-                    <div className="my-10 rounded-xl overflow-hidden shadow-lg">
-                      <img className="w-full h-auto" {...props} referrerPolicy="no-referrer" />
+                    <div className="my-10 rounded-xl overflow-hidden shadow-lg aspect-video">
+                      <ImagePlaceholder className="w-full h-full" />
                     </div>
                   ),
                   a: ({node, ...props}) => <a className="text-sky-600 underline hover:text-sky-800" {...props} />,
@@ -134,12 +135,9 @@ export default function PostDetailPage() {
 
             {/* Example Inline Banner (as requested) */}
             <div className="my-12 p-1 bg-stone-100 rounded-xl overflow-hidden shadow-sm">
-              <img 
-                src="https://picsum.photos/seed/banner/1200/300" 
-                alt="Promotion" 
-                className="w-full h-auto rounded-lg"
-                referrerPolicy="no-referrer"
-              />
+              <div className="aspect-[4/1]">
+                <ImagePlaceholder className="w-full h-full" />
+              </div>
               <div className="p-4 flex justify-between items-center text-xs font-bold uppercase tracking-widest text-stone-500">
                 <span>Bottomless Buckets - Competition</span>
                 <span>17 March - 20 April 2026</span>

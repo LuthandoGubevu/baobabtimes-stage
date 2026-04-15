@@ -7,6 +7,7 @@ import { cn } from "../../../utils/cn";
 import { handleFirestoreError, OperationType } from "../../../lib/firestore-errors";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
 
 /**
  * CeoPanel component for the CEO to answer questions and manage articles
@@ -157,14 +158,7 @@ export default function CeoPanel() {
       label: "Author",
       render: (_, row) => (
         <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 rounded-full bg-stone-100 overflow-hidden border border-stone-200">
-            <img 
-              src={row.author?.avatar || `https://i.pravatar.cc/150?u=${row.author?.id || row.authorId}`} 
-              alt={row.author?.name || row.authorName} 
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-            />
-          </div>
+          <AvatarPlaceholder name={row.author?.name || row.authorName} size="xs" />
           <span className="text-xs font-medium">{row.author?.name || row.authorName || "Anonymous"}</span>
         </div>
       )

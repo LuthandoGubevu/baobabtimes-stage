@@ -2,6 +2,7 @@ import React from "react";
 import { Trophy, Star, Heart } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "../../../utils/cn";
+import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
 
 /**
  * SpotlightCard component for highlighting top performers
@@ -71,14 +72,7 @@ export const SpotlightCard = ({ type, user, rank = 1 }) => {
           "absolute inset-0 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500",
           isRecognizer ? "bg-amber-400" : "bg-blue-400"
         )} />
-        <div className="w-24 h-24 rounded-full p-1 bg-white border border-stone-100 shadow-sm relative z-10 overflow-hidden">
-          <img 
-            src={user.photoURL || `https://i.pravatar.cc/150?u=${user.displayName}`} 
-            alt={user.displayName}
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover rounded-full"
-          />
-        </div>
+        <AvatarPlaceholder name={user.displayName} size="xl" className="relative z-10" />
         {rank === 1 && (
           <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-md border border-stone-100 z-20">
             <Icon className={cn("w-5 h-5", style.icon)} />

@@ -2,9 +2,10 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { articleService } from "../services/articleService";
-import { MessageSquare, Loader2 } from "lucide-react";
+import { MessageSquare, Loader2, User } from "lucide-react";
 import AuthorMeta from "./AuthorMeta";
 import { cn } from "../../../utils/cn";
+import { ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
 
 /**
  * FromTheCeoSection component for the homepage spotlight
@@ -75,6 +76,7 @@ export default function FromTheCeoSection() {
             author={authorData} 
             date={formatDate(createdAt)} 
             size="md"
+            showAvatar={false}
           />
           {commentsCount > 0 && (
             <div className="flex items-center space-x-1.5 text-stone-400 text-xs font-bold uppercase tracking-widest">
@@ -123,12 +125,7 @@ export default function FromTheCeoSection() {
 
             {/* Featured Image - Smaller and on the right */}
             <div className="relative aspect-square overflow-hidden rounded-2xl shadow-xl">
-              <img 
-                src={imageUrl || `https://picsum.photos/seed/ceo-${id}/800/800`} 
-                alt={title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
-                referrerPolicy="no-referrer"
-              />
+              <ImagePlaceholder icon={User} className="group-hover:scale-105 transition-all duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-stone-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>
           </div>

@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { articleService } from "../services/articleService";
 import { format } from "date-fns";
-import { Loader2, ArrowLeft, BookOpen } from "lucide-react";
+import { Loader2, ArrowLeft, BookOpen, User } from "lucide-react";
 import AuthorMeta from "../components/AuthorMeta";
+import { ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
 
 /**
  * CeoArchivePage component
@@ -105,12 +106,7 @@ export default function CeoArchivePage() {
                 to={`/posts/${article.slug || article.id}`}
                 className="hidden md:block aspect-square overflow-hidden rounded-2xl shadow-lg"
               >
-                <img 
-                  src={article.imageUrl || `https://picsum.photos/seed/ceo-${article.id}/500/500`} 
-                  alt={article.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
-                  referrerPolicy="no-referrer"
-                />
+                <ImagePlaceholder icon={User} className="group-hover:scale-105 transition-all duration-700" />
               </Link>
             </article>
           ))

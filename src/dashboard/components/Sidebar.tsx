@@ -48,6 +48,8 @@ const navSections = [
   }
 ];
 
+import { AvatarPlaceholder } from '@/components/ui/GenericPlaceholder';
+
 export const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -112,21 +114,7 @@ export const Sidebar = () => {
             isCollapsed ? "justify-center" : "space-x-3"
           )}
         >
-          <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 border border-zinc-700 overflow-hidden group-hover:border-zinc-600 transition-colors">
-            {user?.photoURL ? (
-              <img 
-                src={`${user.photoURL}${user.photoURL.includes('?') ? '&' : '?'}v=${user.updatedAt || Date.now()}`} 
-                key={user.photoURL}
-                alt={user.displayName || ''} 
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover" 
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-zinc-500">
-                <User size={20} />
-              </div>
-            )}
-          </div>
+          <AvatarPlaceholder name={user?.displayName} size="md" className="flex-shrink-0" />
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-white truncate group-hover:text-zinc-200 transition-colors">{user?.displayName || 'User'}</p>

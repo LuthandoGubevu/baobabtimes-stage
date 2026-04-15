@@ -40,7 +40,7 @@ export const activityService = {
       const snapshot = await getDocs(q);
       let activities = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...(doc.data() as any)
       })) as Activity[];
 
       if (isPublicOnly) {
@@ -85,7 +85,7 @@ export const activityService = {
     return onSnapshot(q, (snapshot) => {
       let activities = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...(doc.data() as any)
       })) as Activity[];
 
       if (isPublicOnly) {

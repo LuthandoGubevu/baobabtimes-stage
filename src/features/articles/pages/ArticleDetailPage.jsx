@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useArticle } from "../hooks/useArticles";
 import { format } from "date-fns";
 import { ArrowLeft, Share2, Bookmark, MessageCircle } from "lucide-react";
+import { AvatarPlaceholder, ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
 
 /**
  * ArticleDetailPage component for displaying a full article
@@ -48,9 +49,7 @@ export default function ArticleDetailPage() {
         </p>
         <div className="flex items-center justify-between py-6 border-y border-stone-100">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-full bg-stone-200 overflow-hidden border-2 border-white shadow-sm">
-              <img src={`https://i.pravatar.cc/150?u=${authorId || id}`} alt={authorName} referrerPolicy="no-referrer" />
-            </div>
+            <AvatarPlaceholder name={authorName} size="md" />
             <div>
               <p className="text-sm font-bold text-stone-900">{authorName || "Anonymous"}</p>
               <p className="text-xs text-stone-400 uppercase tracking-widest font-bold">Contributor</p>
@@ -65,12 +64,7 @@ export default function ArticleDetailPage() {
 
       {/* Featured Image */}
       <div className="aspect-[21/9] rounded-3xl overflow-hidden bg-stone-100 mb-12 shadow-xl">
-        <img 
-          src={imageUrl || `https://picsum.photos/seed/art-hero-${id}/1200/600`} 
-          alt={title}
-          className="w-full h-full object-cover"
-          referrerPolicy="no-referrer"
-        />
+        <ImagePlaceholder className="w-full h-full" />
       </div>
 
       {/* Content */}

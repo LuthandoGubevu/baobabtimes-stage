@@ -6,6 +6,8 @@ import { Search, HelpCircle, User as UserIcon, ChevronRight, ArrowLeft } from 'l
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 
+import { AvatarPlaceholder } from '@/components/ui/GenericPlaceholder';
+
 export const DashboardLayout = () => {
   const location = useLocation();
   const { user } = useAuth();
@@ -71,19 +73,7 @@ export const DashboardLayout = () => {
               to="/dashboard/settings"
               className="flex items-center space-x-2 p-1 rounded-lg hover:bg-zinc-100 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-[10px] font-bold text-white overflow-hidden border border-zinc-200">
-                {user?.photoURL ? (
-                  <img 
-                    src={`${user.photoURL}${user.photoURL.includes('?') ? '&' : '?'}v=${user.updatedAt || Date.now()}`} 
-                    key={user.photoURL}
-                    alt={user.displayName || ''} 
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover" 
-                  />
-                ) : (
-                  <UserIcon size={14} />
-                )}
-              </div>
+              <AvatarPlaceholder name={user?.displayName} size="sm" />
               <div className="hidden lg:block text-left">
                 <p className="text-xs font-bold text-zinc-900 leading-none">{user?.displayName || 'User'}</p>
                 <p className="text-[10px] text-zinc-500 mt-1 leading-none capitalize">{user?.role || 'Employee'}</p>

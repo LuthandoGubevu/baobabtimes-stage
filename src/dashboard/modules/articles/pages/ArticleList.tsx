@@ -17,6 +17,8 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { AvatarPlaceholder } from '@/components/ui/GenericPlaceholder';
+
 interface Article {
   id: string;
   title: string;
@@ -219,14 +221,7 @@ export const ArticleList = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
-                        <div className="w-6 h-6 rounded-full bg-zinc-100 overflow-hidden border border-zinc-200">
-                          <img 
-                            src={article.author?.avatar || `https://i.pravatar.cc/150?u=${article.author?.id || article.authorId}`} 
-                            alt={article.author?.name || article.authorName} 
-                            className="w-full h-full object-cover"
-                            referrerPolicy="no-referrer"
-                          />
-                        </div>
+                        <AvatarPlaceholder name={article.author?.name || article.authorName} size="xs" />
                         <span className="text-sm text-zinc-600">{article.author?.name || article.authorName || "Anonymous"}</span>
                       </div>
                     </td>

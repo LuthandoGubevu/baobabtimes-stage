@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { cn } from "../../../utils/cn";
 import AuthorMeta from "./AuthorMeta";
+import { ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
 
 /**
  * ArticleCard component for displaying article summaries
@@ -32,12 +33,7 @@ export default function ArticleCard({ article, className }) {
       )}
     >
       <div className="aspect-[16/9] overflow-hidden bg-stone-100">
-        <img 
-          src={imageUrl || `https://picsum.photos/seed/art-${id}/800/450`} 
-          alt={title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          referrerPolicy="no-referrer"
-        />
+        <ImagePlaceholder className="group-hover:scale-105 transition-transform duration-500" />
       </div>
       <div className="p-5">
         <div className="flex items-center justify-between mb-3">

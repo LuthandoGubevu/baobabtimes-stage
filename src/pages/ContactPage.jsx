@@ -4,6 +4,7 @@ import { db, auth } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
+import { AvatarPlaceholder } from "../components/ui/GenericPlaceholder";
 
 /**
  * ContactPage component displaying the Internal Comms Team contact details.
@@ -24,7 +25,6 @@ export default function ContactPage() {
       cell: "+27 71 682 0890",
       tel: "+27 43 004 0071",
       email: "harvey@baobabbrands.com",
-      image: "https://picsum.photos/seed/harvey/400/400"
     },
     {
       name: "Shayna Elcott",
@@ -32,7 +32,6 @@ export default function ContactPage() {
       cell: "+27 83 546 8542",
       tel: "+27 43 004 0071",
       email: "shayna@baobabbrands.com",
-      image: "https://picsum.photos/seed/shayna/400/400"
     },
     {
       name: "Roslyn Goldsmith",
@@ -40,7 +39,6 @@ export default function ContactPage() {
       cell: "+27 83 679 9305",
       tel: "+27 43 004 0071",
       email: "roslyn@baobabbrands.com",
-      image: "https://picsum.photos/seed/roslyn/400/400"
     }
   ];
 
@@ -100,12 +98,7 @@ export default function ContactPage() {
           {team.map((member, idx) => (
             <div key={idx} className="bg-white rounded-[2.5rem] shadow-sm border border-stone-200 overflow-hidden group hover:shadow-xl transition-all duration-500">
               <div className="aspect-square overflow-hidden relative">
-                <img 
-                  src={member.image} 
-                  alt={member.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  referrerPolicy="no-referrer"
-                />
+                <AvatarPlaceholder name={member.name} size="full" className="w-full h-full transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
                   <p className="text-white text-sm font-medium italic">"Always here to help."</p>
                 </div>

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { recognitionService } from "../features/recognition/services/recognitionService";
 import ArticleCard from "../features/articles/components/ArticleCard";
 import FromTheCeoSection from "../features/articles/components/FromTheCeoSection";
+import { AvatarPlaceholder, ImagePlaceholder } from "../components/ui/GenericPlaceholder";
 
 /**
  * HomePage component
@@ -30,7 +31,14 @@ export default function HomePage() {
     <div className="space-y-24">
       {/* Hero Section */}
       <section className="text-center py-24 bg-stone-900 text-white rounded-[2rem] overflow-hidden relative shadow-2xl">
-        <div className="absolute inset-0 opacity-30 bg-[url('/staff-image.jpg')] bg-cover bg-center scale-105"></div>
+        <div className="absolute inset-0 opacity-30">
+          <img 
+            src="/staff-image.jpg" 
+            alt="Staff" 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+        </div>
         <div className="absolute inset-0 bg-gradient-to-b from-stone-900/40 to-stone-900/80"></div>
         <div className="relative z-10 max-w-3xl mx-auto px-6">
           <div className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-8 animate-fade-in">
@@ -130,19 +138,7 @@ export default function HomePage() {
                 recentPraise.map((rec) => (
                   <div key={rec.id} className="bg-white p-5 rounded-2xl shadow-sm border border-stone-200/30 hover:shadow-md transition-shadow cursor-default">
                     <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-stone-200 overflow-hidden border border-stone-100">
-                        {rec.isAnonymous ? (
-                          <div className="w-full h-full bg-stone-200 flex items-center justify-center">
-                            <span className="text-stone-400 text-[10px] font-bold">?</span>
-                          </div>
-                        ) : (
-                          <img 
-                            src={rec.fromAvatar || `https://i.pravatar.cc/150?u=${rec.fromName}`} 
-                            alt={rec.fromName} 
-                            referrerPolicy="no-referrer" 
-                          />
-                        )}
-                      </div>
+                      <AvatarPlaceholder name={rec.fromName} size="md" />
                       <div>
                         <p className="text-sm font-bold text-stone-900">
                           {rec.fromName || (rec.isAnonymous ? "Anonymous" : "Someone")}

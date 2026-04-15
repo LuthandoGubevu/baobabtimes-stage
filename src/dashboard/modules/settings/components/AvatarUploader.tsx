@@ -4,6 +4,8 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import { storage, db } from '@/firebase';
 
+import { AvatarPlaceholder } from '@/components/ui/GenericPlaceholder';
+
 export const AvatarUploader = ({ currentUrl, onUploadSuccess, userId, updatedAt }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -81,19 +83,10 @@ export const AvatarUploader = ({ currentUrl, onUploadSuccess, userId, updatedAt 
     <div className="flex flex-col items-center space-y-4">
       <div className="relative group">
         <div className="w-32 h-32 rounded-full overflow-hidden bg-stone-100 border-2 border-stone-200 shadow-inner relative">
-          {previewUrl || currentUrl ? (
-            <img 
-              src={previewUrl || (currentUrl ? `${currentUrl}${currentUrl.includes('?') ? '&' : '?'}v=${updatedAt || Date.now()}` : '')} 
-              key={previewUrl || currentUrl}
-              alt="Profile" 
-              referrerPolicy="no-referrer"
-              className={`w-full h-full object-cover transition-opacity duration-300 ${isUploading ? 'opacity-40' : 'opacity-100'}`}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-stone-400">
-              <Camera className="w-8 h-8" />
-            </div>
-          )}
+          <AvatarPlaceholder 
+            size="full" 
+            className={`w-full h-full transition-opacity duration-300 ${isUploading ? 'opacity-40' : 'opacity-100'}`} 
+          />
           
           {isUploading && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/10">

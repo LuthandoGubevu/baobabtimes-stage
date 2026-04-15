@@ -1,4 +1,5 @@
 import { cn } from "../../../utils/cn";
+import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
 
 /**
  * Reusable AuthorMeta component for displaying author information
@@ -20,12 +21,6 @@ export default function AuthorMeta({
 
   const { id, name, avatar, role } = author;
 
-  const avatarSizeClasses = {
-    sm: "w-6 h-6",
-    md: "w-10 h-10",
-    lg: "w-16 h-16 md:w-24 md:h-24"
-  };
-
   const textSizeClasses = {
     sm: "text-xs",
     md: "text-sm",
@@ -35,17 +30,7 @@ export default function AuthorMeta({
   return (
     <div className={cn("flex items-center space-x-3", className)}>
       {showAvatar && (
-        <div className={cn(
-          "rounded-full bg-stone-100 overflow-hidden border border-stone-200 flex-shrink-0",
-          avatarSizeClasses[size]
-        )}>
-          <img 
-            src={avatar || `https://i.pravatar.cc/150?u=${id || name}`} 
-            alt={name} 
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-          />
-        </div>
+        <AvatarPlaceholder name={name} size={size} />
       )}
       <div className="flex flex-col">
         <span className={cn(

@@ -6,6 +6,7 @@ import { LikeButton } from "./LikeButton";
 import { getRecognitionValue } from "../constants/recognitionValues";
 import { useAuth } from "../../../hooks/useAuth";
 import { recognitionService } from "../services/recognitionService";
+import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
 
 /**
  * RecognitionCard component for displaying peer recognition
@@ -70,20 +71,7 @@ export default function RecognitionCard({ recognition, className }) {
 
       <div className="flex items-center justify-between mb-8 relative z-10">
         <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-full bg-stone-100 overflow-hidden border-2 border-white shadow-sm ring-1 ring-stone-100">
-            {isAnonymous ? (
-              <div className="w-full h-full bg-stone-200 flex items-center justify-center">
-                <span className="text-stone-400 text-xs font-bold">?</span>
-              </div>
-            ) : (
-              <img 
-                src={fromAvatar || `https://i.pravatar.cc/150?u=${fromName}`} 
-                alt={fromName} 
-                referrerPolicy="no-referrer" 
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
+          <AvatarPlaceholder name={isAnonymous ? "?" : fromName} size="md" />
           <div className="flex flex-col">
             <span className="text-sm font-bold text-stone-900 leading-none mb-1">
               {fromName || (isAnonymous ? "Anonymous" : "Someone")}
@@ -102,14 +90,7 @@ export default function RecognitionCard({ recognition, className }) {
             <span className="text-sm font-bold text-stone-900 leading-none mb-1">{toName}</span>
             <span className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">To</span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-stone-100 overflow-hidden border-2 border-white shadow-sm ring-1 ring-stone-100">
-            <img 
-              src={toAvatar || `https://i.pravatar.cc/150?u=${toName}`} 
-              alt={toName} 
-              referrerPolicy="no-referrer" 
-              className="w-full h-full object-cover"
-            />
-          </div>
+          <AvatarPlaceholder name={toName} size="md" />
         </div>
       </div>
       
