@@ -138,13 +138,12 @@ service cloud.firestore {
     // ===============================================================
 
     function isValidUser(data) {
-      return hasOnlyAllowedFields(['uid', 'displayName', 'email', 'photoURL', 'role', 'createdAt', 'fullName', 'phone', 'jobTitle', 'department', 'bio', 'preferences', 'notifications', 'updatedAt', 'fcmTokens']) &&
+      return hasOnlyAllowedFields(['uid', 'displayName', 'email', 'photoURL', 'role', 'createdAt', 'fullName', 'phone', 'jobTitle', 'department', 'bio', 'preferences', 'notifications', 'updatedAt']) &&
              data.uid is string &&
              (data.email is string) &&
              data.role in ['admin', 'ceo', 'user', 'employee', 'editor'] &&
              (!('preferences' in data) || data.preferences is map) &&
-             (!('notifications' in data) || data.notifications is map) &&
-             (!('fcmTokens' in data) || data.fcmTokens is list);
+             (!('notifications' in data) || data.notifications is map);
     }
 
     function isValidArticle(data) {

@@ -76,24 +76,6 @@ export const articleService = {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
-
-      // Send Push Notification if published
-      if (data.status === "PUBLISHED") {
-        try {
-          await fetch('/api/notifications/broadcast', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              title: `New Article: ${data.title}`,
-              body: data.excerpt || "Read the latest news on The Baobab Times",
-              url: `/articles/${docRef.id}`
-            })
-          });
-        } catch (err) {
-          console.error('Failed to send push notification:', err);
-        }
-      }
-
       return { id: docRef.id, ...data };
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, path);
@@ -161,21 +143,6 @@ export const articleService = {
       }
 
       await batch.commit();
-
-      // Send Push Notification
-      try {
-        await fetch('/api/notifications/broadcast', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: `New Message from the CEO`,
-            body: data.title,
-            url: `/from-the-ceo`
-          })
-        });
-      } catch (err) {
-        console.error('Failed to send push notification:', err);
-      }
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, path);
       throw error;

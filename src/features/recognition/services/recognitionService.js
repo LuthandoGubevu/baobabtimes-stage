@@ -249,24 +249,6 @@ export const recognitionService = {
         );
       }
 
-      // Send Push Notification to recipient
-      if (data.toId && data.toId !== "external") {
-        try {
-          await fetch('/api/notifications/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId: data.toId,
-              title: "You've been recognized!",
-              body: `${data.fromName || "Someone"} just posted a recognition for you: "${data.content.substring(0, 50)}..."`,
-              url: "/recognition"
-            })
-          });
-        } catch (err) {
-          console.error('Failed to send push notification:', err);
-        }
-      }
-
       return { id: docRef.id, ...data, likes: 0, likedBy: [] };
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, path);

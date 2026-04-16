@@ -4,7 +4,6 @@ import {
   Route,
   Navigate
 } from "react-router-dom";
-import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -24,7 +23,6 @@ import LoginPage from "./features/auth/pages/LoginPage";
 import ProtectedRoute from "./features/auth/components/ProtectedRoute";
 import LoginModal from "./features/auth/components/LoginModal";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
-import { useNotifications } from "./hooks/useNotifications";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import HelpPage from "./pages/HelpPage";
@@ -61,23 +59,6 @@ const DashboardIndex = () => {
   );
 };
 
-const NotificationHandler = () => {
-  const { user } = useAuth();
-  const { permission, requestPermission, isSupported } = useNotifications();
-
-  useEffect(() => {
-    if (user && isSupported && permission === 'default') {
-      // Automatically request permission after a short delay if logged in
-      const timer = setTimeout(() => {
-        requestPermission();
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [user, isSupported, permission]);
-
-  return null;
-};
-
 export default function App() {
   return (
     <ErrorBoundary>
@@ -85,7 +66,6 @@ export default function App() {
         <AuthProvider>
           <LoginModal />
           <PWAInstallPrompt />
-          <NotificationHandler />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<RootLayout />}>
