@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import articlesRouter from "./src/backend/modules/articles/articles.routes";
 import mediaRouter from "./src/backend/modules/media/media.routes.ts";
+import { notificationService } from "./src/backend/services/notificationService";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,27 @@ async function startServer() {
 
   // --- API ROUTES ---
   
+  // Notifications API
+  app.post("/api/notifications/broadcast", async (req, res) => {
+    const { title, body, url } = req.body;
+    try {
+      await notificationService.broadcast(title, body, url);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/notifications/send", async (req, res) => {
+    const { userId, title, body, url } = req.body;
+    try {
+      await notificationService.sendToUser(userId, title, body, url);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Auth Mock (to be moved to modules/auth/auth.routes.ts)
   app.post("/api/auth/login", (req, res) => {
     const { email } = req.body;
@@ -34,6 +56,11 @@ async function startServer() {
 
   // Media Module
   app.use("/api/media", mediaRouter);
+
+  // Serve Firebase Config for Service Worker
+  app.get("/firebase-applet-config.json", (req, res) => {
+    res.sendFile(path.join(process.cwd(), "firebase-applet-config.json"));
+  });
 
   // Serve uploads statically
   app.use("/uploads", express.static(path.join(process.cwd(), "public", "uploads")));

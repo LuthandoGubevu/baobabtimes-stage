@@ -36,6 +36,7 @@ interface AuthUser {
     ceoUpdates?: boolean;
     systemAlerts?: boolean;
   };
+  fcmTokens?: string[];
   updatedAt?: string;
 }
 
