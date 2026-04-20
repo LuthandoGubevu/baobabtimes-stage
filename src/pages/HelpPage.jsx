@@ -491,9 +491,12 @@ export default function HelpPage() {
           <p className="text-stone-600 max-w-md mx-auto">
             If you couldn't find what you were looking for, our Internal Comms team is here to support you.
           </p>
-          <button className="px-8 py-3 bg-stone-900 text-white font-bold rounded-xl hover:bg-stone-800 transition-colors">
+          <a 
+            href="mailto:luthando@baobabbrands.com"
+            className="inline-block px-8 py-3 bg-stone-900 text-white font-bold rounded-xl hover:bg-stone-800 transition-colors"
+          >
             Contact Support
-          </button>
+          </a>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { articleService } from "../services/articleService";
-import { MessageSquare, Loader2, User } from "lucide-react";
+import { MessageSquare, Loader2 } from "lucide-react";
 import AuthorMeta from "./AuthorMeta";
 import { cn } from "../../../utils/cn";
 import { ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
@@ -92,7 +92,22 @@ export default function FromTheCeoSection() {
           to={`/posts/${articleSlug}`}
           className="block group max-w-7xl mx-auto"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-16 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            {/* Image Column */}
+            <div className="aspect-[4/5] bg-stone-100 rounded-[2.5rem] overflow-hidden relative shadow-2xl">
+              {imageUrl ? (
+                <img 
+                  src={imageUrl} 
+                  alt={title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <ImagePlaceholder className="group-hover:scale-105 transition-transform duration-700" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </div>
+
             {/* Text Content */}
             <div className="space-y-8">
               <h2 className="text-5xl md:text-6xl font-serif font-bold text-stone-900 leading-tight tracking-tight group-hover:text-stone-600 transition-colors">
@@ -121,12 +136,6 @@ export default function FromTheCeoSection() {
                   </svg>
                 </span>
               </div>
-            </div>
-
-            {/* Featured Image - Smaller and on the right */}
-            <div className="relative aspect-square overflow-hidden rounded-2xl shadow-xl">
-              <ImagePlaceholder icon={User} className="group-hover:scale-105 transition-all duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-stone-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>
           </div>
         </Link>

@@ -42,7 +42,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-stone-900/40 to-stone-900/80"></div>
         <div className="relative z-10 max-w-3xl mx-auto px-6">
           <div className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-bold uppercase tracking-[0.3em] mb-8 animate-fade-in">
-            Established 2026
+            Established 2024
           </div>
           <h1 className="text-6xl md:text-8xl font-serif font-bold mb-8 leading-[0.9] tracking-tighter">
             The Baobab <br />

@@ -32,8 +32,17 @@ export default function ArticleCard({ article, className }) {
         className
       )}
     >
-      <div className="aspect-[16/9] overflow-hidden bg-stone-100">
-        <ImagePlaceholder className="group-hover:scale-105 transition-transform duration-500" />
+      <div className="aspect-[16/9] overflow-hidden bg-stone-100 relative">
+        {imageUrl ? (
+          <img 
+            src={imageUrl} 
+            alt={title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <ImagePlaceholder className="group-hover:scale-105 transition-transform duration-700" />
+        )}
       </div>
       <div className="p-5">
         <div className="flex items-center justify-between mb-3">
