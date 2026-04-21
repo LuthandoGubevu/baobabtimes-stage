@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import articlesRouter from "./src/backend/modules/articles/articles.routes";
 import mediaRouter from "./src/backend/modules/media/media.routes.ts";
+import authRouter from "./src/backend/modules/auth/auth.routes";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,18 +17,8 @@ async function startServer() {
 
   // --- API ROUTES ---
   
-  // Auth Mock (to be moved to modules/auth/auth.routes.ts)
-  app.post("/api/auth/login", (req, res) => {
-    const { email } = req.body;
-    const role = email.includes("admin") ? "ADMIN" : 
-                 email.includes("ceo") ? "CEO" : 
-                 email.includes("contributor") ? "CONTRIBUTOR" : "VIEWER";
-    
-    res.json({
-      token: "mock-jwt-token",
-      user: { id: "1", name: "John Doe", email, role }
-    });
-  });
+  // Auth Module
+  app.use("/api/auth", authRouter);
 
   // Articles Module
   app.use("/api/articles", articlesRouter);

@@ -100,17 +100,19 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() &&
-        (request.auth.token.get('email', '') == "keeganbaobabb@gmail.com" ||
-         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
+      return isSignedIn() && (
+        request.auth.token.role == 'admin' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
     }
 
     function isCEO() {
-      return isSignedIn() &&
-        (request.auth.token.get('email', '') == "grant@baobabbrands.com" ||
-         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ceo'));
+      return isSignedIn() && (
+        request.auth.token.role == 'ceo' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ceo')
+      );
     }
 
     function isArticleAuthor(articleData) {
@@ -224,12 +226,11 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role == 'user';
       allow update: if isAuthenticated() && isValidUser(request.resource.data) && (
         (isOwner(userId) && (
-          request.resource.data.role == resource.data.role || 
-          (request.auth.token.get('email', '') == "grant@baobabbrands.com" && request.resource.data.role == "ceo") ||
-          (request.auth.token.get('email', '') == "keeganbaobabb@gmail.com" && request.resource.data.role == "admin")
+          // Role can only be changed by an existing admin or the backend Admin SDK (which bypasses rules)
+          request.resource.data.role == resource.data.role
         )) || 
         isAdmin()
       );

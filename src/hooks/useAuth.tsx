@@ -12,6 +12,7 @@ import {
 import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
+import { getRoleForEmail } from "../lib/rbac-config";
 
 interface AuthUser {
   uid: string;
@@ -66,6 +67,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
+  /**
+   * Syncs the user's role with the backend.
+   * This ensures the Firestore document is updated by the server and Custom Claims are set.
+   */
+  const syncUserWithBackend = async (firebaseUser: FirebaseUser) => {
+    try {
+      const idToken = await firebaseUser.getIdToken();
+      const response = await fetch("/api/auth/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        }
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        console.error("Backend sync failed:", data.error);
+      } else {
+        console.log(">>> Backend role sync successful");
+      }
+    } catch (err) {
+      console.error("Error calling auth sync API:", err);
+    }
+  };
+
   useEffect(() => {
     if (user && pendingAction) {
       pendingAction();
@@ -80,6 +107,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(null);
       
       if (firebaseUser) {
+        // Trigger backend sync asynchronously
+        syncUserWithBackend(firebaseUser);
+
         // Set up real-time listener for the user document
         unsubscribeDoc = onSnapshot(
           doc(db, 'users', firebaseUser.uid),
@@ -87,24 +117,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (userDoc.exists()) {
               const userData = userDoc.data() as AuthUser;
               
-              // Repair logic: Ensure CEO role is set for the specific email
-              if (firebaseUser.email === "grant@baobabbrands.com" && userData.role !== 'ceo') {
-                console.log("Repairing CEO role for:", firebaseUser.email);
-                await setDoc(doc(db, 'users', firebaseUser.uid), {
-                  ...userData,
-                  role: 'ceo'
-                }, { merge: true });
-                return;
-              }
-
-              // Repair logic: Ensure Admin role is set for the specific email
-              if (firebaseUser.email === "keeganbaobabb@gmail.com" && userData.role !== 'admin') {
-                console.log("Repairing Admin role for:", firebaseUser.email);
-                await setDoc(doc(db, 'users', firebaseUser.uid), {
-                  ...userData,
-                  role: 'admin'
-                }, { merge: true });
-                return;
+              const expectedRole = getRoleForEmail(firebaseUser.email);
+              if (userData.role !== expectedRole) {
+                console.log(`>>> Stale local role detected: ${userData.role}. Waiting for backend sync...`);
+                // We don't attempt to repair here because the rules forbid it.
+                // The syncUserWithBackend call (triggered on auth change) will fix this.
               }
 
               setUser(userData);
@@ -134,15 +151,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const initializeNewUser = async (firebaseUser: FirebaseUser) => {
-    const isAdminEmail = firebaseUser.email === "keeganbaobabb@gmail.com";
-    const isCeoEmail = firebaseUser.email === "grant@baobabbrands.com";
-    
     const newUser: AuthUser = {
       uid: firebaseUser.uid,
       displayName: firebaseUser.displayName,
       email: firebaseUser.email || "unknown@baobabbrands.com",
       photoURL: firebaseUser.photoURL,
-      role: isAdminEmail ? 'admin' : (isCeoEmail ? 'ceo' : 'user'),
+      role: 'user', // Default to user on client-side creation
     };
     
     try {
@@ -171,15 +185,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // The onAuthStateChanged listener will handle the Firestore document creation
     // but we might need to ensure the displayName is available immediately
-    const isAdminEmail = email === "keeganbaobabb@gmail.com";
-    const isCeoEmail = email === "grant@baobabbrands.com";
-    
     const newUser: AuthUser = {
       uid: userCredential.user.uid,
       displayName,
       email,
       photoURL: null,
-      role: isAdminEmail ? 'admin' : (isCeoEmail ? 'ceo' : 'user'),
+      role: 'user', // Default to user on client-side
     };
     
     try {
