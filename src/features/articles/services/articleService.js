@@ -11,7 +11,10 @@ import {
   writeBatch,
   serverTimestamp, 
   orderBy,
-  limit
+  limit,
+  increment,
+  arrayUnion,
+  arrayRemove
 } from "firebase/firestore";
 import { db } from "../../../firebase";
 import { handleFirestoreError, OperationType } from "../../../lib/firestore-errors";
@@ -59,6 +62,44 @@ export const articleService = {
     } catch (error) {
       handleFirestoreError(error, OperationType.GET, path);
       return null;
+    }
+  },
+
+  /**
+   * Increment view count for an article
+   * @param {string} id 
+   */
+  incrementViews: async (id) => {
+    if (!id) return;
+    const path = `articles/${id}`;
+    try {
+      const docRef = doc(db, "articles", id);
+      await updateDoc(docRef, {
+        views: increment(1)
+      });
+    } catch (error) {
+      console.error("Error incrementing views:", error);
+    }
+  },
+
+  /**
+   * Toggle like for an article
+   * @param {string} id 
+   * @param {string} userId 
+   * @param {boolean} isLiking 
+   */
+  toggleArticleLike: async (id, userId, isLiking) => {
+    if (!id || !userId) return;
+    const path = `articles/${id}`;
+    try {
+      const docRef = doc(db, "articles", id);
+      await updateDoc(docRef, {
+        likes: increment(isLiking ? 1 : -1),
+        likedBy: isLiking ? arrayUnion(userId) : arrayRemove(userId)
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+      throw error;
     }
   },
 

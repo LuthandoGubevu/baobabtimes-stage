@@ -1,7 +1,8 @@
 import { useArticles } from "../hooks/useArticles";
 import ArticleCard from "../components/ArticleCard";
 import { Search, Filter } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { cn } from "../../../utils/cn";
 
 import { CATEGORIES } from "../../../constants/categories";
@@ -11,8 +12,26 @@ import { CATEGORIES } from "../../../constants/categories";
  */
 export default function ArticlesPage() {
   const { data: articles, isLoading, error } = useArticles();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  
+  const categoryFromUrl = searchParams.get("category") || "All";
+  const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
+
+  // Sync state with URL
+  useEffect(() => {
+    setSelectedCategory(categoryFromUrl);
+  }, [categoryFromUrl]);
+
+  const handleCategoryChange = (cat) => {
+    if (cat === "All") {
+      searchParams.delete("category");
+    } else {
+      searchParams.set("category", cat);
+    }
+    setSearchParams(searchParams);
+    setSelectedCategory(cat);
+  };
 
   const filteredArticles = Array.isArray(articles) ? articles.filter(article => {
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -53,7 +72,7 @@ export default function ArticlesPage() {
         {["All", ...CATEGORIES.map(c => c.name)].map((cat) => (
           <button 
             key={cat}
-            onClick={() => setSelectedCategory(cat)}
+            onClick={() => handleCategoryChange(cat)}
             className={cn(
               "px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-full border transition-all",
               selectedCategory === cat 

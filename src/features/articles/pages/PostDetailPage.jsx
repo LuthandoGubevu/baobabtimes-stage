@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import { useEffect } from "react";
 import AuthorMeta from "../components/AuthorMeta";
 import { ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
+import CommentsSection from "../components/CommentsSection";
 
 export default function PostDetailPage() {
   const { slug } = useParams();
@@ -46,7 +47,7 @@ export default function PostDetailPage() {
     );
   }
 
-  const { title, category, author, authorName, authorId, createdAt, imageUrl, content, excerpt } = article;
+  const { id, title, category, author, authorName, authorId, createdAt, imageUrl, content, excerpt } = article;
 
   const formatDate = (date) => {
     if (!date) return "";
@@ -132,18 +133,10 @@ export default function PostDetailPage() {
                 {content}
               </ReactMarkdown>
             </div>
-
-            {/* Example Inline Banner (as requested) */}
-            <div className="my-12 p-1 bg-stone-100 rounded-xl overflow-hidden shadow-sm">
-              <div className="aspect-[4/1]">
-                <ImagePlaceholder className="w-full h-full" />
-              </div>
-              <div className="p-4 flex justify-between items-center text-xs font-bold uppercase tracking-widest text-stone-500">
-                <span>Bottomless Buckets - Competition</span>
-                <span>17 March - 20 April 2026</span>
-              </div>
-            </div>
         </div>
+
+        {/* Comments Section */}
+        <CommentsSection articleId={id} />
       </div>
     </article>
   );

@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { cn } from "../../../utils/cn";
 import AuthorMeta from "./AuthorMeta";
 import { ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
+import { ThumbsUp, MessageCircle, Eye } from "lucide-react";
+import { useAuth } from "../../../hooks/useAuth";
+import { articleService } from "../services/articleService";
 
 /**
  * ArticleCard component for displaying article summaries
@@ -11,12 +15,39 @@ import { ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
  * @param {string} props.className
  */
 export default function ArticleCard({ article, className }) {
-  const { id, title, slug, category, author, authorName, authorId, createdAt, imageUrl, excerpt } = article;
+  const { user, login } = useAuth();
+  const { 
+    id, title, slug, category, author, authorName, authorId, 
+    createdAt, imageUrl, excerpt, likes, commentsCount, views, likedBy 
+  } = article;
+
+  const [localLikes, setLocalLikes] = useState(likes || 0);
+  const [isLiked, setIsLiked] = useState(user && likedBy?.includes(user.uid));
 
   const formatDate = (date) => {
     if (!date) return "Draft";
     if (date.toDate) return format(date.toDate(), "MMM d, yyyy");
     return format(new Date(date), "MMM d, yyyy");
+  };
+
+  const handleLikeClick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) return login();
+
+    try {
+      const newLikedState = !isLiked;
+      setIsLiked(newLikedState);
+      setLocalLikes(prev => newLikedState ? prev + 1 : prev - 1);
+      
+      await articleService.toggleArticleLike(id, user.uid, newLikedState);
+    } catch (error) {
+      console.error("Failed to like article from card:", error);
+      // Revert if failed
+      setIsLiked(!isLiked);
+      setLocalLikes(likes || 0);
+    }
   };
 
   const articleSlug = slug || id;
@@ -61,8 +92,28 @@ export default function ArticleCard({ article, className }) {
             {excerpt}
           </p>
         )}
-        <div className="pt-4 border-t border-stone-50">
+        <div className="pt-4 border-t border-stone-50 flex items-center justify-between">
           <AuthorMeta author={authorData} size="sm" />
+          <div className="flex items-center space-x-3 text-stone-400">
+            <div className="flex items-center space-x-1">
+              <Eye className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold">{views || 0}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold">{commentsCount || 0}</span>
+            </div>
+            <button 
+              onClick={handleLikeClick}
+              className={cn(
+                "flex items-center space-x-1 transition-colors hover:text-stone-900",
+                isLiked ? "text-red-500 hover:text-red-600" : "text-stone-400"
+              )}
+            >
+              <ThumbsUp className={cn("w-3.5 h-3.5", isLiked && "fill-current")} />
+              <span className="text-[10px] font-bold">{localLikes}</span>
+            </button>
+          </div>
         </div>
       </div>
     </Link>

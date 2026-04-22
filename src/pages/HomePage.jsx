@@ -1,30 +1,53 @@
 import { Link } from "react-router-dom";
+import { motion } from "motion/react";
 import { useArticles } from "../features/articles/hooks/useArticles";
 import { useQuery } from "@tanstack/react-query";
 import { recognitionService } from "../features/recognition/services/recognitionService";
 import ArticleCard from "../features/articles/components/ArticleCard";
 import FromTheCeoSection from "../features/articles/components/FromTheCeoSection";
 import { AvatarPlaceholder, ImagePlaceholder } from "../components/ui/GenericPlaceholder";
+import { useRef, useEffect, useState } from "react";
+import { CATEGORIES } from "../constants/categories";
+import { Search, Filter } from "lucide-react";
 
 /**
  * HomePage component
  * Displays the Hero, CEO Spotlight, and Featured Articles
  */
 export default function HomePage() {
-  const { data: articles, isLoading } = useArticles();
+  const videoRef = useRef(null);
+  const wideVideoRef = useRef(null);
+  const { data: articles, isLoading, isError } = useArticles();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [homeCategory, setHomeCategory] = useState("All");
   
   const { data: recognitions, isLoading: isLoadingRecognitions } = useQuery({
     queryKey: ["recognitions"],
     queryFn: recognitionService.getApprovedRecognitions
   });
 
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(error => {
+        console.error("Sidebar video autoplay was prevented:", error);
+      });
+    }
+    if (wideVideoRef.current) {
+      wideVideoRef.current.play().catch(error => {
+        console.error("Wide video autoplay was prevented:", error);
+      });
+    }
+  }, []);
+
   const recentPraise = Array.isArray(recognitions) ? recognitions.slice(0, 3) : [];
   
-  // Filter out CEO articles from the featured stories section
+  // Filter articles based on home search and category
   const featuredArticles = Array.isArray(articles) 
-    ? articles
-        .filter(article => article.category !== "From the CEO")
-        .slice(0, 4) 
+    ? articles.filter(article => {
+        const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = homeCategory === "All" || article.category === homeCategory;
+        return matchesSearch && matchesCategory;
+      }) 
     : [];
 
   return (
@@ -69,13 +92,88 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Related Articles Search & Navigation */}
+      <div className="space-y-12 py-10 border-y border-stone-100 bg-white/70 backdrop-blur-md px-6 -mx-6 md:rounded-[2rem]">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="max-w-2xl">
+            <h2 className="text-5xl font-serif font-bold mb-4 italic">Related Articles</h2>
+            <p className="text-stone-500 text-lg font-light">
+              Stay informed with the latest updates, stories, and strategic insights from across the organization.
+            </p>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+              <input 
+                type="text" 
+                placeholder="Search articles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2 bg-white border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 transition-all w-64 shadow-sm"
+              />
+            </div>
+            <button className="p-2 bg-white border border-stone-200 rounded-full text-stone-500 hover:text-stone-900 transition-colors shadow-sm">
+              <Filter className="w-5 h-5" />
+            </button>
+          </div>
+        </header>
+
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <button 
+            onClick={() => setHomeCategory("All")}
+            className={`px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all hover:scale-105 shadow-lg ${
+              homeCategory === "All" 
+                ? "bg-stone-900 text-white shadow-stone-900/10" 
+                : "bg-white border border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900"
+            }`}
+          >
+            All
+          </button>
+          {CATEGORIES.map((category) => (
+            <button 
+              key={category.slug}
+              onClick={() => setHomeCategory(category.name)}
+              className={`px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all shadow-sm ${
+                homeCategory === category.name
+                  ? "bg-stone-900 text-white border-stone-900"
+                  : "bg-white border border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900 hover:bg-stone-50"
+              }`}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Panoramic Video Section */}
+      <section className="relative w-full aspect-[5/1] bg-stone-900 rounded-[3rem] overflow-hidden group shadow-2xl border border-white/5">
+        <video 
+          ref={wideVideoRef}
+          src="/WideVideoLandingPage.mp4" 
+          className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
+          autoPlay
+          muted
+          loop
+          playsInline
+        />
+        {/* Subtle decorative overlay */}
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-stone-900/40 to-transparent pointer-events-none"></div>
+      </section>
+
       {/* From The CEO Section */}
       <FromTheCeoSection />
 
       {/* Main Content Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-16">
         {/* Featured Stories Section */}
-        <div className="space-y-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="space-y-12"
+        >
           <div className="flex justify-between items-end border-b border-stone-200 pb-8">
             <div className="space-y-2">
               <h2 className="text-5xl font-serif font-bold italic tracking-tight">Featured Stories</h2>
@@ -99,6 +197,10 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+          ) : isError ? (
+            <div className="py-20 text-center bg-red-50 rounded-3xl border border-dashed border-red-200">
+              <p className="text-red-500 font-serif italic">Failed to load articles. Please check your connection or permissions.</p>
+            </div>
           ) : featuredArticles.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
               {featuredArticles.map((article) => (
@@ -110,10 +212,27 @@ export default function HomePage() {
               <p className="text-stone-400 font-serif italic">No featured articles available at this time.</p>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Sidebar */}
         <aside className="space-y-12">
+          {/* Featured Video Placeholder */}
+          <div className="bg-white rounded-[2rem] border border-stone-200 overflow-hidden shadow-sm">
+            <div className="aspect-video w-full bg-stone-100 flex items-center justify-center relative group shadow-inner">
+              <video 
+                ref={videoRef}
+                src="/FiestaLandingPageVideo.mp4" 
+                className="absolute inset-0 w-full h-full object-cover"
+                autoPlay
+                muted
+                loop
+                playsInline
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+
           {/* Recognition Widget */}
           <div className="bg-stone-100 p-8 rounded-[2rem] border border-stone-200/50 shadow-sm">
             <h2 className="text-2xl font-serif font-bold mb-6 flex items-center">

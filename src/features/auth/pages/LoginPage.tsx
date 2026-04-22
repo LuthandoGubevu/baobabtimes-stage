@@ -75,6 +75,10 @@ export default function LoginPage() {
         message = "Network error: Firebase could not be reached. Please check your internet connection and ensure no ad-blockers are blocking 'identitytoolkit.googleapis.com'.";
       } else if (err.code === 'auth/operation-not-allowed') {
         message = "Email/Password authentication is not enabled in the Firebase Console.";
+      } else if (err.code === 'auth/email-already-in-use') {
+        message = "This email is already registered. Please sign in instead.";
+      } else if (err.code === 'auth/invalid-credential') {
+        message = "Invalid email or password. Please try again.";
       }
       
       setLocalError(message);

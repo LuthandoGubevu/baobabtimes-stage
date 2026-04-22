@@ -1,21 +1,34 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { articleService } from "../services/articleService";
-import { MessageSquare, Loader2 } from "lucide-react";
+import { MessageSquare, Loader2, ThumbsUp, Eye } from "lucide-react";
 import AuthorMeta from "./AuthorMeta";
 import { cn } from "../../../utils/cn";
 import { ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
+import { useAuth } from "../../../hooks/useAuth";
 
 /**
  * FromTheCeoSection component for the homepage spotlight
  * Styled to match the editorial layout in the provided image
  */
 export default function FromTheCeoSection() {
+  const { user, login } = useAuth();
   const { data: article, isLoading, error } = useQuery({
     queryKey: ["article", "latest-ceo"],
     queryFn: articleService.getLatestCeoArticle,
   });
+
+  const [localLikes, setLocalLikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+
+  useEffect(() => {
+    if (article) {
+      setLocalLikes(article.likes || 0);
+      setIsLiked(user && article.likedBy?.includes(user.uid));
+    }
+  }, [article, user]);
 
   if (isLoading) {
     return (
@@ -32,7 +45,26 @@ export default function FromTheCeoSection() {
     return null;
   }
 
-  const { title, slug, id, category, author, authorName, authorId, createdAt, imageUrl, excerpt, content, commentsCount } = article;
+  const { title, slug, id, category, author, authorName, authorId, createdAt, imageUrl, excerpt, content, commentsCount, views } = article;
+
+  const handleLikeClick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) return login();
+
+    try {
+      const newLikedState = !isLiked;
+      setIsLiked(newLikedState);
+      setLocalLikes(prev => newLikedState ? prev + 1 : prev - 1);
+      
+      await articleService.toggleArticleLike(id, user.uid, newLikedState);
+    } catch (error) {
+      console.error("Failed to like CEO article:", error);
+      setIsLiked(!isLiked);
+      setLocalLikes(article.likes || 0);
+    }
+  };
 
   const formatDate = (date) => {
     if (!date) return "";
@@ -78,12 +110,26 @@ export default function FromTheCeoSection() {
             size="md"
             showAvatar={false}
           />
-          {commentsCount > 0 && (
-            <div className="flex items-center space-x-1.5 text-stone-400 text-xs font-bold uppercase tracking-widest">
-              <MessageSquare className="w-4 h-4" />
-              <span>{commentsCount}</span>
+          <div className="flex items-center space-x-6 text-stone-400">
+            <div className="flex items-center space-x-1.5 text-xs font-bold uppercase tracking-widest">
+              <Eye className="w-4 h-4" />
+              <span>{views || 0}</span>
             </div>
-          )}
+            <div className="flex items-center space-x-1.5 text-xs font-bold uppercase tracking-widest">
+              <MessageSquare className="w-4 h-4" />
+              <span>{commentsCount || 0}</span>
+            </div>
+            <button 
+              onClick={handleLikeClick}
+              className={cn(
+                "flex items-center space-x-1.5 text-xs font-bold uppercase tracking-widest transition-colors hover:text-stone-900",
+                isLiked ? "text-red-500 hover:text-red-600" : "text-stone-400"
+              )}
+            >
+              <ThumbsUp className={cn("w-4 h-4", isLiked && "fill-current")} />
+              <span>{localLikes}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -95,16 +141,12 @@ export default function FromTheCeoSection() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             {/* Image Column */}
             <div className="aspect-[4/5] bg-stone-100 rounded-[2.5rem] overflow-hidden relative shadow-2xl">
-              {imageUrl ? (
-                <img 
-                  src={imageUrl} 
-                  alt={title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <ImagePlaceholder className="group-hover:scale-105 transition-transform duration-700" />
-              )}
+              <img 
+                src="/Mr-Wheatley.jpg" 
+                alt="The CEO"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-stone-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </div>
 

@@ -220,6 +220,17 @@ service cloud.firestore {
              (!('category' in data) || data.category in ['TEAM_MILESTONE', 'INNOVATIVE_PROJECT', 'RECOGNITION', 'OTHER']);
     }
 
+    function isValidComment(data) {
+      return hasRequiredFields(['content', 'authorId', 'authorName']) &&
+             data.content is string && data.content.size() > 0 && data.content.size() < 5000 &&
+             data.authorId is string &&
+             data.authorName is string &&
+             (!('authorAvatar' in data) || data.authorAvatar is string) &&
+             (!('likes' in data) || data.likes is number) &&
+             (!('likedBy' in data) || data.likedBy is list) &&
+             (!('parentId' in data) || (data.parentId == null || data.parentId is string));
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -240,8 +251,21 @@ service cloud.firestore {
       allow read: if resource.data.status == 'PUBLISHED';
       allow read: if isSignedIn() && (isOwner(resource.data.authorId) || hasDashboardAccess());
       allow create: if hasDashboardAccess() && isValidArticle(request.resource.data) && (request.resource.data.authorId == request.auth.uid || isAdmin());
-      allow update: if hasDashboardAccess() && isValidArticle(request.resource.data) && (isOwner(resource.data.authorId) || isAdmin() || isCEO());
+      allow update: if (hasDashboardAccess() && isValidArticle(request.resource.data) && (isOwner(resource.data.authorId) || isAdmin() || isCEO())) ||
+                     (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])) ||
+                     (isAuthenticated() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likedBy', 'views']));
       allow delete: if isAdmin() || (isCEO() && isOwner(resource.data.authorId));
+
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isAuthenticated() && isValidComment(request.resource.data) && request.resource.data.authorId == request.auth.uid;
+        allow update: if isAuthenticated() && (
+          isAdmin() || 
+          resource.data.authorId == request.auth.uid ||
+          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likedBy']))
+        );
+        allow delete: if isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+      }
     }
 
     match /recognitions/{recognitionId} {
