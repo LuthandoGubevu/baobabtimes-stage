@@ -6,13 +6,15 @@ import {
   Newspaper, 
   Award, 
   MessageSquare, 
+  Users,
   LayoutDashboard, 
   User, 
   LogOut,
   Settings,
   ShieldCheck,
   Menu,
-  X
+  X,
+  Star
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "../utils/cn";

@@ -1,8 +1,8 @@
 import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { articleService } from "../services/articleService";
-import { Loader2, Calendar, MessageCircle, ChevronRight, Home } from "lucide-react";
+import { Loader2, Calendar, MessageCircle, ChevronRight, Home, Eye } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useEffect } from "react";
 import AuthorMeta from "../components/AuthorMeta";
@@ -11,6 +11,7 @@ import CommentsSection from "../components/CommentsSection";
 
 export default function PostDetailPage() {
   const { slug } = useParams();
+  const queryClient = useQueryClient();
 
   // Scroll to top on mount
   useEffect(() => {
@@ -22,6 +23,16 @@ export default function PostDetailPage() {
     queryFn: () => articleService.getArticleBySlug(slug),
     enabled: !!slug,
   });
+
+  useEffect(() => {
+    if (article?.id) {
+      articleService.incrementViews(article.id).then(() => {
+        // Invalidate to refresh the cache with new view count
+        queryClient.invalidateQueries({ queryKey: ["article", slug] });
+        queryClient.invalidateQueries({ queryKey: ["articles"] });
+      });
+    }
+  }, [article?.id, slug, queryClient]);
 
   if (isLoading) {
     return (
@@ -47,7 +58,10 @@ export default function PostDetailPage() {
     );
   }
 
-  const { id, title, category, author, authorName, authorId, createdAt, imageUrl, content, excerpt } = article;
+  const { 
+    id, title, category, author, authorName, authorId, 
+    createdAt, imageUrl, content, excerpt, views, commentsCount 
+  } = article;
 
   const formatDate = (date) => {
     if (!date) return "";
@@ -94,10 +108,14 @@ export default function PostDetailPage() {
           <div className="flex flex-wrap items-center justify-between gap-6 border-b border-stone-100 pb-8">
             <AuthorMeta author={authorData} date={formatDate(createdAt)} size="md" />
             
-            <div className="flex items-center space-x-4 text-stone-400 text-sm">
+            <div className="flex items-center space-x-6 text-stone-400 text-sm">
+              <div className="flex items-center space-x-2">
+                <Eye className="w-4 h-4" />
+                <span className="font-bold">{views || 0}</span>
+              </div>
               <div className="flex items-center space-x-2">
                 <MessageCircle className="w-4 h-4" />
-                <span>1</span>
+                <span className="font-bold">{commentsCount || 0}</span>
               </div>
             </div>
           </div>

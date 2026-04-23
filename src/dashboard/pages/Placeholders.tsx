@@ -4,4 +4,5 @@ export const CategoryList = () => <div className="p-8">Category List Placeholder
 export const RecognitionModeration = () => <div className="p-8">Recognition Moderation Placeholder</div>;
 export const CeoAmaModeration = () => <div className="p-8">CEO AMA Moderation Placeholder</div>;
 export const MediaLibrary = () => <div className="p-8">Media Library Placeholder</div>;
-export const UserManagement = () => <div className="p-8">User Management Placeholder</div>;
+import { UserManagement } from '../modules/users/pages/UserManagement';
+export { UserManagement };

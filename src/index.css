@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-50: #f0f9fa;
+  --color-brand-100: #e1f2f4;
+  --color-brand-500: #64B0B8;
+  --color-brand-600: #4a9aa2;
+  --color-brand-700: #3a7a81;
+  --color-brand-900: #254d51;
+}
+
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;

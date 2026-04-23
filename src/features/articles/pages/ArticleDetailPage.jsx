@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useArticle } from "../hooks/useArticles";
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ArrowLeft, Share2, Bookmark, MessageCircle, ThumbsUp, Eye } from "lucide-react";
 import { AvatarPlaceholder, ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
@@ -15,6 +16,7 @@ import { cn } from "../../../utils/cn";
 export default function ArticleDetailPage() {
   const { id } = useParams();
   const { user, login } = useAuth();
+  const queryClient = useQueryClient();
   const { data: article, isLoading, error } = useArticle(id);
   const [localArticle, setLocalArticle] = useState(null);
 
@@ -22,9 +24,12 @@ export default function ArticleDetailPage() {
     if (article) {
       setLocalArticle(article);
       // Increment views
-      articleService.incrementViews(id);
+      articleService.incrementViews(id).then(() => {
+        queryClient.invalidateQueries({ queryKey: ["articles", id] });
+        queryClient.invalidateQueries({ queryKey: ["articles", "published"] });
+      });
     }
-  }, [article, id]);
+  }, [article, id, queryClient]);
 
   if (isLoading) return <div className="py-20 text-center">Loading article...</div>;
   if (error) return <div className="py-20 text-center text-red-500">Error loading article.</div>;

@@ -12,6 +12,8 @@ import HomePage from "./pages/HomePage";
 import ArticleDetailPage from "./features/articles/pages/ArticleDetailPage";
 import PostDetailPage from "./features/articles/pages/PostDetailPage";
 import ArticlesPage from "./features/articles/pages/ArticlesPage";
+import ValuesPage from "./features/values/pages/ValuesPage";
+import ThisIsMePage from "./pages/ThisIsMePage";
 import RecognitionPage from "./features/recognition/pages/RecognitionPage";
 import AskCeoPage from "./features/ceo-ama/pages/AskCeoPage";
 import CeoArchivePage from "./features/articles/pages/CeoArchivePage";
@@ -38,16 +40,18 @@ import { RecognitionModeration } from './dashboard/modules/recognition/pages/Rec
 import { CeoAmaModeration } from './dashboard/modules/ask-ceo/pages/CeoAmaModeration';
 import { CeoMessageList } from './dashboard/modules/from-the-ceo/pages/CeoMessageList';
 import { CeoMessageEditor } from './dashboard/modules/from-the-ceo/pages/CeoMessageEditor';
-import { StoryIdeaModeration } from './dashboard/modules/story-ideas/pages/StoryIdeaModeration';
 import { SettingsPage } from './dashboard/modules/settings/pages/SettingsPage';
 import { ProfileSettings } from './dashboard/modules/settings/components/ProfileSettings';
-import { AccountSettings } from './dashboard/modules/settings/components/AccountSettings';
 import { SecuritySettings } from './dashboard/modules/settings/components/SecuritySettings';
 import { NotificationSettings } from './dashboard/modules/settings/components/NotificationSettings';
 import { 
   CategoryList, 
   UserManagement
 } from './dashboard/pages/Placeholders';
+
+// This is me Management
+import { ThisIsMeList } from './dashboard/modules/this-is-me/pages/ThisIsMeList';
+import { ThisIsMeEditor } from './dashboard/modules/this-is-me/pages/ThisIsMeEditor';
 
 const queryClient = new QueryClient();
 
@@ -71,6 +75,8 @@ export default function App() {
               <Route path="/" element={<RootLayout />}>
                 <Route index element={<HomePage />} />
                 <Route path="articles" element={<ArticlesPage />} />
+                <Route path="values" element={<ValuesPage />} />
+                <Route path="this-is-me" element={<ThisIsMePage />} />
                 <Route path="articles/:id" element={<ArticleDetailPage />} />
                 <Route path="posts/:slug" element={<PostDetailPage />} />
                 <Route path="recognition" element={<RecognitionPage />} />
@@ -162,20 +168,29 @@ export default function App() {
                     <CeoAmaModeration />
                   </ProtectedRoute>
                 } />
-                <Route path="story-ideas" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <StoryIdeaModeration />
-                  </ProtectedRoute>
-                } />
                 <Route path="users" element={
                   <ProtectedRoute role="ADMIN_OR_CEO">
                     <UserManagement />
                   </ProtectedRoute>
                 } />
+                <Route path="this-is-me" element={
+                  <ProtectedRoute role="ADMIN_OR_CEO">
+                    <ThisIsMeList />
+                  </ProtectedRoute>
+                } />
+                <Route path="this-is-me/new" element={
+                  <ProtectedRoute role="ADMIN_OR_CEO">
+                    <ThisIsMeEditor />
+                  </ProtectedRoute>
+                } />
+                <Route path="this-is-me/:id/edit" element={
+                  <ProtectedRoute role="ADMIN_OR_CEO">
+                    <ThisIsMeEditor />
+                  </ProtectedRoute>
+                } />
                 <Route path="settings" element={<SettingsPage />}>
                   <Route index element={<Navigate to="profile" replace />} />
                   <Route path="profile" element={<ProfileSettings />} />
-                  <Route path="account" element={<AccountSettings />} />
                   <Route path="security" element={<SecuritySettings />} />
                   <Route path="notifications" element={<NotificationSettings />} />
                 </Route>

@@ -10,7 +10,6 @@ import {
 
 const SETTINGS_NAV = [
   { id: 'profile', label: 'Profile', icon: User, path: '/dashboard/settings/profile' },
-  { id: 'account', label: 'Account', icon: SettingsIcon, path: '/dashboard/settings/account' },
   { id: 'security', label: 'Security', icon: Shield, path: '/dashboard/settings/security' },
   { id: 'notifications', label: 'Notifications', icon: Bell, path: '/dashboard/settings/notifications' },
 ];

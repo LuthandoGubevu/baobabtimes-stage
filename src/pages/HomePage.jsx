@@ -8,7 +8,7 @@ import FromTheCeoSection from "../features/articles/components/FromTheCeoSection
 import { AvatarPlaceholder, ImagePlaceholder } from "../components/ui/GenericPlaceholder";
 import { useRef, useEffect, useState } from "react";
 import { CATEGORIES } from "../constants/categories";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Video, ArrowUpRight, Star } from "lucide-react";
 
 /**
  * HomePage component
@@ -164,6 +164,53 @@ export default function HomePage() {
       {/* From The CEO Section */}
       <FromTheCeoSection />
 
+      {/* Separator */}
+      <hr className="border-stone-200" />
+
+      {/* Values Header */}
+      <div className="space-y-2">
+        <h2 className="text-5xl md:text-6xl font-serif font-bold italic tracking-tight text-stone-900">
+          Our Values <span className="text-stone-400 not-italic font-sans text-xl ml-4 tracking-widest uppercase align-middle">Video Series</span>
+        </h2>
+        <p className="text-stone-500 text-lg font-light">Deepening our understanding of the Baobab culture.</p>
+      </div>
+
+      {/* Our Values Page Link Card */}
+      <section className="bg-brand-500 rounded-[2.5rem] overflow-hidden relative group shadow-2xl">
+        <div className="absolute inset-0 opacity-40 mix-blend-overlay">
+          <img 
+            src="/HarveyValues.png" 
+            alt="Baobab Values" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-700/80 via-brand-600/40 to-transparent"></div>
+        
+        <div className="relative z-10 px-12 py-16 md:py-20 max-w-4xl">
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
+              <Star className="text-white w-5 h-5 fill-white" />
+            </div>
+            <span className="text-white/80 text-xs font-bold uppercase tracking-[0.3em]">Corporate Culture</span>
+          </div>
+          
+          <p className="text-brand-50 text-lg md:text-xl font-light mb-10 max-w-xl leading-relaxed">
+            A deeper look into the behavioral competencies and core beliefs that define excellence at The Baobab Times.
+          </p>
+          
+          <Link 
+            to="/values" 
+            className="inline-flex items-center space-x-3 px-8 py-4 bg-white text-brand-900 font-bold rounded-full hover:bg-brand-50 transition-all hover:scale-105 shadow-xl group/btn"
+          >
+            <span>Explore the Series</span>
+            <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
+          </Link>
+        </div>
+        
+        {/* Abstract decorative shape */}
+        <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-brand-400 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
+      </section>
+
       {/* Main Content Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-16">
         {/* Featured Stories Section */}
@@ -230,6 +277,28 @@ export default function HomePage() {
               >
                 Your browser does not support the video tag.
               </video>
+            </div>
+          </div>
+
+          {/* This is me Widget */}
+          <div className="bg-white p-8 rounded-[2rem] border border-stone-200 shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-stone-50 rounded-full -mr-12 -mt-12 group-hover:scale-125 transition-transform duration-700"></div>
+            <div className="relative z-10">
+              <h2 className="text-2xl font-serif font-bold mb-3 flex items-center">
+                <div className="w-8 h-8 bg-zinc-100 text-zinc-900 rounded-lg flex items-center justify-center mr-3 group-hover:bg-zinc-900 group-hover:text-white transition-colors">
+                  <Video size={16} />
+                </div>
+                This is me
+              </h2>
+              <p className="text-stone-500 text-sm mb-6 leading-relaxed">
+                Our in-office interview series. Behind the scenes stories and surprise questions with the Baobab team.
+              </p>
+              <Link 
+                to="/this-is-me"
+                className="w-full mt-2 py-4 bg-stone-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-stone-800 transition-all text-center block shadow-lg shadow-stone-900/10"
+              >
+                Watch Episodes
+              </Link>
             </div>
           </div>
 

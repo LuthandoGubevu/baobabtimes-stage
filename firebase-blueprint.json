@@ -133,21 +133,25 @@
       },
       "required": ["type", "title", "isPublic", "createdAt"]
     },
-    "StoryIdea": {
-      "title": "Story Idea",
-      "description": "Submitted story ideas from employees",
+    "ThisIsMeVideo": {
+      "title": "This Is Me Video",
+      "description": "Episodes of the 'This is me' video series",
       "type": "object",
       "properties": {
-        "authorId": { "type": "string" },
-        "authorName": { "type": "string" },
-        "authorEmail": { "type": "string" },
         "title": { "type": "string" },
         "description": { "type": "string" },
-        "category": { "type": "string", "enum": ["TEAM_MILESTONE", "INNOVATIVE_PROJECT", "RECOGNITION", "OTHER"] },
-        "status": { "type": "string", "enum": ["PENDING", "REVIEWED", "ARCHIVED"] },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "youtubeUrl": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "duration": { "type": "string" },
+        "category": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "likes": { "type": "integer" },
+        "commentsCount": { "type": "integer" },
+        "status": { "type": "string", "enum": ["DRAFT", "PUBLISHED"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["authorId", "title", "description", "status", "createdAt"]
+      "required": ["title", "youtubeUrl", "status"]
     }
   },
   "firestore": {
@@ -175,9 +179,9 @@
       "schema": "Activity",
       "description": "Recent platform activity"
     },
-    "/story_ideas/{ideaId}": {
-      "schema": "StoryIdea",
-      "description": "Submitted story ideas"
+    "/this_is_me/{videoId}": {
+      "schema": "ThisIsMeVideo",
+      "description": "Videos in the 'This is me' series"
     }
   }
 }

@@ -16,7 +16,8 @@ import {
   Layout,
   User,
   ArrowLeft,
-  Lightbulb
+  Lightbulb,
+  Video
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -34,9 +35,9 @@ const navSections = [
   {
     label: 'Engagement',
     items: [
+      { name: 'This is me', path: '/dashboard/this-is-me', icon: Video, roles: ['admin', 'ceo'] },
       { name: 'Recognition', path: '/dashboard/recognition', icon: Award, roles: ['admin', 'ceo'] },
       { name: 'Ask the CEO', path: '/dashboard/ask-ceo', icon: MessageSquare, roles: ['ceo'] },
-      { name: 'Story Ideas', path: '/dashboard/story-ideas', icon: Lightbulb, roles: ['admin', 'ceo'] },
     ]
   },
   {
