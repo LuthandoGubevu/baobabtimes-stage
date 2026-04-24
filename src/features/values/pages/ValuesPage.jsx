@@ -26,6 +26,7 @@ const INITIAL_VIDEOS = [
   { 
     id: 'MsVRb1yCAAQ', 
     title: 'Smart', 
+    description: 'Wise decision making. Effective prioritising. Clear thought articulation.',
     value: 'Smart', 
     isNew: true,
     likes: 0,
@@ -35,6 +36,7 @@ const INITIAL_VIDEOS = [
   { 
     id: 'A6zKceRq4cc', 
     title: 'Selflessness', 
+    description: 'Making time for others. Egoless. Sharing ideas openly and proactively.',
     value: 'Selflessness',
     likes: 0,
     likedByUser: false,
@@ -43,6 +45,7 @@ const INITIAL_VIDEOS = [
   { 
     id: 'Gw0BRPRPlXE', 
     title: 'Authentic', 
+    description: 'Open and direct. Non-political. Quick to admit mistakes.',
     value: 'Authentic',
     likes: 0,
     likedByUser: false,
@@ -51,6 +54,7 @@ const INITIAL_VIDEOS = [
   { 
     id: 'GOJlAvwMz4Q', 
     title: 'Passion', 
+    description: 'Inspiring others with a thirst for excellence. Tenacious and supportive.',
     value: 'Passion',
     likes: 0,
     likedByUser: false,
@@ -59,6 +63,7 @@ const INITIAL_VIDEOS = [
   { 
     id: 'MbEnVfNlUr4', 
     title: 'Innovation', 
+    description: 'Generating useful ideas that minimise complexity. Finding practical solutions.',
     value: 'Innovation',
     likes: 0,
     likedByUser: false,
@@ -67,6 +72,7 @@ const INITIAL_VIDEOS = [
   { 
     id: 'F0et-Ep-lAs', 
     title: 'Transforming', 
+    description: 'Learning eagerly and rapidly. Contributing effectively outside of speciality.',
     value: 'Transforming',
     likes: 0,
     likedByUser: false,
@@ -75,6 +81,7 @@ const INITIAL_VIDEOS = [
   { 
     id: 'zigmyF10tDo', 
     title: 'Impact', 
+    description: 'Reliable strong performance. Highly productive. Results focused.',
     value: 'Impact',
     likes: 0,
     likedByUser: false,
@@ -83,6 +90,7 @@ const INITIAL_VIDEOS = [
   { 
     id: 'FwZDKeHtj2U', 
     title: 'Communication', 
+    description: 'Listening to understand. Respectful with a calm composure.',
     value: 'Communication',
     likes: 0,
     likedByUser: false,
@@ -175,11 +183,11 @@ const VideoCard = ({ video, onPlay, onLike, onAddComment }) => {
       <div className="p-8 flex-1 flex flex-col">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h3 className="text-2xl font-serif font-bold text-stone-900 leading-tight">
+            <h3 className="text-2xl font-serif font-bold text-[#6ecbda] leading-tight">
               {video.title}
             </h3>
-            <p className="text-stone-400 text-xs font-bold uppercase tracking-widest mt-1">
-              Video Insight
+            <p className="text-stone-500 text-sm font-medium mt-1 leading-relaxed">
+              {video.description}
             </p>
           </div>
         </div>
@@ -332,7 +340,7 @@ export default function ValuesPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-5xl md:text-7xl font-serif font-bold text-brand-900 tracking-tight leading-none mb-4">
+            <h1 className="text-5xl md:text-7xl font-serif font-bold text-[#6ecbda] tracking-tight leading-none mb-4">
               OUR VALUES
             </h1>
             <div className="h-1 w-24 bg-brand-500 mx-auto rounded-full mb-8" />
@@ -377,7 +385,7 @@ export default function ValuesPage() {
             viewport={{ once: true }}
             className="lg:col-span-12 xl:col-span-8 space-y-8"
           >
-            <h3 className="text-3xl md:text-4xl font-serif font-bold text-stone-900 leading-tight">
+            <h3 className="text-3xl md:text-4xl font-serif font-bold text-[#6ecbda] leading-tight">
               “I’m thrilled to introduce this video series designed to help us all reconnect with and refresh our understanding of Baobab’s core values.”
             </h3>
             <p className="text-lg text-stone-600 leading-relaxed max-w-3xl">

@@ -25,6 +25,7 @@ import LoginPage from "./features/auth/pages/LoginPage";
 import ProtectedRoute from "./features/auth/components/ProtectedRoute";
 import LoginModal from "./features/auth/components/LoginModal";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
+import ScrollToTop from "./components/ScrollToTop";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import HelpPage from "./pages/HelpPage";
@@ -71,6 +72,7 @@ export default function App() {
           <LoginModal />
           <PWAInstallPrompt />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<RootLayout />}>
                 <Route index element={<HomePage />} />

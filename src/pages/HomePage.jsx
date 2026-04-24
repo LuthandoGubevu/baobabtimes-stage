@@ -96,7 +96,7 @@ export default function HomePage() {
       <div className="space-y-12 py-10 border-y border-stone-100 bg-white/70 backdrop-blur-md px-6 -mx-6 md:rounded-[2rem]">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <h2 className="text-5xl font-serif font-bold mb-4 italic">Related Articles</h2>
+            <h2 className="text-5xl font-serif font-bold mb-4 italic">Search Articles</h2>
             <p className="text-stone-500 text-lg font-light">
               Stay informed with the latest updates, stories, and strategic insights from across the organization.
             </p>
