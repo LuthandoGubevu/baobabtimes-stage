@@ -16,6 +16,7 @@ import { EmptyState } from '@/dashboard/components/EmptyState';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { articleService } from '@/features/articles/services/articleService';
 
 import { AvatarPlaceholder } from '@/components/ui/GenericPlaceholder';
 
@@ -63,11 +64,25 @@ export const ArticleList = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to permanently delete this article? This action cannot be undone.')) {
       try {
-        await deleteDoc(doc(db, 'articles', id));
-        toast.success('Article deleted permanently.');
+        await articleService.deleteArticle(id);
+        toast.success('Article removed completely.');
+        setSelectedArticles(prev => prev.filter(aId => aId !== id));
       } catch (error) {
         console.error("Error deleting article:", error);
         toast.error('Failed to delete article.');
+      }
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (window.confirm(`Are you sure you want to permanently delete ${selectedArticles.length} articles? This action cannot be undone.`)) {
+      try {
+        await Promise.all(selectedArticles.map(id => articleService.deleteArticle(id)));
+        toast.success(`${selectedArticles.length} articles removed completely.`);
+        setSelectedArticles([]);
+      } catch (error) {
+        console.error("Error deleting articles:", error);
+        toast.error('Failed to delete some articles.');
       }
     }
   };
@@ -151,6 +166,12 @@ export const ArticleList = () => {
                   className="px-3 py-1.5 bg-white border border-zinc-200 text-zinc-600 rounded-lg text-xs font-bold hover:bg-zinc-50 transition-colors"
                 >
                   Archive
+                </button>
+                <button 
+                  onClick={handleBulkDelete}
+                  className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-100 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors"
+                >
+                  Delete
                 </button>
               </div>
             )}

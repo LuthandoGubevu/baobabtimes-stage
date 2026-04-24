@@ -56,7 +56,7 @@ export default function RootLayout() {
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden lg:flex items-center space-x-8">
               {navItems.map((item) => (
                 <NavLink
                   key={item.path}
@@ -75,7 +75,7 @@ export default function RootLayout() {
             </nav>
 
             {/* User Actions */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden lg:flex items-center space-x-4">
               <NotificationBell isPublicOnly={!user} />
               
               {user ? (
@@ -127,7 +127,7 @@ export default function RootLayout() {
             </div>
 
             {/* Mobile Menu Toggle */}
-            <div className="md:hidden flex items-center space-x-2">
+            <div className="lg:hidden flex items-center space-x-2">
               <NotificationBell isPublicOnly={!user} />
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -141,7 +141,7 @@ export default function RootLayout() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-stone-200 py-4 px-4 space-y-4 shadow-lg">
+          <div className="lg:hidden bg-white border-t border-stone-200 py-4 px-4 space-y-4 shadow-lg">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}

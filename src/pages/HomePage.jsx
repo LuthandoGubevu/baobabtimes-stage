@@ -364,7 +364,7 @@ export default function HomePage() {
             </p>
             <div className="space-y-4 relative z-10">
               <div className="p-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-                <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Latest Answer:</p>
+                <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Latest Question:</p>
                 <p className="text-sm font-serif font-bold leading-snug">
                   "What is our policy on remote work for the next quarter?"
                 </p>

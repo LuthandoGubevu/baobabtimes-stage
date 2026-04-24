@@ -61,8 +61,8 @@ export const CeoMessageList = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to permanently delete this CEO message? This action cannot be undone.')) {
       try {
-        await deleteDoc(doc(db, 'articles', id));
-        toast.success('Message deleted permanently.');
+        await articleService.deleteArticle(id);
+        toast.success('Message removed completely.');
       } catch (error) {
         console.error("Error deleting message:", error);
         toast.error('Failed to delete message.');

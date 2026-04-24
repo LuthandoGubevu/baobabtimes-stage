@@ -7,6 +7,7 @@ import {
   doc, 
   addDoc, 
   setDoc,
+  deleteDoc,
   updateDoc,
   writeBatch,
   serverTimestamp, 
@@ -300,6 +301,21 @@ export const articleService = {
     } catch (error) {
       handleFirestoreError(error, OperationType.LIST, path);
       return [];
+    }
+  },
+
+  /**
+   * Delete an article completely
+   * @param {string} id 
+   */
+  deleteArticle: async (id) => {
+    if (!id) return;
+    const path = `articles/${id}`;
+    try {
+      await deleteDoc(doc(db, "articles", id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, path);
+      throw error;
     }
   }
 };

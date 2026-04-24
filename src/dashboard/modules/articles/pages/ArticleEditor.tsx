@@ -20,6 +20,8 @@ import { cn } from '@/lib/utils';
 import { ImageUpload } from '@/dashboard/components/ImageUpload';
 import { toast, Toaster } from 'sonner';
 import { handleFirestoreError, OperationType } from '@/lib/firestore-errors';
+import { Trash2 } from 'lucide-react';
+import { articleService } from '@/features/articles/services/articleService';
 
 import { CATEGORIES } from '@/constants/categories';
 
@@ -145,6 +147,23 @@ export const ArticleEditor = () => {
       toast.error('Failed to save article. Please check your permissions.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    if (window.confirm('Are you sure you want to permanently delete this article? This action cannot be undone.')) {
+      setIsSaving(true);
+      try {
+        await articleService.deleteArticle(id);
+        toast.success('Article deleted successfully.');
+        setTimeout(() => navigate('/dashboard/articles'), 1000);
+      } catch (err) {
+        console.error("Error deleting article:", err);
+        toast.error('Failed to delete article.');
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -294,6 +313,19 @@ export const ArticleEditor = () => {
                 </div>
               </div>
             </section>
+
+            {id && (
+              <section className="pt-8 border-t border-zinc-100">
+                <button 
+                  onClick={handleDelete}
+                  disabled={isSaving}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100 disabled:opacity-50"
+                >
+                  <Trash2 size={16} />
+                  <span>Delete Article</span>
+                </button>
+              </section>
+            )}
           </div>
         </motion.aside>
       </div>
