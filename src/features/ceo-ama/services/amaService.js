@@ -77,6 +77,10 @@ export const amaService = {
    * @param {boolean} isReacted - Current state
    */
   toggleReaction: async (questionId, userId, reactionType, isReacted) => {
+    if (!questionId) {
+      console.error("toggleReaction: Missing questionId");
+      return;
+    }
     const path = `ama_questions/${questionId}`;
     try {
       const docRef = doc(db, "ama_questions", questionId);

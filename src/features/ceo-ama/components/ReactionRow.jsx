@@ -21,12 +21,54 @@ export default function ReactionRow({ questionId, reactions = {} }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Safely handle if reactions is null
+  const safeReactions = reactions || {};
+
   const mutation = useMutation({
     mutationFn: async ({ type, isReacted }) => {
       if (!user) throw new Error("Must be logged in to react");
       return await amaService.toggleReaction(questionId, user.uid, type, isReacted);
     },
-    onSuccess: () => {
+    onMutate: async ({ type, isReacted }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["ceo-questions"] });
+
+      // Snapshot the previous value
+      const previousQuestions = queryClient.getQueryData(["ceo-questions"]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(["ceo-questions"], (old) => {
+        if (!old) return old;
+        return old.map(q => {
+          if (q.id === questionId) {
+            const currentUsers = (q.reactions?.[type]) || [];
+            const newUsers = isReacted 
+              ? currentUsers.filter(uid => uid !== user?.uid)
+              : [...currentUsers, user?.uid].filter(Boolean);
+            
+            return {
+              ...q,
+              reactions: {
+                ...(q.reactions || {}),
+                [type]: newUsers
+              }
+            };
+          }
+          return q;
+        });
+      });
+
+      return { previousQuestions };
+    },
+    onError: (err, variables, context) => {
+      // Rollback to the previous value
+      if (context?.previousQuestions) {
+        queryClient.setQueryData(["ceo-questions"], context.previousQuestions);
+      }
+      console.error("Failed to toggle reaction:", err);
+    },
+    onSettled: () => {
+      // Always refetch after error or success to keep data in sync
       queryClient.invalidateQueries({ queryKey: ["ceo-questions"] });
     }
   });
@@ -42,13 +84,14 @@ export default function ReactionRow({ questionId, reactions = {} }) {
   return (
     <div className="flex items-center space-x-4 mt-4">
       {REACTION_TYPES.map(({ type, emoji, label }) => {
-        const userIds = reactions[type] || [];
+        const userIds = safeReactions[type] || [];
         const count = userIds.length;
         const isReacted = user && userIds.includes(user.uid);
 
         return (
           <button
             key={type}
+            id={`reaction-${type}-${questionId}`}
             onClick={() => handleReaction(type, isReacted)}
             disabled={mutation.isPending}
             className={cn(

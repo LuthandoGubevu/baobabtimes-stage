@@ -27,16 +27,27 @@ export default function HomePage() {
   });
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(error => {
-        console.error("Sidebar video autoplay was prevented:", error);
-      });
-    }
-    if (wideVideoRef.current) {
-      wideVideoRef.current.play().catch(error => {
-        console.error("Wide video autoplay was prevented:", error);
-      });
-    }
+    let isMounted = true;
+
+    const attemptPlay = async (ref, name) => {
+      if (ref.current) {
+        try {
+          await ref.current.play();
+        } catch (error) {
+          // Only log if the component is still mounted and it's not a normal interruption/abort
+          if (isMounted && error.name !== 'AbortError') {
+            console.error(`${name} autoplay was prevented:`, error);
+          }
+        }
+      }
+    };
+
+    attemptPlay(videoRef, "Sidebar video");
+    attemptPlay(wideVideoRef, "Wide video");
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const recentPraise = Array.isArray(recognitions) ? recognitions.slice(0, 3) : [];

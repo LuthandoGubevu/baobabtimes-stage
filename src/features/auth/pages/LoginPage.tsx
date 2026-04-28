@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import { Button } from "../../../components/ui/Button";
-import { LogIn, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { LogIn, Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +14,10 @@ const loginSchema = z.object({
 
 const registerSchema = loginSchema.extend({
   displayName: z.string().min(2, "Name must be at least 2 characters"),
+  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -28,6 +32,7 @@ export default function LoginPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [localError, setLocalError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   
   const displayError = localError || authError;
   
@@ -177,13 +182,43 @@ export default function LoginPage() {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
                 <input 
                   {...registerField("password")}
-                  type="password" 
+                  type={showPassword ? "text" : "password"} 
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-3.5 bg-stone-50 border border-stone-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:bg-white focus:border-stone-200 transition-all"
+                  className="w-full pl-12 pr-12 py-3.5 bg-stone-50 border border-stone-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:bg-white focus:border-stone-200 transition-all"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-300 hover:text-stone-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
               {errors.password && <p className="text-red-500 text-[10px] font-bold ml-1">{errors.password.message as string}</p>}
             </div>
+
+            {authMode === 'register' && (
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-stone-400 ml-1">Confirm Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300" size={18} />
+                  <input 
+                    {...registerField("confirmPassword")}
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••"
+                    className="w-full pl-12 pr-12 py-3.5 bg-stone-50 border border-stone-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-stone-900/10 focus:bg-white focus:border-stone-200 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-300 hover:text-stone-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.confirmPassword && <p className="text-red-500 text-[10px] font-bold ml-1">{errors.confirmPassword.message as string}</p>}
+              </div>
+            )}
 
             <Button 
               type="submit" 
