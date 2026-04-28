@@ -7,6 +7,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { Loader2 } from "lucide-react";
 import RootLayout from "./layouts/RootLayout";
 import HomePage from "./pages/HomePage";
 import ArticleDetailPage from "./features/articles/pages/ArticleDetailPage";
@@ -56,6 +57,163 @@ import { ThisIsMeEditor } from './dashboard/modules/this-is-me/pages/ThisIsMeEdi
 
 const queryClient = new QueryClient();
 
+const LoadingScreen = () => (
+  <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50">
+    <div className="flex flex-col items-center space-y-4">
+      <div className="w-16 h-16 bg-stone-900 rounded-[1.5rem] flex items-center justify-center animate-pulse">
+        <span className="text-white font-serif font-bold text-2xl">B</span>
+      </div>
+      <div className="flex items-center space-x-2 text-stone-400">
+        <Loader2 className="w-4 h-4 animate-spin" />
+        <span className="text-sm font-medium">Loading The Baobab Times...</span>
+      </div>
+    </div>
+  </div>
+);
+
+const AppContent = () => {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <>
+      <LoginModal />
+      <PWAInstallPrompt />
+      <BrowserRouter>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<RootLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="articles" element={<ArticlesPage />} />
+            <Route path="values" element={<ValuesPage />} />
+            <Route path="this-is-me" element={<ThisIsMePage />} />
+            <Route path="articles/:id" element={<ArticleDetailPage />} />
+            <Route path="posts/:slug" element={<PostDetailPage />} />
+            <Route path="recognition" element={<RecognitionPage />} />
+            <Route path="ask-ceo" element={<AskCeoPage />} />
+            <Route path="from-the-ceo" element={<CeoArchivePage />} />
+            <Route path="privacy" element={<PrivacyPage />} />
+            <Route path="terms" element={<TermsPage />} />
+            <Route path="help" element={<HelpPage />} />
+            <Route path="guidelines" element={<GuidelinesPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="login" element={<LoginPage />} />
+            
+            {/* Protected Routes */}
+            <Route path="contributor" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <ContributorDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="contributor/create" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <CreateArticlePage />
+              </ProtectedRoute>
+            } />
+            <Route path="ceo-panel" element={
+              <ProtectedRoute role="CEO_ONLY">
+                <CeoPanel />
+              </ProtectedRoute>
+            } />
+            <Route path="admin" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+          </Route>
+
+          <Route path="/dashboard" element={
+            <ProtectedRoute role="ADMIN_OR_CEO">
+              <DashboardLayout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<DashboardIndex />} />
+            <Route path="articles" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <ArticleList />
+              </ProtectedRoute>
+            } />
+            <Route path="articles/new" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <ArticleEditor />
+              </ProtectedRoute>
+            } />
+            <Route path="articles/:id/edit" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <ArticleEditor />
+              </ProtectedRoute>
+            } />
+            <Route path="categories" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <CategoryList />
+              </ProtectedRoute>
+            } />
+            <Route path="from-the-ceo" element={
+              <ProtectedRoute role="CEO_ONLY">
+                <CeoMessageList />
+              </ProtectedRoute>
+            } />
+            <Route path="from-the-ceo/new" element={
+              <ProtectedRoute role="CEO_ONLY">
+                <CeoMessageEditor />
+              </ProtectedRoute>
+            } />
+            <Route path="from-the-ceo/:id/edit" element={
+              <ProtectedRoute role="CEO_ONLY">
+                <CeoMessageEditor />
+              </ProtectedRoute>
+            } />
+            <Route path="recognition" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <RecognitionModeration />
+              </ProtectedRoute>
+            } />
+            <Route path="ask-ceo" element={
+              <ProtectedRoute role="CEO_ONLY">
+                <CeoAmaModeration />
+              </ProtectedRoute>
+            } />
+            <Route path="ask-ceo/:id/answer" element={
+              <ProtectedRoute role="CEO_ONLY">
+                <CeoAmaModeration />
+              </ProtectedRoute>
+            } />
+            <Route path="users" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <UserManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="this-is-me" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <ThisIsMeList />
+              </ProtectedRoute>
+            } />
+            <Route path="this-is-me/new" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <ThisIsMeEditor />
+              </ProtectedRoute>
+            } />
+            <Route path="this-is-me/:id/edit" element={
+              <ProtectedRoute role="ADMIN_OR_CEO">
+                <ThisIsMeEditor />
+              </ProtectedRoute>
+            } />
+            <Route path="settings" element={<SettingsPage />}>
+              <Route index element={<Navigate to="profile" replace />} />
+              <Route path="profile" element={<ProfileSettings />} />
+              <Route path="security" element={<SecuritySettings />} />
+              <Route path="notifications" element={<NotificationSettings />} />
+            </Route>
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </>
+  );
+};
+
 const DashboardIndex = () => {
   return (
     <ProtectedRoute role="ADMIN_OR_CEO">
@@ -69,136 +227,7 @@ export default function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <LoginModal />
-          <PWAInstallPrompt />
-          <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<RootLayout />}>
-                <Route index element={<HomePage />} />
-                <Route path="articles" element={<ArticlesPage />} />
-                <Route path="values" element={<ValuesPage />} />
-                <Route path="this-is-me" element={<ThisIsMePage />} />
-                <Route path="articles/:id" element={<ArticleDetailPage />} />
-                <Route path="posts/:slug" element={<PostDetailPage />} />
-                <Route path="recognition" element={<RecognitionPage />} />
-                <Route path="ask-ceo" element={<AskCeoPage />} />
-                <Route path="from-the-ceo" element={<CeoArchivePage />} />
-                <Route path="privacy" element={<PrivacyPage />} />
-                <Route path="terms" element={<TermsPage />} />
-                <Route path="help" element={<HelpPage />} />
-                <Route path="guidelines" element={<GuidelinesPage />} />
-                <Route path="contact" element={<ContactPage />} />
-                <Route path="login" element={<LoginPage />} />
-                
-                {/* Protected Routes */}
-                <Route path="contributor" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <ContributorDashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="contributor/create" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <CreateArticlePage />
-                  </ProtectedRoute>
-                } />
-                <Route path="ceo-panel" element={
-                  <ProtectedRoute role="CEO_ONLY">
-                    <CeoPanel />
-                  </ProtectedRoute>
-                } />
-                <Route path="admin" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                } />
-              </Route>
-
-              <Route path="/dashboard" element={
-                <ProtectedRoute role="ADMIN_OR_CEO">
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<DashboardIndex />} />
-                <Route path="articles" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <ArticleList />
-                  </ProtectedRoute>
-                } />
-                <Route path="articles/new" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <ArticleEditor />
-                  </ProtectedRoute>
-                } />
-                <Route path="articles/:id/edit" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <ArticleEditor />
-                  </ProtectedRoute>
-                } />
-                <Route path="categories" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <CategoryList />
-                  </ProtectedRoute>
-                } />
-                <Route path="from-the-ceo" element={
-                  <ProtectedRoute role="CEO_ONLY">
-                    <CeoMessageList />
-                  </ProtectedRoute>
-                } />
-                <Route path="from-the-ceo/new" element={
-                  <ProtectedRoute role="CEO_ONLY">
-                    <CeoMessageEditor />
-                  </ProtectedRoute>
-                } />
-                <Route path="from-the-ceo/:id/edit" element={
-                  <ProtectedRoute role="CEO_ONLY">
-                    <CeoMessageEditor />
-                  </ProtectedRoute>
-                } />
-                <Route path="recognition" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <RecognitionModeration />
-                  </ProtectedRoute>
-                } />
-                <Route path="ask-ceo" element={
-                  <ProtectedRoute role="CEO_ONLY">
-                    <CeoAmaModeration />
-                  </ProtectedRoute>
-                } />
-                <Route path="ask-ceo/:id/answer" element={
-                  <ProtectedRoute role="CEO_ONLY">
-                    <CeoAmaModeration />
-                  </ProtectedRoute>
-                } />
-                <Route path="users" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <UserManagement />
-                  </ProtectedRoute>
-                } />
-                <Route path="this-is-me" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <ThisIsMeList />
-                  </ProtectedRoute>
-                } />
-                <Route path="this-is-me/new" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <ThisIsMeEditor />
-                  </ProtectedRoute>
-                } />
-                <Route path="this-is-me/:id/edit" element={
-                  <ProtectedRoute role="ADMIN_OR_CEO">
-                    <ThisIsMeEditor />
-                  </ProtectedRoute>
-                } />
-                <Route path="settings" element={<SettingsPage />}>
-                  <Route index element={<Navigate to="profile" replace />} />
-                  <Route path="profile" element={<ProfileSettings />} />
-                  <Route path="security" element={<SecuritySettings />} />
-                  <Route path="notifications" element={<NotificationSettings />} />
-                </Route>
-              </Route>
-            </Routes>
-          </BrowserRouter>
+          <AppContent />
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>

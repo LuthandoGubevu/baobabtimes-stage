@@ -14,6 +14,16 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Skip cross-origin requests, like Firestore
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  // Skip API requests if you have any (e.g., /api/*)
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
