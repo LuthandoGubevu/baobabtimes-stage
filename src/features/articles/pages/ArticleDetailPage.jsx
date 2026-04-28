@@ -125,7 +125,7 @@ export default function ArticleDetailPage() {
       {/* Featured Image */}
       <div className="aspect-[21/9] rounded-3xl overflow-hidden bg-stone-100 mb-12 shadow-xl">
         {imageUrl ? (
-          <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
+          <img src={imageUrl} alt={title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
         ) : (
           <ImagePlaceholder className="w-full h-full" />
         )}

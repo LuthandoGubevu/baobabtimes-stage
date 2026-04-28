@@ -46,6 +46,7 @@ export default function ThisIsMePage() {
           src="https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&q=80&w=2000"
           alt="This Is Me Podcast"
           className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-[3000ms] ease-out"
+          referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-linear-to-t from-stone-900 via-stone-900/20 to-transparent" />
         
@@ -102,7 +103,7 @@ export default function ThisIsMePage() {
             <div className="flex -space-x-3">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="w-12 h-12 rounded-full border-4 border-white bg-stone-200 overflow-hidden shadow-sm">
-                  <img src={`https://i.pravatar.cc/100?u=${i}`} alt="Avatar" />
+                  <img src={`https://i.pravatar.cc/100?u=${i}`} alt="Avatar" referrerPolicy="no-referrer" />
                 </div>
               ))}
             </div>
@@ -160,6 +161,7 @@ export default function ThisIsMePage() {
                     src={episode.thumbnail} 
                     alt={episode.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute inset-0 bg-stone-900/20 group-hover:bg-stone-900/40 transition-colors" />
                   <div className="absolute inset-0 flex items-center justify-center translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">

@@ -193,6 +193,7 @@ export default function HomePage() {
             src="/HarveyValues.png" 
             alt="Baobab Values" 
             className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-brand-700/80 via-brand-600/40 to-transparent"></div>

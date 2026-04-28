@@ -26,6 +26,9 @@ async function startServer() {
   // Media Module
   app.use("/api/media", mediaRouter);
 
+  // Serve public directory statically (ensures assets in /public are available at root)
+  app.use(express.static(path.join(process.cwd(), "public")));
+
   // Serve uploads statically
   app.use("/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
 

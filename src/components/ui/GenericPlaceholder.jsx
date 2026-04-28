@@ -2,7 +2,7 @@ import React from 'react';
 import { User, Image as ImageIcon, FileText } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
-export const AvatarPlaceholder = ({ name = "", size = "md", className = "" }) => {
+export const AvatarPlaceholder = ({ name = "", src = "", size = "md", className = "" }) => {
   const initials = name
     ? name
         .split(' ')
@@ -24,12 +24,16 @@ export const AvatarPlaceholder = ({ name = "", size = "md", className = "" }) =>
   return (
     <div 
       className={cn(
-        "flex items-center justify-center rounded-full bg-stone-100 text-stone-500 font-bold border border-stone-200 shrink-0",
+        "flex items-center justify-center rounded-full bg-stone-100 text-stone-500 font-bold border border-stone-200 shrink-0 overflow-hidden",
         sizeClasses[size] || size,
         className
       )}
     >
-      {initials || <User className="w-1/2 h-1/2" />}
+      {src ? (
+        <img src={src} alt={name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+      ) : (
+        initials || <User className="w-1/2 h-1/2" />
+      )}
     </div>
   );
 };

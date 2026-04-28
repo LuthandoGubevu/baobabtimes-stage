@@ -30,7 +30,7 @@ export default function AuthorMeta({
   return (
     <div className={cn("flex items-center space-x-3", className)}>
       {showAvatar && (
-        <AvatarPlaceholder name={name} size={size} />
+        <AvatarPlaceholder name={name} src={avatar} size={size} />
       )}
       <div className="flex flex-col">
         <span className={cn(

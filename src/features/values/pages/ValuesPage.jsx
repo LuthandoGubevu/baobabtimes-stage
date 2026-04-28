@@ -368,6 +368,7 @@ export default function ValuesPage() {
                     src={value.icon} 
                     alt={value.label} 
                     className="w-10 h-10 object-contain" 
+                    referrerPolicy="no-referrer"
                   />
                 </div>
               </motion.div>
@@ -407,6 +408,7 @@ export default function ValuesPage() {
                     src="/Harvey.jpg" 
                     alt="Harvey De Wit"
                     className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
                   />
                 </div>
               </div>
