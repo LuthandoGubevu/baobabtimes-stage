@@ -15,16 +15,21 @@ export const LikeButton = ({ initialLiked = false, initialCount = 0, onLike, cla
   const [isLiked, setIsLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
   // Sync with initial props if they change (e.g. after a full data refresh)
   useEffect(() => {
-    setIsLiked(initialLiked);
-    setCount(initialCount);
-  }, [initialLiked, initialCount]);
+    if (!isPending) {
+      setIsLiked(initialLiked);
+      setCount(initialCount);
+    }
+  }, [initialLiked, initialCount, isPending]);
 
   const handleToggle = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (isPending) return;
 
     // Optimistic UI update
     const newLikedState = !isLiked;
@@ -33,10 +38,11 @@ export const LikeButton = ({ initialLiked = false, initialCount = 0, onLike, cla
     setIsLiked(newLikedState);
     setCount(newCount);
     setIsAnimating(true);
+    setIsPending(true);
 
     try {
       if (onLike) {
-        await onLike(isLiked); // Pass current state to toggle
+        await onLike(isLiked); // Pass old state to toggle
       }
     } catch (error) {
       // Rollback on error
@@ -44,6 +50,7 @@ export const LikeButton = ({ initialLiked = false, initialCount = 0, onLike, cla
       setCount(count);
       console.error("Failed to toggle like:", error);
     } finally {
+      setIsPending(false);
       // Animation settles after a short delay
       setTimeout(() => setIsAnimating(false), 400);
     }

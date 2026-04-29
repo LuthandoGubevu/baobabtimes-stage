@@ -18,7 +18,7 @@ export default function ArticleCard({ article, className }) {
   const { user, login } = useAuth();
   const { 
     id, title, slug, category, author, authorName, authorId, 
-    createdAt, imageUrl, excerpt, likes, commentsCount, views, likedBy 
+    createdAt, imageUrl, excerpt, content, likes, commentsCount, views, likedBy 
   } = article;
 
   const [localLikes, setLocalLikes] = useState(likes || 0);
@@ -55,6 +55,49 @@ export default function ArticleCard({ article, className }) {
   // Use the new author object or fallback to existing authorName/authorId
   const authorData = author || { id: authorId, name: authorName };
 
+  // Helper to strip markdown and get a plain text snippet
+  const getPreviewText = (text) => {
+    if (!text) return "";
+    
+    // 1. Remove markdown syntax
+    let cleanText = text
+      .replace(/[#*`_~[\]()]/g, "") // Remove common markdown chars
+      .replace(/!\[.*?\]\(.*?\)/g, "") // Remove images
+      .replace(/\[.*?\]\(.*?\)/g, "$1") // Keep link text, remove URL
+      .replace(/\s+/g, " ") // Normalize whitespace
+      .trim();
+
+    // 2. Try to get the first 180 characters, breaking at a sentence end if possible
+    if (cleanText.length <= 180) return cleanText;
+    
+    const truncated = cleanText.substring(0, 180);
+    const lastPunctuation = Math.max(
+      truncated.lastIndexOf("."),
+      truncated.lastIndexOf("?"),
+      truncated.lastIndexOf("!")
+    );
+
+    if (lastPunctuation > 80) {
+      return cleanText.substring(0, lastPunctuation + 1);
+    }
+
+    return truncated + "...";
+  };
+
+  // The user specifically wants to pull from the "story" element (which is the main article content/body)
+  // We prioritize the content field over the excerpt for the card preview to ensure actual sentences are shown.
+  const storyPreview = getPreviewText(content);
+  
+  // Final decision: If storyPreview exists and isn't just the author/title, use it.
+  // Otherwise try excerpt, then default.
+  let finalPreview = "Read the latest update from our team and stay connected with our community insights.";
+  
+  if (storyPreview && storyPreview.length > 20) {
+    finalPreview = storyPreview;
+  } else if (excerpt && excerpt.length > 20 && excerpt.toLowerCase() !== authorName?.toLowerCase()) {
+    finalPreview = excerpt;
+  }
+
   return (
     <Link 
       to={`/posts/${articleSlug}`}
@@ -63,18 +106,6 @@ export default function ArticleCard({ article, className }) {
         className
       )}
     >
-      <div className="aspect-[16/9] overflow-hidden bg-stone-100 relative">
-        {imageUrl ? (
-          <img 
-            src={imageUrl} 
-            alt={title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            referrerPolicy="no-referrer"
-          />
-        ) : (
-          <ImagePlaceholder className="group-hover:scale-105 transition-transform duration-700" />
-        )}
-      </div>
       <div className="p-5">
         <div className="flex items-center justify-between mb-3">
           <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400 px-2 py-0.5 bg-stone-50 rounded border border-stone-100">
@@ -84,15 +115,38 @@ export default function ArticleCard({ article, className }) {
             {formatDate(createdAt)}
           </span>
         </div>
-        <h3 className="text-xl font-serif font-bold mb-2 group-hover:text-stone-600 transition-colors leading-tight">
+        <h3 className="text-2xl font-serif font-bold mb-2 group-hover:text-stone-600 transition-colors leading-tight">
           {title}
         </h3>
-        {excerpt && (
-          <p className="text-stone-500 text-sm line-clamp-2 mb-4">
-            {excerpt}
+        
+        <div className="mb-4">
+          <p className="text-stone-400 text-xs font-bold uppercase tracking-widest">
+            {authorName || "Editorial Team"}
           </p>
-        )}
-        <div className="pt-4 border-t border-stone-50 flex items-center justify-between">
+        </div>
+
+        <p className="text-stone-600 text-sm leading-relaxed line-clamp-3 mb-6">
+          {finalPreview}
+        </p>
+
+        <div className="mb-6">
+          <div className="inline-flex items-center px-4 py-2 bg-stone-50 border border-stone-100 rounded-lg text-[10px] font-bold uppercase tracking-widest text-stone-900 group-hover:bg-stone-900 group-hover:text-white transition-all duration-300">
+            Read Full Article
+            <svg 
+              className="ml-2 w-3.5 h-3.5" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="3" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+
+        <div className="pt-5 border-t border-stone-50 flex items-center justify-between">
           <AuthorMeta author={authorData} size="sm" />
           <div className="flex items-center space-x-3 text-stone-400">
             <div className="flex items-center space-x-1">

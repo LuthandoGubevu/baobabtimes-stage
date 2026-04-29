@@ -140,14 +140,24 @@ export default function FromTheCeoSection() {
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             {/* Image Column */}
-            <div className="aspect-[4/5] bg-stone-100 rounded-[2.5rem] overflow-hidden relative shadow-2xl">
-              <img 
-                src="/Mr-Wheatley.jpg" 
-                alt="The CEO"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-stone-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="flex justify-center lg:justify-start">
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-brand-100 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative w-80 h-80 md:w-96 md:h-96 rounded-full border-4 border-brand-500 p-3 shadow-2xl">
+                  <div className="w-full h-full rounded-full overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
+                    <img 
+                      src="/Mr-Wheatley.jpg" 
+                      alt="The CEO"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                </div>
+                <div className="absolute -bottom-4 -right-4 bg-white border border-stone-200 px-8 py-4 rounded-2xl shadow-xl">
+                  <p className="text-sm font-bold text-brand-900">Mr. Wheatley</p>
+                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Chief Executive Officer</p>
+                </div>
+              </div>
             </div>
 
             {/* Text Content */}

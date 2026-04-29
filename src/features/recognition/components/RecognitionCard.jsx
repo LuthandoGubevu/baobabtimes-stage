@@ -7,6 +7,7 @@ import { getRecognitionValue } from "../constants/recognitionValues";
 import { useAuth } from "../../../hooks/useAuth";
 import { recognitionService } from "../services/recognitionService";
 import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
+import { useQueryClient } from "@tanstack/react-query";
 
 /**
  * RecognitionCard component for displaying peer recognition
@@ -15,7 +16,8 @@ import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
  * @param {string} props.className
  */
 export default function RecognitionCard({ recognition, className }) {
-  const { user } = useAuth();
+  const { user, executeProtectedAction } = useAuth();
+  const queryClient = useQueryClient();
   const { 
     id, 
     fromName, 
@@ -41,12 +43,13 @@ export default function RecognitionCard({ recognition, className }) {
 
   const isLiked = user ? likedBy.includes(user.uid) : false;
 
-  const handleLike = async () => {
-    if (!user) {
-      console.warn("User must be logged in to like.");
-      return;
-    }
-    await recognitionService.toggleLike(id, user.uid, isLiked);
+  const handleLike = async (currentlyLiked) => {
+    // Pass the actual state from the button to avoid closure stale state
+    await recognitionService.toggleLike(id, user.uid, currentlyLiked);
+    
+    // Invalidate queries to sync with other parts of the app
+    queryClient.invalidateQueries({ queryKey: ["recognitions"] });
+    queryClient.invalidateQueries({ queryKey: ["recognition-stats"] });
   };
 
   const formatDate = (date) => {
@@ -69,28 +72,33 @@ export default function RecognitionCard({ recognition, className }) {
         <Icon className={cn("w-12 h-12", config.color)} />
       </div>
 
-      <div className="flex items-center justify-between mb-8 relative z-10">
-        <div className="flex items-center space-x-4">
-          <AvatarPlaceholder name={isAnonymous ? "?" : fromName} size="md" />
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-stone-900 leading-none mb-1">
-              {fromName || (isAnonymous ? "Anonymous" : "Someone")}
-            </span>
-            <span className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">From</span>
+      <div className="flex flex-col items-center mb-8 relative z-10">
+        {/* Badge at top right */}
+        <div className="absolute top-0 right-0">
+          <RecognitionBadge 
+            value={primaryValue} 
+            className="rotate-12 group-hover:rotate-0" 
+          />
+        </div>
+
+        {/* Receiver (To) - Centered & Large */}
+        <div className="flex flex-col items-center mb-6 pt-4">
+          <AvatarPlaceholder name={toName} size="xl" className="mb-4 border-4 border-stone-50 shadow-md group-hover:scale-105 transition-transform duration-500" />
+          <div className="text-center">
+            <span className="text-[10px] text-stone-400 uppercase tracking-widest font-bold block mb-1">To the recipient</span>
+            <h3 className="text-3xl font-black text-stone-900 leading-tight tracking-tight">{toName}</h3>
           </div>
         </div>
 
-        <RecognitionBadge 
-          value={primaryValue} 
-          className="rotate-3 group-hover:rotate-0" 
-        />
-
-        <div className="flex items-center space-x-4 text-right">
-          <div className="flex flex-col items-end">
-            <span className="text-sm font-bold text-stone-900 leading-none mb-1">{toName}</span>
-            <span className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">To</span>
+        {/* Sender (From) - Below and smaller */}
+        <div className="flex items-center space-x-3 text-stone-600 bg-stone-50/80 pl-2 pr-4 py-1.5 rounded-full border border-stone-100 shadow-sm">
+          <AvatarPlaceholder name={isAnonymous ? "?" : fromName} size="sm" />
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">From</span>
+            <span className="text-sm font-bold text-stone-800">
+              {fromName || (isAnonymous ? "Anonymous" : "Someone")}
+            </span>
           </div>
-          <AvatarPlaceholder name={toName} size="md" />
         </div>
       </div>
       
@@ -123,7 +131,14 @@ export default function RecognitionCard({ recognition, className }) {
         <LikeButton 
           initialLiked={isLiked} 
           initialCount={likes} 
-          onLike={handleLike}
+          onLike={(currentlyLiked) => {
+            if (!user) {
+              executeProtectedAction(() => handleLike(currentlyLiked));
+              // Throwing error triggers rollback in LikeButton so heart doesn't stay red while logged out
+              throw new Error("Authentication required");
+            }
+            return handleLike(currentlyLiked);
+          }}
         />
         <span className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
           {formatDate(createdAt)}
