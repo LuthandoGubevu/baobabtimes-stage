@@ -19,8 +19,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip API requests if you have any (e.g., /api/*)
-  if (event.request.url.includes('/api/')) {
+  // Skip API requests or video files
+  if (event.request.url.includes('/api/') || event.request.url.endsWith('.mp4')) {
     return;
   }
 
