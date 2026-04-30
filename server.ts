@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import articlesRouter from "./src/backend/modules/articles/articles.routes.ts";
 import mediaRouter from "./src/backend/modules/media/media.routes.ts";
 import authRouter from "./src/backend/modules/auth/auth.routes.ts";
 
@@ -18,9 +17,6 @@ async function startServer() {
   
   // Auth Module
   app.use("/api/auth", authRouter);
-
-  // Articles Module
-  app.use("/api/articles", articlesRouter);
 
   // Media Module
   app.use("/api/media", mediaRouter);

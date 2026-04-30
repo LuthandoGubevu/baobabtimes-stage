@@ -10,16 +10,16 @@ import {
 } from 'lucide-react';
 
 const VALUES = [
-  { id: 'smart', label: 'Smart', icon: '/Baobab-Values-01-scaled.png' },
-  { id: 'communication', label: 'Communication', icon: '/Baobab-Values-02-scaled.png' },
-  { id: 'impact', label: 'Impact', icon: '/Baobab-Values-03-scaled.png' },
-  { id: 'transforming', label: 'Transforming', icon: '/Baobab-Values-04-scaled.png' },
-  { id: 'innovation', label: 'Innovation', icon: '/Baobab-Values-05-scaled.png' },
-  { id: 'courage', label: 'Courage', icon: '/Baobab-Values-06-scaled.png' },
-  { id: 'passion', label: 'Passion', icon: '/Baobab-Values-07-scaled.png' },
-  { id: 'authentic', label: 'Authentic', icon: '/Baobab-Values-08-scaled.png' },
-  { id: 'selflessness', label: 'Selflessness', icon: '/Baobab-Values-09-scaled.png' },
-  { id: 'heart', label: 'Heart', icon: '/Baobab-Values-10-scaled.png' },
+  { id: 'smart', label: 'Smart', icon: 'http://times.baobabbrands.com/wp-content/uploads/2026/04/Baobab-Values-01-scaled-1.png' },
+  { id: 'communication', label: 'Communication', icon: 'http://times.baobabbrands.com/wp-content/uploads/2026/04/Baobab-Values-02-scaled-1.png' },
+  { id: 'impact', label: 'Impact', icon: 'http://times.baobabbrands.com/wp-content/uploads/2026/04/Baobab-Values-03-scaled-1.png' },
+  { id: 'transforming', label: 'Transforming', icon: 'http://times.baobabbrands.com/wp-content/uploads/2026/04/Baobab-Values-04-scaled-1.png' },
+  { id: 'innovation', label: 'Innovation', icon: 'http://times.baobabbrands.com/wp-content/uploads/2026/04/Baobab-Values-05-scaled-1.png' },
+  { id: 'courage', label: 'Courage', icon: 'http://times.baobabbrands.com/wp-content/uploads/2026/04/Baobab-Values-06-scaled-1.png' },
+  { id: 'passion', label: 'Passion', icon: 'http://times.baobabbrands.com/wp-content/uploads/2026/04/Baobab-Values-07-scaled-1.png' },
+  { id: 'authentic', label: 'Authentic', icon: 'http://times.baobabbrands.com/wp-content/uploads/2026/04/Baobab-Values-08-scaled-1.png' },
+  { id: 'selflessness', label: 'Selflessness', icon: 'http://times.baobabbrands.com/wp-content/uploads/2026/04/Baobab-Values-09-scaled-1.png' },
+  { id: 'heart', label: 'Heart', icon: 'http://times.baobabbrands.com/wp-content/uploads/2026/04/Baobab-Values-10-scaled-1.png' },
 ];
 
 const INITIAL_VIDEOS = [
