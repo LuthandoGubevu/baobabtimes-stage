@@ -21,6 +21,8 @@ export const AvatarPlaceholder = ({ name = "", src = "", size = "md", className 
     "2xl": "w-32 h-32 text-3xl"
   };
 
+  const finalSrc = src || (name === "CEO" || name === "The CEO" || name === "Harvey De Wit" ? "https://times.baobabbrands.com/wp-content/uploads/2024/07/DSC02639.jpg" : "");
+
   return (
     <div 
       className={cn(
@@ -29,8 +31,8 @@ export const AvatarPlaceholder = ({ name = "", src = "", size = "md", className 
         className
       )}
     >
-      {src ? (
-        <img src={src} alt={name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+      {finalSrc ? (
+        <img src={finalSrc} alt={name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
       ) : (
         initials || <User className="w-1/2 h-1/2" />
       )}

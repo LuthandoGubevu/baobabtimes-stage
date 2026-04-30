@@ -89,7 +89,7 @@ export default function PostDetailPage() {
       <div className="max-w-4xl mx-auto px-4 mb-12">
         <div className="aspect-[21/9] w-full bg-stone-100 rounded-2xl overflow-hidden mb-8 shadow-sm">
           <img 
-            src="/staff-image.jpg" 
+            src="https://times.baobabbrands.com/wp-content/uploads/2026/04/staff-image.jpg" 
             alt={title} 
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"

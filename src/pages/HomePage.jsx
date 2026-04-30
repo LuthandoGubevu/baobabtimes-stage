@@ -67,7 +67,7 @@ export default function HomePage() {
       <section className="text-center py-24 bg-stone-900 text-white rounded-[2rem] overflow-hidden relative shadow-2xl">
         <div className="absolute inset-0 opacity-30">
           <img 
-            src="/staff-image.jpg" 
+            src="https://times.baobabbrands.com/wp-content/uploads/2026/04/staff-image.jpg" 
             alt="Staff" 
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
@@ -192,7 +192,7 @@ export default function HomePage() {
       <section className="bg-brand-500 rounded-[2.5rem] overflow-hidden relative group shadow-2xl">
         <div className="absolute inset-0 opacity-40 mix-blend-overlay">
           <img 
-            src="/HarveyValues.png" 
+            src="https://times.baobabbrands.com/wp-content/uploads/2026/04/HarveyValues.png" 
             alt="Baobab Values" 
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
@@ -288,7 +288,7 @@ export default function HomePage() {
                 loop
                 playsInline
               >
-                <source src="/FiestaLandingPageVideo.mp4" type="video/mp4" />
+                <source src="https://times.baobabbrands.com/wp-content/uploads/2026/04/FiestaLandingPageVideo.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>

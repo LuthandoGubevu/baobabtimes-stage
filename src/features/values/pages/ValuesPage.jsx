@@ -405,7 +405,7 @@ export default function ValuesPage() {
               <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-full border-4 border-brand-500 p-3 shadow-2xl">
                 <div className="w-full h-full rounded-full overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
                   <img 
-                    src="/Harvey.jpg" 
+                    src="https://times.baobabbrands.com/wp-content/uploads/2024/07/DSC02601.jpg" 
                     alt="Harvey De Wit"
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"

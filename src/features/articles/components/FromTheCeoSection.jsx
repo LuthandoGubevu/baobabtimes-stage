@@ -146,7 +146,7 @@ export default function FromTheCeoSection() {
                 <div className="relative w-80 h-80 md:w-96 md:h-96 rounded-full border-4 border-brand-500 p-3 shadow-2xl">
                   <div className="w-full h-full rounded-full overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
                     <img 
-                      src="/Mr-Wheatley.jpg" 
+                      src="https://times.baobabbrands.com/wp-content/uploads/2024/07/DSC02639.jpg" 
                       alt="The CEO"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       referrerPolicy="no-referrer"
