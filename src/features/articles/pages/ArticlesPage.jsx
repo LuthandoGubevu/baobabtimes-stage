@@ -116,7 +116,7 @@ export default function ArticlesPage() {
                 playsInline
                 crossOrigin="anonymous"
               >
-                <source src="/FamilyFiestaPortraitVideo.mp4" type="video/mp4" />
+                <source src="https://times.baobabbrands.com/wp-content/uploads/2026/04/25-W2-FamilyFiesta-Video-1080x1920-20s-Bots_Les.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
               <div className="absolute inset-0 bg-stone-900/10 group-hover:bg-transparent transition-colors duration-500"></div>
