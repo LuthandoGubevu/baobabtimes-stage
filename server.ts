@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import { createServer as createViteServer } from "vite";
 import articlesRouter from "./src/backend/modules/articles/articles.routes.ts";
 import mediaRouter from "./src/backend/modules/media/media.routes.ts";
 import authRouter from "./src/backend/modules/auth/auth.routes.ts";
@@ -46,11 +45,11 @@ async function startServer() {
     ]);
   });
 
-  // --- VITE MIDDLEWARE ---
+  // --- MIDDLEWARE & ERROR HANDLING ---
 
   // Global Error Handler (ensure JSON for API errors)
   app.use((err: any, req: any, res: any, next: any) => {
-    console.error(err.stack);
+    console.error(">>> SERVER ERROR:", err.stack || err);
     if (req.path.startsWith("/api/")) {
       return res.status(err.status || 500).json({
         error: err.message || "Internal Server Error",
@@ -59,13 +58,18 @@ async function startServer() {
     next(err);
   });
 
+  // --- VITE MIDDLEWARE ---
+  
   if (process.env.NODE_ENV !== "production") {
+    console.log(">>> Starting development server with Vite middleware...");
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
+    console.log(">>> Starting production server...");
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
@@ -78,4 +82,7 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch((error) => {
+  console.error(">>> FATAL SERVER STARTUP ERROR:", error);
+  process.exit(1);
+});
