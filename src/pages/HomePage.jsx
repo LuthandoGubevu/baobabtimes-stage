@@ -166,9 +166,8 @@ export default function HomePage() {
           muted
           loop
           playsInline
-          crossOrigin="anonymous"
         >
-          <source src="http://times.baobabbrands.com/wp-content/uploads/2026/04/WideVideoLandingPage.mp4" type="video/mp4" />
+          <source src="https://times.baobabbrands.com/wp-content/uploads/2026/04/WideVideoLandingPage.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         {/* Subtle decorative overlay */}
@@ -288,7 +287,6 @@ export default function HomePage() {
                 muted
                 loop
                 playsInline
-                crossOrigin="anonymous"
               >
                 <source src="/FiestaLandingPageVideo.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
