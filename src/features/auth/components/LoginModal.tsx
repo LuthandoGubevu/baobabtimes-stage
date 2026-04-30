@@ -4,18 +4,9 @@ import { X, LogIn, Mail, Lock, Globe } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 
 export default function LoginModal() {
-  const { showLoginModal, setShowLoginModal, login } = useAuth();
+  const { showLoginModal, setShowLoginModal } = useAuth();
 
   if (!showLoginModal) return null;
-
-  const handleGoogleLogin = async () => {
-    try {
-      await login();
-      setShowLoginModal(false);
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -55,13 +46,13 @@ export default function LoginModal() {
             </div>
 
             <div className="space-y-4">
-              <button 
-                onClick={handleGoogleLogin}
-                className="w-full flex items-center justify-center space-x-3 py-4 bg-white border border-stone-200 rounded-2xl font-bold text-stone-700 hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm"
+              <a 
+                href="/login"
+                className="w-full flex items-center justify-center space-x-3 py-4 bg-stone-900 text-white rounded-2xl font-bold hover:bg-stone-800 transition-all shadow-lg shadow-stone-200"
               >
-                <Globe className="w-5 h-5 text-stone-400" />
-                <span>Continue with Google</span>
-              </button>
+                <Mail className="w-5 h-5" />
+                <span>Sign in with Email</span>
+              </a>
 
               <div className="relative py-4">
                 <div className="absolute inset-0 flex items-center">
@@ -72,8 +63,8 @@ export default function LoginModal() {
                 </div>
               </div>
 
-              <p className="text-center text-xs text-stone-400 font-medium leading-relaxed">
-                By logging in, you agree to our <a href="/terms" className="text-stone-900 underline">Terms of Service</a> and <a href="/privacy" className="text-stone-900 underline">Privacy Policy</a>.
+              <p className="text-center text-xs text-stone-400 font-medium leading-relaxed italic">
+                Please use your official @baobabbrands.com or @kfcbaobab.com email to access the internal platform.
               </p>
             </div>
           </div>

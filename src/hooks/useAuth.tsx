@@ -176,11 +176,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const loginWithEmail = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(auth, email.toLowerCase().trim(), password);
   };
 
   const registerWithEmail = async (email: string, password: string, displayName: string) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const isWorkEmail = email.endsWith("@baobabbrands.com") || email.endsWith("@kfcbaobab.com");
+    if (!isWorkEmail) {
+      throw new Error("Only @baobabbrands.com or @kfcbaobab.com emails are allowed for registration.");
+    }
+
+    const userCredential = await createUserWithEmailAndPassword(auth, email.toLowerCase().trim(), password);
     await updateProfile(userCredential.user, { displayName });
     
     // The onAuthStateChanged listener will handle the Firestore document creation
