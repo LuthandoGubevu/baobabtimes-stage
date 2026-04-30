@@ -2,31 +2,54 @@ import admin from "firebase-admin";
 import { readFileSync } from "fs";
 import path from "path";
 
-/**
- * Initializes Firebase Admin SDK.
- * 
- * In production (Cloud Run), this defaults to Application Default Credentials.
- * In development, we can use the project ID from the config.
- */
+let isInitialized = false;
 
-if (!admin.apps.length) {
+function initializeFirebaseAdmin() {
+  if (isInitialized || admin.apps.length > 0) {
+    isInitialized = true;
+    return;
+  }
+
   try {
     const configPath = path.join(process.cwd(), "firebase-applet-config.json");
-    const firebaseConfig = JSON.parse(readFileSync(configPath, "utf-8"));
-
-    admin.initializeApp({
-      projectId: firebaseConfig.projectId,
-      // For local development with a service account, you would add credential: admin.credential.cert(...)
-      // But in this environment, ADC or the project ID is usually sufficient for emulated/managed access.
-    });
+    let firebaseConfig: any = {};
     
-    console.log(">>> Firebase Admin initialized for project:", firebaseConfig.projectId);
+    try {
+      firebaseConfig = JSON.parse(readFileSync(configPath, "utf-8"));
+    } catch (readError) {
+      console.warn(">>> Could not read firebase-applet-config.json, falling back to ADC.", readError);
+    }
+
+    const options: admin.AppOptions = {};
+    if (firebaseConfig.projectId) {
+      options.projectId = firebaseConfig.projectId;
+    }
+    if (firebaseConfig.storageBucket) {
+      options.storageBucket = firebaseConfig.storageBucket;
+    }
+
+    admin.initializeApp(options);
+    console.log(">>> Firebase Admin initialized successfully.");
+    isInitialized = true;
   } catch (error) {
     console.error(">>> Failed to initialize Firebase Admin:", error);
-    // Fallback for basic initialization
-    admin.initializeApp();
+    // If it fails, any subsequent call to adminAuth or adminDb will fail, 
+    // but at least the server won't crash on startup.
   }
 }
 
-export const adminAuth = admin.auth();
-export const adminDb = admin.firestore();
+// Function to get Auth instance lazily
+export const getAdminAuth = () => {
+  initializeFirebaseAdmin();
+  return admin.auth();
+};
+
+// Function to get Firestore instance lazily
+export const getAdminDb = () => {
+  initializeFirebaseAdmin();
+  return admin.firestore();
+};
+
+// For backward compatibility while refactoring, but exported as functions to prevent crashes at module load
+export const adminAuth = () => getAdminAuth();
+export const adminDb = () => getAdminDb();

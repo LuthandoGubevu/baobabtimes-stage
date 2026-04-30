@@ -1,4 +1,4 @@
-import { adminAuth, adminDb } from "../../firebase-admin.ts";
+import { getAdminAuth, getAdminDb } from "../../firebase-admin.ts";
 import { getRoleForEmail } from "../../../lib/rbac-config.ts";
 
 /**
@@ -16,7 +16,7 @@ export async function syncUserRole(uid: string, email: string) {
   // 1. Update Custom Claims in Firebase Auth (Most secure for backend/cloud functions)
   // This allows the role to be present in the user's ID token.
   try {
-    await adminAuth.setCustomUserClaims(uid, { role });
+    await getAdminAuth().setCustomUserClaims(uid, { role });
   } catch (error: any) {
     // Handle the specific error where Identity Toolkit API is disabled or permissions are missing
     if (error.code === "auth/internal-error" || error.code === "permission-denied" || error.code === 7 || error.message.includes("identitytoolkit") || error.message.includes("PERMISSION_DENIED")) {
@@ -29,7 +29,7 @@ export async function syncUserRole(uid: string, email: string) {
   // 2. Update/Create User Document in Firestore
   try {
     console.log(`>>> Attempting Firestore sync for ${uid}...`);
-    const userRef = adminDb.collection("users").doc(uid);
+    const userRef = getAdminDb().collection("users").doc(uid);
     const userSnap = await userRef.get();
 
     const userData = {
@@ -74,7 +74,7 @@ export async function authenticate(req: any, res: any, next: any) {
 
   const idToken = authHeader.split("Bearer ")[1];
   try {
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    const decodedToken = await getAdminAuth().verifyIdToken(idToken);
     req.user = decodedToken;
     next();
   } catch (error) {

@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import admin from "firebase-admin";
+import { getAdminAuth } from "../../firebase-admin.ts";
 import { verifyToken, AuthRequest } from "../../middleware/auth.ts";
 
 const router = express.Router();
@@ -33,6 +34,8 @@ router.post("/upload", verifyToken, upload.single("image"), async (req: AuthRequ
       return res.status(401).json({ error: "Unauthorized" });
     }
 
+    // Ensure initialized
+    getAdminAuth();
     const bucket = admin.storage().bucket();
     console.log("Attempting to upload to bucket:", bucket.name);
     
