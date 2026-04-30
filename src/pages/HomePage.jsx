@@ -161,7 +161,7 @@ export default function HomePage() {
       <section className="relative w-full aspect-[5/1] bg-stone-900 rounded-[3rem] overflow-hidden group shadow-2xl border border-white/5">
         <video 
           ref={wideVideoRef}
-          src="/WideVideoLandingPage.mp4" 
+          src="https://drive.google.com/uc?export=download&id=1bDKeGoPS_Ri9I9tq_qlNwL5UOJ27Z5oi" 
           className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
           autoPlay
           muted
