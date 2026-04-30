@@ -1,5 +1,5 @@
-import { adminAuth, adminDb } from "../../firebase-admin";
-import { getRoleForEmail } from "../../../lib/rbac-config";
+import { adminAuth, adminDb } from "../../firebase-admin.ts";
+import { getRoleForEmail } from "../../../lib/rbac-config.ts";
 
 /**
  * Syncs user data with calculated roles based on the allowlist.

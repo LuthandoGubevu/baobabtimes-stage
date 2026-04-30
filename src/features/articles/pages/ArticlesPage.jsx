@@ -109,13 +109,16 @@ export default function ArticlesPage() {
           <div className="bg-white rounded-[2rem] border border-stone-200 overflow-hidden shadow-sm group">
             <div className="aspect-[9/16] w-full bg-stone-100 flex items-center justify-center relative shadow-inner">
               <video 
-                src="/FamilyFiestaPortraitVideo.mp4" 
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                 autoPlay
                 muted
                 loop
                 playsInline
-              />
+                crossOrigin="anonymous"
+              >
+                <source src="/FamilyFiestaPortraitVideo.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
               <div className="absolute inset-0 bg-stone-900/10 group-hover:bg-transparent transition-colors duration-500"></div>
             </div>
           </div>

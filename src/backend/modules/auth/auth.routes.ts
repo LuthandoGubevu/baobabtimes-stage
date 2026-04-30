@@ -1,5 +1,5 @@
 import express from "express";
-import { syncUserRole, authenticate } from "./auth.service";
+import { syncUserRole, authenticate } from "./auth.service.ts";
 
 const router = express.Router();
 

@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import admin from "firebase-admin";
-import firebaseConfig from "../../../firebase-applet-config.json";
+import { readFileSync } from "fs";
+import path from "path";
+
+const configPath = path.join(process.cwd(), "firebase-applet-config.json");
+const firebaseConfig = JSON.parse(readFileSync(configPath, "utf-8"));
 
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {

@@ -2,9 +2,9 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
-import articlesRouter from "./src/backend/modules/articles/articles.routes";
+import articlesRouter from "./src/backend/modules/articles/articles.routes.ts";
 import mediaRouter from "./src/backend/modules/media/media.routes.ts";
-import authRouter from "./src/backend/modules/auth/auth.routes";
+import authRouter from "./src/backend/modules/auth/auth.routes.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
