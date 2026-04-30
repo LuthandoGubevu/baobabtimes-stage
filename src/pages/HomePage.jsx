@@ -16,6 +16,7 @@ import { Search, Filter, Video, ArrowUpRight, Star } from "lucide-react";
  */
 export default function HomePage() {
   const videoRef = useRef(null);
+  const wideVideoRef = useRef(null);
   const { data: articles, isLoading, isError } = useArticles();
   const [searchQuery, setSearchQuery] = useState("");
   const [homeCategory, setHomeCategory] = useState("All");
@@ -42,6 +43,7 @@ export default function HomePage() {
     };
 
     attemptPlay(videoRef, "Sidebar video");
+    attemptPlay(wideVideoRef, "Wide video");
 
     return () => {
       isMounted = false;
@@ -157,14 +159,18 @@ export default function HomePage() {
 
       {/* Panoramic Video Section */}
       <section className="relative w-full aspect-[5/1] bg-stone-900 rounded-[3rem] overflow-hidden group shadow-2xl border border-white/5">
-        <iframe
-          className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-[2000ms] ease-out pointer-events-none"
-          src="https://www.youtube.com/embed/wOi1nf807oU?autoplay=1&mute=1&loop=1&playlist=wOi1nf807oU&controls=0&modestbranding=1&rel=0&iv_load_policy=3"
-          title="Panoramic Video"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-          style={{ border: 'none', width: '100%', height: '100%', pointerEvents: 'none' }}
-        ></iframe>
+        <video 
+          ref={wideVideoRef}
+          className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
+          autoPlay
+          muted
+          loop
+          playsInline
+          crossOrigin="anonymous"
+        >
+          <source src="http://times.baobabbrands.com/wp-content/uploads/2026/04/WideVideoLandingPage.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
         {/* Subtle decorative overlay */}
         <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-stone-900/40 to-transparent pointer-events-none"></div>
       </section>
