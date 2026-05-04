@@ -15,4 +15,9 @@ export const getPrisma = (): PrismaClient => {
 };
 
 // Export for compatibility if needed, but getPrisma() is preferred
-export const prisma = getPrisma();
+// Use a proxy or a function to make it lazy
+export const prisma = new Proxy({} as PrismaClient, {
+  get: (target, prop) => {
+    return (getPrisma() as any)[prop];
+  }
+});

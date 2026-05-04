@@ -21,11 +21,15 @@ async function startServer() {
   // Media Module
   app.use("/api/media", mediaRouter);
 
-  // Serve public directory statically (ensures assets in /public are available at root)
-  app.use(express.static(path.join(process.cwd(), "public")));
+  // Serve public directory statically
+  const publicPath = process.env.NODE_ENV === "production" 
+    ? path.join(__dirname, "..", "public")
+    : path.join(process.cwd(), "public");
+  
+  app.use(express.static(publicPath));
 
   // Serve uploads statically
-  app.use("/uploads", express.static(path.join(process.cwd(), "public", "uploads")));
+  app.use("/uploads", express.static(path.join(publicPath, "uploads")));
 
   // Recognition API (to be moved to modules/recognition/recognition.routes.ts)
   app.get("/api/recognition", (req, res) => {
@@ -66,7 +70,7 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     console.log(">>> Starting production server...");
-    const distPath = path.join(process.cwd(), "dist");
+    const distPath = __dirname;
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
