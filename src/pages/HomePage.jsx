@@ -6,9 +6,8 @@ import { recognitionService } from "../features/recognition/services/recognition
 import ArticleCard from "../features/articles/components/ArticleCard";
 import FromTheCeoSection from "../features/articles/components/FromTheCeoSection";
 import { AvatarPlaceholder, ImagePlaceholder } from "../components/ui/GenericPlaceholder";
-import { useRef, useEffect, useState } from "react";
-import { CATEGORIES } from "../constants/categories";
-import { Search, Filter, Video, ArrowUpRight, Star } from "lucide-react";
+import { useRef, useEffect } from "react";
+import { Video, ArrowUpRight, Star } from "lucide-react";
 
 /**
  * HomePage component
@@ -18,9 +17,7 @@ export default function HomePage() {
   const videoRef = useRef(null);
   const wideVideoRef = useRef(null);
   const { data: articles, isLoading, isError } = useArticles();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [homeCategory, setHomeCategory] = useState("All");
-  
+
   const { data: recognitions, isLoading: isLoadingRecognitions } = useQuery({
     queryKey: ["recognitions"],
     queryFn: recognitionService.getApprovedRecognitions
@@ -52,14 +49,7 @@ export default function HomePage() {
 
   const recentPraise = Array.isArray(recognitions) ? recognitions.slice(0, 3) : [];
   
-  // Filter articles based on home search and category
-  const featuredArticles = Array.isArray(articles) 
-    ? articles.filter(article => {
-        const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = homeCategory === "All" || article.category === homeCategory;
-        return matchesSearch && matchesCategory;
-      }) 
-    : [];
+  const featuredArticles = Array.isArray(articles) ? articles : [];
 
   return (
     <div className="space-y-24">
@@ -103,59 +93,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Related Articles Search & Navigation */}
-      <div className="space-y-12 py-10 border-y border-stone-100 bg-white/70 backdrop-blur-md px-6 -mx-6 md:rounded-[2rem]">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="max-w-2xl">
-            <h2 className="text-5xl font-serif font-bold mb-4 italic">Search Articles</h2>
-            <p className="text-stone-500 text-lg font-light">
-              Stay informed with the latest updates, stories, and strategic insights from across the organization.
-            </p>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-              <input 
-                type="text" 
-                placeholder="Search articles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-white border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 transition-all w-64 shadow-sm"
-              />
-            </div>
-            <button className="p-2 bg-white border border-stone-200 rounded-full text-stone-500 hover:text-stone-900 transition-colors shadow-sm">
-              <Filter className="w-5 h-5" />
-            </button>
-          </div>
-        </header>
-
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <button 
-            onClick={() => setHomeCategory("All")}
-            className={`px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all hover:scale-105 shadow-lg ${
-              homeCategory === "All" 
-                ? "bg-stone-900 text-white shadow-stone-900/10" 
-                : "bg-white border border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900"
-            }`}
-          >
-            All
-          </button>
-          {CATEGORIES.map((category) => (
-            <button 
-              key={category.slug}
-              onClick={() => setHomeCategory(category.name)}
-              className={`px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all shadow-sm ${
-                homeCategory === category.name
-                  ? "bg-stone-900 text-white border-stone-900"
-                  : "bg-white border border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900 hover:bg-stone-50"
-              }`}
-            >
-              {category.name}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* Panoramic Video Section */}
       <section className="relative w-full aspect-[5/1] bg-stone-900 rounded-[3rem] overflow-hidden group shadow-2xl border border-white/5">

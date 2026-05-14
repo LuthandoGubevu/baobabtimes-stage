@@ -1,10 +1,10 @@
-const CACHE_NAME = 'baobab-times-v2';
+const CACHE_NAME = 'baobab-times-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
+  '/icons/android-chrome-192x192.png',
+  '/icons/android-chrome-512x512.png',
   '/HarveyValues.png'
 ];
 
