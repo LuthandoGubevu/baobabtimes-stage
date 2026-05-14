@@ -48,7 +48,7 @@ export default function HomePage() {
   }, []);
 
   const recentPraise = Array.isArray(recognitions) ? recognitions.slice(0, 3) : [];
-  
+
   const featuredArticles = Array.isArray(articles) ? articles : [];
 
   return (
@@ -56,9 +56,9 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="text-center py-24 bg-stone-900 text-white rounded-[2rem] overflow-hidden relative shadow-2xl">
         <div className="absolute inset-0 opacity-30">
-          <img 
-            src="https://times.baobabbrands.com/wp-content/uploads/2026/04/staff-image.jpg" 
-            alt="Staff" 
+          <img
+            src="https://times.baobabbrands.com/wp-content/uploads/2026/04/staff-image.jpg"
+            alt="Staff"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
@@ -73,18 +73,18 @@ export default function HomePage() {
             <span className="italic text-stone-400">Times</span>
           </h1>
           <p className="text-xl text-stone-300 font-light mb-10 max-w-2xl mx-auto leading-relaxed">
-            Reimagining internal communication through editorial excellence, 
+            Reimagining internal communication through editorial excellence,
             strategic clarity, and deep employee engagement.
           </p>
           <div className="flex flex-wrap justify-center gap-6">
-            <Link 
-              to="/articles" 
+            <Link
+              to="/articles"
               className="px-10 py-4 bg-white text-stone-900 font-bold rounded-full hover:bg-stone-200 transition-all transform hover:scale-105 shadow-xl"
             >
               Read Latest News
             </Link>
-            <Link 
-              to="/recognition" 
+            <Link
+              to="/recognition"
               className="px-10 py-4 bg-transparent border-2 border-white/30 text-white font-bold rounded-full hover:bg-white/10 transition-all backdrop-blur-sm"
             >
               Recognize a Peer
@@ -94,9 +94,15 @@ export default function HomePage() {
       </section>
 
 
+
+
+      {/* From The CEO Section */}
+      <FromTheCeoSection />
+
+
       {/* Panoramic Video Section */}
       <section className="relative w-full aspect-[5/1] bg-stone-900 rounded-[3rem] overflow-hidden group shadow-2xl border border-white/5">
-        <video 
+        <video
           ref={wideVideoRef}
           className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
           autoPlay
@@ -110,9 +116,6 @@ export default function HomePage() {
         {/* Subtle decorative overlay */}
         <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-stone-900/40 to-transparent pointer-events-none"></div>
       </section>
-
-      {/* From The CEO Section */}
-      <FromTheCeoSection />
 
       {/* Separator */}
       <hr className="border-stone-200" />
@@ -128,15 +131,15 @@ export default function HomePage() {
       {/* Our Values Page Link Card */}
       <section className="bg-brand-500 rounded-[2.5rem] overflow-hidden relative group shadow-2xl">
         <div className="absolute inset-0 opacity-40 mix-blend-overlay">
-          <img 
-            src="https://times.baobabbrands.com/wp-content/uploads/2026/04/HarveyValues.png" 
-            alt="Baobab Values" 
+          <img
+            src="https://times.baobabbrands.com/wp-content/uploads/2026/04/HarveyValues.png"
+            alt="Baobab Values"
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-r from-brand-700/80 via-brand-600/40 to-transparent"></div>
-        
+
         <div className="relative z-10 px-12 py-16 md:py-20 max-w-4xl">
           <div className="flex items-center space-x-3 mb-8">
             <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
@@ -144,20 +147,20 @@ export default function HomePage() {
             </div>
             <span className="text-white/80 text-xs font-bold uppercase tracking-[0.3em]">Corporate Culture</span>
           </div>
-          
+
           <p className="text-brand-50 text-lg md:text-xl font-light mb-10 max-w-xl leading-relaxed">
             A deeper look into the behavioral competencies and core beliefs that define excellence at The Baobab Times.
           </p>
-          
-          <Link 
-            to="/values" 
+
+          <Link
+            to="/values"
             className="inline-flex items-center space-x-3 px-8 py-4 bg-white text-brand-900 font-bold rounded-full hover:bg-brand-50 transition-all hover:scale-105 shadow-xl group/btn"
           >
             <span>Explore the Series</span>
             <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
           </Link>
         </div>
-        
+
         {/* Abstract decorative shape */}
         <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-brand-400 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
       </section>
@@ -165,7 +168,7 @@ export default function HomePage() {
       {/* Main Content Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-16">
         {/* Featured Stories Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -177,14 +180,14 @@ export default function HomePage() {
               <h2 className="text-5xl font-serif font-bold italic tracking-tight">Featured Stories</h2>
               <p className="text-stone-400 text-lg font-light">Hand-picked insights from across the organization.</p>
             </div>
-            <Link 
-              to="/articles" 
+            <Link
+              to="/articles"
               className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 hover:text-stone-900 transition-colors border-b border-stone-200 hover:border-stone-900 pb-2 mb-1"
             >
               View All
             </Link>
           </div>
-          
+
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
               {[1, 2, 3, 4].map((i) => (
@@ -217,7 +220,7 @@ export default function HomePage() {
           {/* Featured Video Placeholder */}
           <div className="bg-white rounded-[2rem] border border-stone-200 overflow-hidden shadow-sm">
             <div className="aspect-video w-full bg-stone-100 flex items-center justify-center relative group shadow-inner">
-              <video 
+              <video
                 ref={videoRef}
                 className="absolute inset-0 w-full h-full object-cover"
                 autoPlay
@@ -244,7 +247,7 @@ export default function HomePage() {
               <p className="text-stone-500 text-sm mb-6 leading-relaxed">
                 Our in-office interview series. Behind the scenes stories and surprise questions with the Baobab team.
               </p>
-              <Link 
+              <Link
                 to="/this-is-me"
                 className="w-full mt-2 py-4 bg-stone-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-stone-800 transition-all text-center block shadow-lg shadow-stone-900/10"
               >
@@ -298,7 +301,7 @@ export default function HomePage() {
                 </div>
               )}
             </div>
-            <Link 
+            <Link
               to="/recognition"
               className="w-full mt-8 py-4 bg-stone-900 text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-stone-800 transition-all text-center block shadow-lg shadow-stone-900/10"
             >
@@ -321,7 +324,7 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-            <Link 
+            <Link
               to="/ask-ceo"
               className="w-full mt-8 py-4 bg-white text-stone-900 text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-stone-100 transition-all text-center block shadow-xl"
             >
