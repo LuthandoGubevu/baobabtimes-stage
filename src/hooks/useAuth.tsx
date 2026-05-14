@@ -67,31 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
-  /**
-   * Syncs the user's role with the backend.
-   * This ensures the Firestore document is updated by the server and Custom Claims are set.
-   */
-  const syncUserWithBackend = async (firebaseUser: FirebaseUser) => {
-    try {
-      const idToken = await firebaseUser.getIdToken();
-      const response = await fetch("/api/auth/sync", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`
-        }
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        console.error("Backend sync failed:", data.error);
-      } else {
-        console.log(">>> Backend role sync successful");
-      }
-    } catch (err) {
-      console.error("Error calling auth sync API:", err);
-    }
-  };
+
 
   useEffect(() => {
     if (user && pendingAction) {
@@ -107,9 +83,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(null);
       
       if (firebaseUser) {
-        // Trigger backend sync asynchronously
-        syncUserWithBackend(firebaseUser);
-
         // Set up real-time listener for the user document
         unsubscribeDoc = onSnapshot(
           doc(db, 'users', firebaseUser.uid),
@@ -119,9 +92,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               
               const expectedRole = getRoleForEmail(firebaseUser.email);
               if (userData.role !== expectedRole) {
-                console.log(`>>> Stale local role detected: ${userData.role}. Waiting for backend sync...`);
-                // We don't attempt to repair here because the rules forbid it.
-                // The syncUserWithBackend call (triggered on auth change) will fix this.
+                console.log(`>>> Stale local role detected: ${userData.role}. Fixing client-side...`);
+                try {
+                  await setDoc(doc(db, 'users', firebaseUser.uid), { role: expectedRole }, { merge: true });
+                  userData.role = expectedRole;
+                } catch (e) {
+                  console.error("Failed to update role client-side:", e);
+                }
               }
 
               setUser(userData);
@@ -151,12 +128,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const initializeNewUser = async (firebaseUser: FirebaseUser) => {
+    const expectedRole = getRoleForEmail(firebaseUser.email);
     const newUser: AuthUser = {
       uid: firebaseUser.uid,
       displayName: firebaseUser.displayName,
       email: firebaseUser.email || "unknown@baobabbrands.com",
       photoURL: firebaseUser.photoURL,
-      role: 'user', // Default to user on client-side creation
+      role: expectedRole,
     };
     
     try {
