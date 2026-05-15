@@ -133,16 +133,16 @@ export const recognitionService = {
   /**
    * Toggle like on a recognition
    * @param {string} recognitionId 
-   * @param {string} userId 
-   * @param {boolean} isLiked 
+   * @param {string} userId
+   * @param {boolean} isNowLiking - true = user is liking, false = user is unliking
    */
-  toggleLike: async (recognitionId, userId, isLiked) => {
+  toggleLike: async (recognitionId, userId, isNowLiking) => {
     const path = `recognitions/${recognitionId}`;
     try {
       const docRef = doc(db, "recognitions", recognitionId);
       await updateDoc(docRef, {
-        likes: increment(isLiked ? -1 : 1),
-        likedBy: isLiked ? arrayRemove(userId) : arrayUnion(userId)
+        likes: increment(isNowLiking ? 1 : -1),
+        likedBy: isNowLiking ? arrayUnion(userId) : arrayRemove(userId)
       });
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, path);

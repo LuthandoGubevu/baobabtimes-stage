@@ -7,7 +7,6 @@ import { getRecognitionValue } from "../constants/recognitionValues";
 import { useAuth } from "../../../hooks/useAuth";
 import { recognitionService } from "../services/recognitionService";
 import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
-import { useQueryClient } from "@tanstack/react-query";
 
 /**
  * RecognitionCard component for displaying peer recognition
@@ -17,7 +16,6 @@ import { useQueryClient } from "@tanstack/react-query";
  */
 export default function RecognitionCard({ recognition, className }) {
   const { user, executeProtectedAction } = useAuth();
-  const queryClient = useQueryClient();
   const { 
     id, 
     fromName, 
@@ -43,13 +41,13 @@ export default function RecognitionCard({ recognition, className }) {
 
   const isLiked = user ? likedBy.includes(user.uid) : false;
 
-  const handleLike = async (currentlyLiked) => {
-    // Pass the actual state from the button to avoid closure stale state
-    await recognitionService.toggleLike(id, user.uid, currentlyLiked);
-    
-    // Invalidate queries to sync with other parts of the app
-    queryClient.invalidateQueries({ queryKey: ["recognitions"] });
-    queryClient.invalidateQueries({ queryKey: ["recognition-stats"] });
+  const handleLike = async (wasLiked) => {
+    // wasLiked = the state BEFORE this click (passed from LikeButton)
+    // We call toggleLike with the NEW desired state
+    await recognitionService.toggleLike(id, user.uid, !wasLiked);
+    // NOTE: do NOT invalidateQueries here — it overwrites the optimistic
+    // state in LikeButton while isPending is true, causing the heart to snap back.
+    // Queries will naturally refresh on next focus/mount.
   };
 
   const formatDate = (date) => {
