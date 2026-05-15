@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Save, 
-  Send, 
-  ChevronLeft, 
-  Settings, 
-  Hash, 
+import {
+  Save,
+  Send,
+  ChevronLeft,
+  Settings,
+  Hash,
   Calendar,
   User,
   Archive
@@ -94,7 +94,7 @@ export const CeoMessageEditor = () => {
         // Use the atomic replacement logic
         await articleService.publishCeoMessage(id || null, messageData, user);
         toast.success('Message published and set as active on homepage!');
-        
+
         // Create activity
         activityService.createActivity({
           type: 'ceo_message_published',
@@ -142,7 +142,7 @@ export const CeoMessageEditor = () => {
         }
         toast.success('Draft saved successfully!');
       }
-      
+
       setTimeout(() => {
         navigate('/dashboard/from-the-ceo');
       }, 1500);
@@ -165,10 +165,10 @@ export const CeoMessageEditor = () => {
           </div>
         </div>
       )}
-      
+
       <header className="h-16 border-b border-zinc-100 px-6 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-20">
         <div className="flex items-center space-x-4">
-          <button 
+          <button
             onClick={() => navigate('/dashboard/from-the-ceo')}
             className="p-2 rounded-lg hover:bg-zinc-50 text-zinc-500 transition-colors"
           >
@@ -183,35 +183,35 @@ export const CeoMessageEditor = () => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-1 sm:space-x-3">
           {status === 'PUBLISHED' && (
-            <button 
+            <button
               disabled={isSaving}
               onClick={() => handleSave('ARCHIVED')}
-              className="flex items-center px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-all disabled:opacity-50"
+              className="flex items-center px-3 sm:px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-all disabled:opacity-50"
             >
-              <Archive size={18} className="mr-2" />
-              Archive
+              <Archive size={18} className="sm:mr-2" />
+              <span className="hidden sm:inline">Archive</span>
             </button>
           )}
-          <button 
+          <button
             disabled={isSaving}
             onClick={() => handleSave('DRAFT')}
-            className="flex items-center px-4 py-2 text-sm font-bold text-zinc-600 hover:bg-zinc-50 rounded-xl transition-all disabled:opacity-50"
+            className="flex items-center px-3 sm:px-4 py-2 text-sm font-bold text-zinc-600 hover:bg-zinc-50 rounded-xl transition-all disabled:opacity-50"
           >
-            <Save size={18} className="mr-2" />
-            Save Draft
+            <Save size={18} className="sm:mr-2" />
+            <span className="hidden sm:inline">Save Draft</span>
           </button>
-          <button 
+          <button
             disabled={isSaving}
             onClick={() => handleSave('PUBLISHED')}
-            className="flex items-center px-6 py-2 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-200 disabled:opacity-50"
+            className="flex items-center px-4 sm:px-6 py-2 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-200 disabled:opacity-50"
           >
-            <Send size={18} className="mr-2" />
-            {status === 'PUBLISHED' ? 'Update & Keep Active' : 'Publish & Set Active'}
+            <Send size={18} className="sm:mr-2" />
+            <span className="hidden sm:inline">{status === 'PUBLISHED' ? 'Update & Keep Active' : 'Publish & Set Active'}</span>
           </button>
           <div className="h-6 w-px bg-zinc-100 mx-2" />
-          <button 
+          <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className={cn(
               "p-2 rounded-lg transition-colors",
@@ -223,8 +223,8 @@ export const CeoMessageEditor = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        <main className="flex-1 overflow-y-auto bg-zinc-50/50">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-x-hidden overflow-y-auto lg:overflow-hidden">
+        <main className="flex-1 min-w-0 lg:overflow-y-auto bg-zinc-50/50">
           <div className="max-w-4xl mx-auto py-20 px-12">
             <div className="mb-12">
               <span className="inline-block px-3 py-1 bg-zinc-900 text-white text-[10px] font-bold uppercase tracking-[0.2em] mb-6">
@@ -238,7 +238,7 @@ export const CeoMessageEditor = () => {
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
-            
+
             <div className="space-y-8">
               <div className="p-8 bg-white rounded-3xl border border-zinc-200 shadow-sm">
                 <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-4">Executive Summary / Excerpt</h3>
@@ -263,18 +263,19 @@ export const CeoMessageEditor = () => {
           </div>
         </main>
 
-        <motion.aside 
-          initial={false}
-          animate={{ width: isSidebarOpen ? 360 : 0, opacity: isSidebarOpen ? 1 : 0 }}
-          className="bg-white border-l border-zinc-100 overflow-hidden flex flex-col"
+        <aside
+          className={cn(
+            "bg-white border-t lg:border-t-0 lg:border-l border-zinc-100 overflow-hidden flex flex-col transition-all duration-300",
+            isSidebarOpen ? "lg:w-[360px] opacity-100" : "h-0 lg:h-auto lg:w-0 opacity-0"
+          )}
         >
-          <div className="p-8 space-y-10 w-[360px]">
+          <div className="p-8 space-y-10 w-full lg:w-[360px]">
             <section className="space-y-4">
               <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest flex items-center">
                 <User size={14} className="mr-2" />
                 Featured Image
               </h3>
-              <ImageUpload 
+              <ImageUpload
                 value={imageUrl}
                 onChange={setImageUrl}
               />
@@ -293,7 +294,7 @@ export const CeoMessageEditor = () => {
                   <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Category</p>
                   <p className="text-sm font-bold text-zinc-900">From the CEO</p>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
                   <div className="space-y-0.5">
                     <p className="text-xs font-bold text-zinc-900">Homepage Spotlight</p>
@@ -333,7 +334,7 @@ export const CeoMessageEditor = () => {
               </div>
             </section>
           </div>
-        </motion.aside>
+        </aside>
       </div>
     </div>
   );

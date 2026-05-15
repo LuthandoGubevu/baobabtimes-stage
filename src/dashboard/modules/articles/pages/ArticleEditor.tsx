@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Save, 
-  Send, 
-  Eye, 
-  ChevronLeft, 
-  Image as ImageIcon, 
-  Settings, 
-  Hash, 
+import {
+  Save,
+  Send,
+  Eye,
+  ChevronLeft,
+  Image as ImageIcon,
+  Settings,
+  Hash,
   Calendar,
   Plus
 } from 'lucide-react';
@@ -121,7 +121,7 @@ export const ArticleEditor = () => {
       }
 
       toast.success(`Article ${status === 'PUBLISHED' ? 'published' : 'saved as draft'} successfully!`);
-      
+
       // Create activity if published
       if (status === 'PUBLISHED') {
         activityService.createActivity({
@@ -181,7 +181,7 @@ export const ArticleEditor = () => {
       {/* Editor Header */}
       <header className="h-16 border-b border-zinc-100 px-6 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-20">
         <div className="flex items-center space-x-4">
-          <button 
+          <button
             onClick={() => navigate('/dashboard/articles')}
             className="p-2 rounded-lg hover:bg-zinc-50 text-zinc-500 transition-colors"
           >
@@ -196,25 +196,25 @@ export const ArticleEditor = () => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <button 
+        <div className="flex items-center space-x-1 sm:space-x-3">
+          <button
             disabled={isSaving}
             onClick={() => handleSave('DRAFT')}
-            className="flex items-center px-4 py-2 text-sm font-bold text-zinc-600 hover:bg-zinc-50 rounded-xl transition-all disabled:opacity-50"
+            className="flex items-center px-3 sm:px-4 py-2 text-sm font-bold text-zinc-600 hover:bg-zinc-50 rounded-xl transition-all disabled:opacity-50"
           >
-            <Save size={18} className="mr-2" />
-            Save Draft
+            <Save size={18} className="sm:mr-2" />
+            <span className="hidden sm:inline">Save Draft</span>
           </button>
-          <button 
+          <button
             disabled={isSaving}
             onClick={() => handleSave('PUBLISHED')}
-            className="flex items-center px-6 py-2 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-200 disabled:opacity-50"
+            className="flex items-center px-4 sm:px-6 py-2 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-200 disabled:opacity-50"
           >
-            <Send size={18} className="mr-2" />
-            Publish
+            <Send size={18} className="sm:mr-2" />
+            <span className="hidden sm:inline">Publish</span>
           </button>
           <div className="h-6 w-px bg-zinc-100 mx-2" />
-          <button 
+          <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className={cn(
               "p-2 rounded-lg transition-colors",
@@ -226,9 +226,9 @@ export const ArticleEditor = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-x-hidden overflow-y-auto lg:overflow-hidden">
         {/* Main Editor Area */}
-        <main className="flex-1 overflow-y-auto bg-zinc-50/50">
+        <main className="flex-1 min-w-0 lg:overflow-y-auto bg-zinc-50/50">
           <div className="max-w-3xl mx-auto py-20 px-8">
             <textarea
               placeholder="Article Title..."
@@ -237,7 +237,7 @@ export const ArticleEditor = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
-            
+
             <div className="prose prose-zinc prose-lg max-w-none">
               <textarea
                 placeholder="Article excerpt (brief summary)..."
@@ -257,14 +257,15 @@ export const ArticleEditor = () => {
         </main>
 
         {/* Editor Sidebar */}
-        <motion.aside 
-          initial={false}
-          animate={{ width: isSidebarOpen ? 320 : 0, opacity: isSidebarOpen ? 1 : 0 }}
-          className="bg-white border-l border-zinc-100 overflow-hidden flex flex-col"
+        <aside
+          className={cn(
+            "bg-white border-t lg:border-t-0 lg:border-l border-zinc-100 overflow-hidden flex flex-col transition-all duration-300",
+            isSidebarOpen ? "lg:w-[320px] opacity-100" : "h-0 lg:h-auto lg:w-0 opacity-0"
+          )}
         >
-          <div className="p-6 space-y-8 w-[320px]">
+          <div className="p-6 space-y-8 w-full lg:w-[320px]">
             <section className="space-y-4">
-              <ImageUpload 
+              <ImageUpload
                 value={featuredImage}
                 onChange={setFeaturedImage}
               />
@@ -278,7 +279,7 @@ export const ArticleEditor = () => {
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-600">Category</label>
-                  <select 
+                  <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10"
@@ -316,7 +317,7 @@ export const ArticleEditor = () => {
 
             {id && (
               <section className="pt-8 border-t border-zinc-100">
-                <button 
+                <button
                   onClick={handleDelete}
                   disabled={isSaving}
                   className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-all border border-transparent hover:border-red-100 disabled:opacity-50"
@@ -327,7 +328,7 @@ export const ArticleEditor = () => {
               </section>
             )}
           </div>
-        </motion.aside>
+        </aside>
       </div>
     </div>
   );

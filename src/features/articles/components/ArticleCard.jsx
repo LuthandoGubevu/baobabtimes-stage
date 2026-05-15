@@ -16,9 +16,9 @@ import { articleService } from "../services/articleService";
  */
 export default function ArticleCard({ article, className }) {
   const { user, login } = useAuth();
-  const { 
-    id, title, slug, category, author, authorName, authorId, 
-    createdAt, imageUrl, excerpt, content, likes, commentsCount, views, likedBy 
+  const {
+    id, title, slug, category, author, authorName, authorId,
+    createdAt, imageUrl, excerpt, content, likes, commentsCount, views, likedBy
   } = article;
 
   const [localLikes, setLocalLikes] = useState(likes || 0);
@@ -40,7 +40,7 @@ export default function ArticleCard({ article, className }) {
       const newLikedState = !isLiked;
       setIsLiked(newLikedState);
       setLocalLikes(prev => newLikedState ? prev + 1 : prev - 1);
-      
+
       await articleService.toggleArticleLike(id, user.uid, newLikedState);
     } catch (error) {
       console.error("Failed to like article from card:", error);
@@ -50,7 +50,7 @@ export default function ArticleCard({ article, className }) {
     }
   };
 
-  const articleSlug = slug || id;
+  // Always navigate by Firestore document ID — no slug field stored in Firestore
 
   // Use the new author object or fallback to existing authorName/authorId
   const authorData = author || { id: authorId, name: authorName };
@@ -58,7 +58,7 @@ export default function ArticleCard({ article, className }) {
   // Helper to strip markdown and get a plain text snippet
   const getPreviewText = (text) => {
     if (!text) return "";
-    
+
     // 1. Remove markdown syntax
     let cleanText = text
       .replace(/[#*`_~[\]()]/g, "") // Remove common markdown chars
@@ -69,7 +69,7 @@ export default function ArticleCard({ article, className }) {
 
     // 2. Try to get the first 180 characters, breaking at a sentence end if possible
     if (cleanText.length <= 180) return cleanText;
-    
+
     const truncated = cleanText.substring(0, 180);
     const lastPunctuation = Math.max(
       truncated.lastIndexOf("."),
@@ -87,11 +87,11 @@ export default function ArticleCard({ article, className }) {
   // The user specifically wants to pull from the "story" element (which is the main article content/body)
   // We prioritize the content field over the excerpt for the card preview to ensure actual sentences are shown.
   const storyPreview = getPreviewText(content);
-  
+
   // Final decision: If storyPreview exists and isn't just the author/title, use it.
   // Otherwise try excerpt, then default.
   let finalPreview = "Read the latest update from our team and stay connected with our community insights.";
-  
+
   if (storyPreview && storyPreview.length > 20) {
     finalPreview = storyPreview;
   } else if (excerpt && excerpt.length > 20 && excerpt.toLowerCase() !== authorName?.toLowerCase()) {
@@ -99,8 +99,8 @@ export default function ArticleCard({ article, className }) {
   }
 
   return (
-    <Link 
-      to={`/posts/${articleSlug}`}
+    <Link
+      to={`/articles/${id}`}
       className={cn(
         "group block bg-white rounded-2xl overflow-hidden border border-stone-200 hover:border-stone-400 transition-all duration-300",
         className
@@ -118,7 +118,7 @@ export default function ArticleCard({ article, className }) {
         <h3 className="text-2xl font-serif font-bold mb-2 group-hover:text-stone-600 transition-colors leading-tight">
           {title}
         </h3>
-        
+
         <div className="mb-4">
           <p className="text-stone-400 text-xs font-bold uppercase tracking-widest">
             {authorName || "Editorial Team"}
@@ -132,13 +132,13 @@ export default function ArticleCard({ article, className }) {
         <div className="mb-6">
           <div className="inline-flex items-center px-4 py-2 bg-stone-50 border border-stone-100 rounded-lg text-[10px] font-bold uppercase tracking-widest text-stone-900 group-hover:bg-stone-900 group-hover:text-white transition-all duration-300">
             Read Full Article
-            <svg 
-              className="ml-2 w-3.5 h-3.5" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="3" 
-              strokeLinecap="round" 
+            <svg
+              className="ml-2 w-3.5 h-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
               strokeLinejoin="round"
             >
               <path d="M5 12h14M12 5l7 7-7 7" />
@@ -157,7 +157,7 @@ export default function ArticleCard({ article, className }) {
               <MessageCircle className="w-3.5 h-3.5" />
               <span className="text-[10px] font-bold">{commentsCount || 0}</span>
             </div>
-            <button 
+            <button
               onClick={handleLikeClick}
               className={cn(
                 "flex items-center space-x-1 transition-colors hover:text-stone-900",

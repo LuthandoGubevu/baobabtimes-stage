@@ -4,7 +4,7 @@
  * This file maintains the source of truth for administrative and executive roles.
  */
 
-export const CEO_EMAIL = "grant@baobabbrands.com";
+export const CEO_EMAIL = "grant@baobabbrands.com, keaganbaobabb@gmail.com";
 
 export const ADMIN_ALLOWLIST = [
   "megan@baobabbrands.com",
@@ -30,7 +30,7 @@ export type UserRole = "ceo" | "admin" | "user";
  */
 export function getRoleForEmail(email?: string | null): UserRole {
   if (!email) return "user";
-  
+
   const normalizedEmail = email.toLowerCase().trim();
 
   if (normalizedEmail === CEO_EMAIL.toLowerCase()) {

@@ -5,11 +5,11 @@ import { cn } from '../../utils/cn';
 export const AvatarPlaceholder = ({ name = "", src = "", size = "md", className = "" }) => {
   const initials = name
     ? name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
     : '';
 
   const sizeClasses = {
@@ -21,10 +21,10 @@ export const AvatarPlaceholder = ({ name = "", src = "", size = "md", className 
     "2xl": "w-32 h-32 text-3xl"
   };
 
-  const finalSrc = src || (name === "CEO" || name === "The CEO" || name === "Harvey De Wit" ? "https://times.baobabbrands.com/wp-content/uploads/2024/07/DSC02639.jpg" : "");
+  const finalSrc = src || "";
 
   return (
-    <div 
+    <div
       className={cn(
         "flex items-center justify-center rounded-full bg-stone-100 text-stone-500 font-bold border border-stone-200 shrink-0 overflow-hidden",
         sizeClasses[size] || size,
@@ -42,7 +42,7 @@ export const AvatarPlaceholder = ({ name = "", src = "", size = "md", className 
 
 export const ImagePlaceholder = ({ icon: Icon = ImageIcon, className = "" }) => {
   return (
-    <div 
+    <div
       className={cn(
         "w-full h-full bg-stone-50 flex flex-col items-center justify-center text-stone-200",
         className

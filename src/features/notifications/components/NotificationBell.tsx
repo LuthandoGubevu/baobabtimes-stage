@@ -11,13 +11,23 @@ interface NotificationBellProps {
 
 export const NotificationBell: React.FC<NotificationBellProps> = ({ isPublicOnly = false }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [lastViewedCount, setLastViewedCount] = useState(0);
   const { user } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   // Use public only if specified or if user is not logged in
   const effectivePublicOnly = isPublicOnly || !user;
-  
+
   const { activities, isLoading, error } = useActivity(effectivePublicOnly, 15);
+
+  // Track viewed notifications
+  useEffect(() => {
+    if (isOpen) {
+      setLastViewedCount(activities.length);
+    }
+  }, [isOpen, activities.length]);
+
+  const hasUnseen = activities.length > lastViewedCount;
 
   // Close when clicking outside
   useEffect(() => {
@@ -40,15 +50,14 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ isPublicOnly
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`relative p-2 rounded-full transition-colors ${
-          isOpen 
-            ? "bg-zinc-100 text-zinc-900" 
+        className={`relative p-2 rounded-full transition-colors ${isOpen
+            ? "bg-zinc-100 text-zinc-900"
             : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
-        }`}
+          }`}
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
-        {activities.length > 0 && !effectivePublicOnly && (
+        {hasUnseen && !effectivePublicOnly && (
           <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
         )}
       </button>
@@ -70,7 +79,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ isPublicOnly
                   {activities.length}
                 </span>
               </div>
-              <button 
+              <button
                 onClick={() => setIsOpen(false)}
                 className="p-1 rounded-md hover:bg-zinc-200 text-zinc-400 hover:text-zinc-600 transition-colors"
               >
@@ -80,9 +89,9 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ isPublicOnly
 
             {/* Content */}
             <div className="max-h-[480px] overflow-y-auto custom-scrollbar">
-              <ActivityFeedList 
-                activities={activities} 
-                isLoading={isLoading} 
+              <ActivityFeedList
+                activities={activities}
+                isLoading={isLoading}
                 error={error}
                 onClose={() => setIsOpen(false)}
               />

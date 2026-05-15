@@ -81,7 +81,7 @@ export default function CeoArchivePage() {
                   )}
                 </div>
 
-                <Link to={`/posts/${article.slug || article.id}`} className="block space-y-4">
+                <Link to={`/articles/${article.id}`} className="block space-y-4">
                   <h2 className="text-3xl font-serif font-bold text-stone-900 group-hover:text-stone-600 transition-colors leading-tight">
                     {article.title}
                   </h2>
@@ -91,7 +91,7 @@ export default function CeoArchivePage() {
                 </Link>
 
                 <Link 
-                  to={`/posts/${article.slug || article.id}`}
+                  to={`/articles/${article.id}`}
                   className="inline-flex items-center text-xs font-bold uppercase tracking-widest text-stone-900 hover:translate-x-2 transition-transform"
                 >
                   Read Full Message
@@ -103,7 +103,7 @@ export default function CeoArchivePage() {
 
               {/* Thumbnail */}
               <Link 
-                to={`/posts/${article.slug || article.id}`}
+                to={`/articles/${article.id}`}
                 className="hidden md:block aspect-square overflow-hidden rounded-2xl shadow-lg"
               >
                 <ImagePlaceholder icon={User} className="group-hover:scale-105 transition-all duration-700" />
