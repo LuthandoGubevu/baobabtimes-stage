@@ -4,7 +4,7 @@ import { useArticle } from "../hooks/useArticles";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ArrowLeft, Share2, Bookmark, MessageCircle, ThumbsUp, Eye } from "lucide-react";
-import { AvatarPlaceholder, ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
+import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
 import CommentsSection from "../components/CommentsSection";
 import { articleService } from "../services/articleService";
 import { useAuth } from "../../../hooks/useAuth";
@@ -122,14 +122,17 @@ export default function ArticleDetailPage() {
         </div>
       </header>
 
-      {/* Featured Image */}
-      <div className="aspect-[21/9] rounded-3xl overflow-hidden bg-stone-100 mb-12 shadow-xl">
-        {imageUrl ? (
-          <img src={imageUrl} alt={title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-        ) : (
-          <ImagePlaceholder className="w-full h-full" />
-        )}
-      </div>
+      {/* Featured Image — only rendered when a URL is actually stored */}
+      {imageUrl && (
+        <div className="aspect-[21/9] rounded-3xl overflow-hidden bg-stone-100 mb-12 shadow-xl">
+          <img
+            src={imageUrl}
+            alt={title}
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+      )}
 
       {/* Content */}
       <div className="prose prose-stone prose-lg max-w-none mb-16 px-4 md:px-0">

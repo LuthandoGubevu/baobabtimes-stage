@@ -9,7 +9,7 @@ import {
   createUserWithEmailAndPassword,
   updateProfile
 } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { handleFirestoreError, OperationType } from "../lib/firestore-errors";
 import { getRoleForEmail } from "../lib/rbac-config";
@@ -67,8 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
-
-
+  // Execute any pending action once the user is authenticated
   useEffect(() => {
     if (user && pendingAction) {
       pendingAction();
@@ -77,74 +76,78 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, pendingAction]);
 
   useEffect(() => {
-    let unsubscribeDoc: (() => void) | null = null;
-
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       setError(null);
-      
-      if (firebaseUser) {
-        // Set up real-time listener for the user document
-        unsubscribeDoc = onSnapshot(
-          doc(db, 'users', firebaseUser.uid),
-          async (userDoc) => {
-            if (userDoc.exists()) {
-              const userData = userDoc.data() as AuthUser;
-              
-              const expectedRole = getRoleForEmail(firebaseUser.email);
-              if (userData.role !== expectedRole) {
-                console.log(`>>> Stale local role detected: ${userData.role}. Fixing client-side...`);
-                try {
-                  await setDoc(doc(db, 'users', firebaseUser.uid), { role: expectedRole }, { merge: true });
-                  userData.role = expectedRole;
-                } catch (e) {
-                  console.error("Failed to update role client-side:", e);
-                }
-              }
 
-              setUser(userData);
-              setLoading(false);
-            } else {
-              // Handle new user creation
-              initializeNewUser(firebaseUser);
-            }
-          },
-          (err) => {
-            console.error("Firestore listener error:", err);
-            handleFirestoreError(err, OperationType.GET, `users/${firebaseUser.uid}`);
-            setLoading(false);
+      if (firebaseUser) {
+        try {
+          const userRef = doc(db, "users", firebaseUser.uid);
+          const userSnap = await getDoc(userRef);
+
+          if (userSnap.exists()) {
+            // ✅ READ ONLY — never write role from the client
+            const userData = userSnap.data() as AuthUser;
+            setUser({
+              uid: firebaseUser.uid,
+              displayName: firebaseUser.displayName,
+              email: firebaseUser.email,
+              photoURL: firebaseUser.photoURL,
+              ...userData,
+            });
+          } else {
+            // First-time sign-in: create the user document
+            await initializeNewUser(firebaseUser);
           }
-        );
+        } catch (err) {
+          // Log once and fail gracefully — no retries
+          console.error("Failed to load user profile:", err);
+          handleFirestoreError(err, OperationType.GET, `users/${firebaseUser.uid}`);
+
+          // Fall back to minimal user object so the app still functions
+          setUser({
+            uid: firebaseUser.uid,
+            displayName: firebaseUser.displayName,
+            email: firebaseUser.email,
+            photoURL: firebaseUser.photoURL,
+            role: "user",
+          });
+        } finally {
+          setLoading(false);
+        }
       } else {
-        if (unsubscribeDoc) unsubscribeDoc();
         setUser(null);
         setLoading(false);
       }
     });
 
-    return () => {
-      unsubscribeAuth();
-      if (unsubscribeDoc) unsubscribeDoc();
-    };
+    return () => unsubscribeAuth();
   }, []);
 
+  /**
+   * Called once for brand-new users only.
+   * Role defaults to whatever getRoleForEmail returns, but is ONLY set on creation.
+   * Subsequent role changes must go through Firebase Admin SDK / Cloud Functions.
+   */
   const initializeNewUser = async (firebaseUser: FirebaseUser) => {
-    const expectedRole = getRoleForEmail(firebaseUser.email);
+    const defaultRole = getRoleForEmail(firebaseUser.email);
     const newUser: AuthUser = {
       uid: firebaseUser.uid,
       displayName: firebaseUser.displayName,
       email: firebaseUser.email || "unknown@baobabbrands.com",
       photoURL: firebaseUser.photoURL,
-      role: expectedRole,
+      role: defaultRole,
     };
-    
+
     try {
-      await setDoc(doc(db, 'users', firebaseUser.uid), {
+      await setDoc(doc(db, "users", firebaseUser.uid), {
         ...newUser,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
       });
-      // setUser is handled by onSnapshot
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, `users/${firebaseUser.uid}`);
+      setUser(newUser);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `users/${firebaseUser.uid}`);
+      // Still set a minimal user so the app doesn't break
+      setUser(newUser);
     }
   };
 
@@ -158,33 +161,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const registerWithEmail = async (email: string, password: string, displayName: string) => {
-    const isWorkEmail = email.endsWith("@baobabbrands.com") || email.endsWith("@kfcbaobab.com");
+    const isWorkEmail =
+      email.endsWith("@baobabbrands.com") || email.endsWith("@kfcbaobab.com");
     if (!isWorkEmail) {
-      throw new Error("Only @baobabbrands.com or @kfcbaobab.com emails are allowed for registration.");
+      throw new Error(
+        "Only @baobabbrands.com or @kfcbaobab.com emails are allowed for registration."
+      );
     }
 
-    const userCredential = await createUserWithEmailAndPassword(auth, email.toLowerCase().trim(), password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email.toLowerCase().trim(),
+      password
+    );
     await updateProfile(userCredential.user, { displayName });
-    
-    // The onAuthStateChanged listener will handle the Firestore document creation
-    // but we might need to ensure the displayName is available immediately
-    const newUser: AuthUser = {
-      uid: userCredential.user.uid,
-      displayName,
-      email,
-      photoURL: null,
-      role: 'user', // Default to user on client-side
-    };
-    
-    try {
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-        ...newUser,
-        createdAt: serverTimestamp()
-      });
-      setUser(newUser);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, `users/${userCredential.user.uid}`);
-    }
+    // initializeNewUser is called automatically by onAuthStateChanged
   };
 
   const logout = async () => {
@@ -223,7 +214,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 /**
  * Hook to access auth context
- * @returns {Object}
  */
 export function useAuth() {
   const context = useContext(AuthContext);
