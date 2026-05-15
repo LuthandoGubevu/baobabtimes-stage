@@ -110,17 +110,15 @@ export const recognitionService = {
       const snapshot = await getDocs(q);
       const allStats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
-      // Sort for Top Recognizers
+      // Sort for Top Recognizers — return full list; UI slices to top 3
       const topRecognizers = [...allStats]
         .filter(s => (s.monthlyGiven || 0) > 0)
-        .sort((a, b) => (b.monthlyGiven || 0) - (a.monthlyGiven || 0))
-        .slice(0, 3);
-        
-      // Sort for Most Appreciated
+        .sort((a, b) => (b.monthlyGiven || 0) - (a.monthlyGiven || 0));
+
+      // Sort for Most Appreciated — return full list; UI slices to top 3
       const mostAppreciated = [...allStats]
         .filter(s => (s.monthlyReceived || 0) > 0)
-        .sort((a, b) => (b.monthlyReceived || 0) - (a.monthlyReceived || 0))
-        .slice(0, 3);
+        .sort((a, b) => (b.monthlyReceived || 0) - (a.monthlyReceived || 0));
       
       return {
         topRecognizers,
