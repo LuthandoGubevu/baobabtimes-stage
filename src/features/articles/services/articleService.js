@@ -89,6 +89,23 @@ export const articleService = {
   },
 
   /**
+   * Increment article views safely
+   * @param {string} id 
+   */
+  incrementViews: async (id) => {
+    if (!id) return;
+    const path = `articles/${id}`;
+    try {
+      const docRef = doc(db, "articles", id);
+      await updateDoc(docRef, {
+        views: increment(1)
+      });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, path);
+    }
+  },
+
+  /**
    * Create a new article
    * @param {Object} data 
    * @returns {Promise<Object>}

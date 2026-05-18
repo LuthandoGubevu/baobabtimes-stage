@@ -7,7 +7,8 @@ import {
   Trash2, 
   ChevronLeft, 
   ChevronRight,
-  FileText
+  FileText,
+  Eye
 } from 'lucide-react';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
@@ -34,6 +35,7 @@ interface Article {
   category: string;
   status: 'PUBLISHED' | 'DRAFT' | 'ARCHIVED';
   createdAt: any;
+  views?: number;
 }
 
 export const ArticleList = () => {
@@ -195,6 +197,7 @@ export const ArticleList = () => {
                 <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Category</th>
                 <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Views</th>
                 <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
@@ -255,6 +258,12 @@ export const ArticleList = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-zinc-500">
                       {article.createdAt?.toDate ? article.createdAt.toDate().toLocaleDateString() : 'Just now'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-1 text-zinc-500">
+                        <Eye size={14} />
+                        <span className="text-sm">{article.views || 0}</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-1">
@@ -338,6 +347,10 @@ export const ArticleList = () => {
                     <span className="text-xs text-zinc-500">
                       {article.createdAt?.toDate ? article.createdAt.toDate().toLocaleDateString() : 'Just now'}
                     </span>
+                    <div className="flex items-center space-x-1 text-zinc-500 text-xs mt-1 mb-2">
+                      <Eye size={12} />
+                      <span>{article.views || 0}</span>
+                    </div>
                     <div className="flex items-center space-x-1">
                       <button 
                         onClick={() => navigate(`/dashboard/articles/${article.id}/edit`)}

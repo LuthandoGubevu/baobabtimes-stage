@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useArticle } from "../hooks/useArticles";
 import { format } from "date-fns";
-import { ArrowLeft, Share2, Bookmark, MessageCircle, ThumbsUp } from "lucide-react";
+import { ArrowLeft, Share2, Bookmark, MessageCircle, ThumbsUp, Eye } from "lucide-react";
 import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
 import CommentsSection from "../components/CommentsSection";
 import { articleService } from "../services/articleService";
@@ -18,6 +18,15 @@ export default function ArticleDetailPage() {
   const { data: article, isLoading, error } = useArticle(id);
   const [localArticle, setLocalArticle] = useState(null);
 
+  const viewIncremented = useRef(false);
+  
+  useEffect(() => {
+    if (article?.id && !viewIncremented.current) {
+      viewIncremented.current = true;
+      articleService.incrementViews(article.id).catch(console.error);
+    }
+  }, [article?.id]);
+
   useEffect(() => {
     if (article && !localArticle) {
       // Subsequent article loads (e.g. auth change) still sync local state
@@ -29,7 +38,7 @@ export default function ArticleDetailPage() {
   if (error) return <div className="py-20 text-center text-red-500">Error loading article.</div>;
   if (!article) return <div className="py-20 text-center">Article not found.</div>;
 
-  const { title, category, authorName, authorAvatar, authorId, createdAt, imageUrl, content, excerpt, likes, likedBy, commentsCount } = localArticle || article;
+  const { title, category, authorName, authorAvatar, authorId, createdAt, imageUrl, content, excerpt, likes, likedBy, commentsCount, views } = localArticle || article;
   const isLiked = user && likedBy?.includes(user.uid);
 
   const formatDate = (date) => {
@@ -75,6 +84,11 @@ export default function ArticleDetailPage() {
             <span className="text-stone-400 text-xs font-medium">
               {formatDate(createdAt)}
             </span>
+            <span className="text-stone-300">•</span>
+            <div className="flex items-center space-x-1 text-stone-400 text-xs font-medium">
+              <Eye className="w-3 h-3" />
+              <span>{views || 0}</span>
+            </div>
           </div>
         </div>
         <h1 className="text-4xl md:text-6xl font-serif font-bold leading-tight mb-6">
@@ -147,6 +161,10 @@ export default function ArticleDetailPage() {
               <ThumbsUp className={cn("w-5 h-5", isLiked && "fill-current")} />
               <span className="text-sm font-bold">Likes ({likes || 0})</span>
             </button>
+            <div className="flex items-center space-x-2 text-stone-500">
+              <Eye className="w-5 h-5" />
+              <span className="text-sm font-bold">Views ({views || 0})</span>
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <span className="text-xs text-stone-400 font-bold uppercase tracking-widest mr-4 hidden md:inline">Share this story</span>
