@@ -212,11 +212,11 @@ export const ArticleEditor = () => {
             <Send size={18} className="sm:mr-2" />
             <span className="hidden sm:inline">Publish</span>
           </button>
-          <div className="h-6 w-px bg-zinc-100 mx-2" />
+          <div className="hidden lg:block h-6 w-px bg-zinc-100 mx-2" />
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className={cn(
-              "p-2 rounded-lg transition-colors",
+              "hidden lg:flex p-2 rounded-lg transition-colors",
               isSidebarOpen ? "bg-zinc-900 text-white" : "hover:bg-zinc-50 text-zinc-500"
             )}
           >
@@ -225,9 +225,10 @@ export const ArticleEditor = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-x-hidden overflow-y-auto lg:overflow-hidden">
-        {/* Main Editor Area */}
-        <main className="flex-1 min-w-0 lg:overflow-y-auto bg-zinc-50/50">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="min-h-full flex flex-col lg:flex-row">
+          {/* Main Editor Area */}
+          <main className="flex-1 min-w-0 bg-zinc-50/50">
           <div className="max-w-3xl mx-auto py-20 px-8">
             <textarea
               placeholder="Article Title..."
@@ -258,8 +259,8 @@ export const ArticleEditor = () => {
         {/* Editor Sidebar */}
         <aside
           className={cn(
-            "bg-white border-t lg:border-t-0 lg:border-l border-zinc-100 overflow-hidden flex flex-col transition-all duration-300",
-            isSidebarOpen ? "lg:w-[320px] opacity-100" : "h-0 lg:h-auto lg:w-0 opacity-0"
+            "bg-white border-t lg:border-t-0 lg:border-l border-zinc-100 flex flex-col overflow-hidden transition-all duration-300",
+            isSidebarOpen ? "lg:w-[320px] lg:opacity-100" : "lg:w-0 lg:opacity-0"
           )}
         >
           <div className="p-6 space-y-8 w-full lg:w-[320px]">
@@ -326,8 +327,29 @@ export const ArticleEditor = () => {
                 </button>
               </section>
             )}
+
+            {/* Mobile Actions */}
+            <section className="pt-8 border-t border-zinc-100 lg:hidden space-y-3 pb-8">
+              <button
+                disabled={isSaving}
+                onClick={() => handleSave('DRAFT')}
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-white border border-zinc-200 text-zinc-700 rounded-xl text-sm font-bold hover:bg-zinc-50 transition-all disabled:opacity-50"
+              >
+                <Save size={18} />
+                <span>Save Draft</span>
+              </button>
+              <button
+                disabled={isSaving}
+                onClick={() => handleSave('PUBLISHED')}
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-200 disabled:opacity-50"
+              >
+                <Send size={18} />
+                <span>Publish</span>
+              </button>
+            </section>
           </div>
         </aside>
+        </div>
       </div>
     </div>
   );

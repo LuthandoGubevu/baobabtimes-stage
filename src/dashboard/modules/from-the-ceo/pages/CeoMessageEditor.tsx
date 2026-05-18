@@ -209,11 +209,11 @@ export const CeoMessageEditor = () => {
             <Send size={18} className="sm:mr-2" />
             <span className="hidden sm:inline">{status === 'PUBLISHED' ? 'Update & Keep Active' : 'Publish & Set Active'}</span>
           </button>
-          <div className="h-6 w-px bg-zinc-100 mx-2" />
+          <div className="hidden lg:block h-6 w-px bg-zinc-100 mx-2" />
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className={cn(
-              "p-2 rounded-lg transition-colors",
+              "hidden lg:flex p-2 rounded-lg transition-colors",
               isSidebarOpen ? "bg-zinc-900 text-white" : "hover:bg-zinc-50 text-zinc-500"
             )}
           >
@@ -222,8 +222,9 @@ export const CeoMessageEditor = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-x-hidden overflow-y-auto lg:overflow-hidden">
-        <main className="flex-1 min-w-0 lg:overflow-y-auto bg-zinc-50/50">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="min-h-full flex flex-col lg:flex-row">
+          <main className="flex-1 min-w-0 bg-zinc-50/50">
           <div className="max-w-4xl mx-auto py-20 px-12">
             <div className="mb-12">
               <span className="inline-block px-3 py-1 bg-zinc-900 text-white text-[10px] font-bold uppercase tracking-[0.2em] mb-6">
@@ -264,8 +265,8 @@ export const CeoMessageEditor = () => {
 
         <aside
           className={cn(
-            "bg-white border-t lg:border-t-0 lg:border-l border-zinc-100 overflow-hidden flex flex-col transition-all duration-300",
-            isSidebarOpen ? "lg:w-[360px] opacity-100" : "h-0 lg:h-auto lg:w-0 opacity-0"
+            "bg-white border-t lg:border-t-0 lg:border-l border-zinc-100 flex flex-col overflow-hidden transition-all duration-300",
+            isSidebarOpen ? "lg:w-[360px] lg:opacity-100" : "lg:w-0 lg:opacity-0"
           )}
         >
           <div className="p-8 space-y-10 w-full lg:w-[360px]">
@@ -332,8 +333,39 @@ export const CeoMessageEditor = () => {
                 </div>
               </div>
             </section>
+
+            {/* Mobile Actions */}
+            <section className="pt-8 border-t border-zinc-100 lg:hidden space-y-3 pb-8">
+              {status === 'PUBLISHED' && (
+                <button
+                  disabled={isSaving}
+                  onClick={() => handleSave('ARCHIVED')}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-white border border-zinc-200 text-red-600 rounded-xl text-sm font-bold hover:bg-red-50 transition-all disabled:opacity-50"
+                >
+                  <Archive size={18} />
+                  <span>Archive</span>
+                </button>
+              )}
+              <button
+                disabled={isSaving}
+                onClick={() => handleSave('DRAFT')}
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-white border border-zinc-200 text-zinc-700 rounded-xl text-sm font-bold hover:bg-zinc-50 transition-all disabled:opacity-50"
+              >
+                <Save size={18} />
+                <span>Save Draft</span>
+              </button>
+              <button
+                disabled={isSaving}
+                onClick={() => handleSave('PUBLISHED')}
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-zinc-200 disabled:opacity-50"
+              >
+                <Send size={18} />
+                <span>{status === 'PUBLISHED' ? 'Update' : 'Publish'}</span>
+              </button>
+            </section>
           </div>
         </aside>
+        </div>
       </div>
     </div>
   );
