@@ -17,6 +17,7 @@ import { articleService } from "../services/articleService";
 export default function ArticleCard({ article, className }) {
   const { user, login } = useAuth();
   const {
+    id, title, slug, category, author, authorName, authorId,
     createdAt, imageUrl, excerpt, content, likes, commentsCount, likedBy
   } = article;
 
