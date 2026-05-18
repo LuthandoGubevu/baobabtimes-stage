@@ -177,7 +177,8 @@ export const ArticleList = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-zinc-50/50">
@@ -276,6 +277,86 @@ export const ArticleList = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards View */}
+        <div className="block md:hidden divide-y divide-zinc-100">
+          {filteredArticles.length === 0 ? (
+            <div className="p-8 text-center">
+              <EmptyState 
+                icon={FileText}
+                title="No articles found"
+                description="Start writing your first article to see it here."
+                actionLabel="Create Article"
+                onAction={() => navigate('/dashboard/articles/new')}
+              />
+            </div>
+          ) : (
+            filteredArticles.map((article) => (
+              <div 
+                key={article.id} 
+                className={cn(
+                  "p-4 space-y-4 hover:bg-zinc-50/50 transition-colors",
+                  selectedArticles.includes(article.id) && "bg-zinc-50"
+                )}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 flex-1">
+                    <input 
+                      type="checkbox" 
+                      className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 mt-1"
+                      checked={selectedArticles.includes(article.id)}
+                      onChange={() => toggleSelect(article.id)}
+                    />
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <span 
+                        onClick={() => navigate(`/dashboard/articles/${article.id}/edit`)}
+                        className="text-base font-bold text-zinc-900 hover:text-blue-600 transition-colors cursor-pointer truncate"
+                      >
+                        {article.title}
+                      </span>
+                      <span className="text-xs text-zinc-400 mt-0.5 truncate">ID: {article.id}</span>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <StatusBadge status={article.status} />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pl-7">
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <AvatarPlaceholder name={article.author?.name || article.authorName} size="xs" />
+                      <span className="text-sm text-zinc-600 truncate max-w-[120px]">{article.author?.name || article.authorName || "Anonymous"}</span>
+                    </div>
+                    <span className="px-2 py-1 bg-zinc-100 text-zinc-600 rounded-md text-[10px] font-bold uppercase tracking-wider w-fit">
+                      {article.category}
+                    </span>
+                  </div>
+                  
+                  <div className="flex flex-col items-end justify-between h-full space-y-2">
+                    <span className="text-xs text-zinc-500">
+                      {article.createdAt?.toDate ? article.createdAt.toDate().toLocaleDateString() : 'Just now'}
+                    </span>
+                    <div className="flex items-center space-x-1">
+                      <button 
+                        onClick={() => navigate(`/dashboard/articles/${article.id}/edit`)}
+                        className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-colors"
+                      >
+                        <Edit3 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(article.id)}
+                        className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-red-600 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

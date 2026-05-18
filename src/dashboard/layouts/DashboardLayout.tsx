@@ -29,7 +29,7 @@ export const DashboardLayout = () => {
       <Sidebar />
       <main className="flex-1 flex flex-col min-w-0">
         <header className="h-16 border-b border-zinc-200 bg-white/80 backdrop-blur-md sticky top-0 z-20 flex items-center px-4 sm:px-8 justify-between">
-          <nav className="flex items-center space-x-2 text-sm text-zinc-500 overflow-hidden">
+          <nav className="flex items-center space-x-2 text-sm text-zinc-500 overflow-hidden ml-12 md:ml-0">
             {breadcrumbs.map((crumb, index) => (
               <React.Fragment key={crumb.path}>
                 {index > 0 && <ChevronRight size={14} className="text-zinc-300 flex-shrink-0" />}

@@ -126,7 +126,8 @@ export const CeoMessageList = () => {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-zinc-50/50">
@@ -215,6 +216,88 @@ export const CeoMessageList = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards View */}
+        <div className="block md:hidden divide-y divide-zinc-100">
+          {filteredMessages.length === 0 ? (
+            <div className="p-8 text-center">
+              <EmptyState 
+                icon={User}
+                title="No CEO messages found"
+                description="Start your leadership communication by creating your first message."
+                actionLabel="Create CEO Message"
+                onAction={() => navigate('/dashboard/from-the-ceo/new')}
+              />
+            </div>
+          ) : (
+            filteredMessages.map((msg) => (
+              <div 
+                key={msg.id} 
+                className="p-4 space-y-4 hover:bg-zinc-50/50 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <span 
+                      onClick={() => navigate(`/dashboard/from-the-ceo/${msg.id}/edit`)}
+                      className="text-base font-bold text-zinc-900 hover:text-blue-600 transition-colors cursor-pointer truncate font-serif"
+                    >
+                      {msg.title}
+                    </span>
+                    <span className="text-xs text-zinc-400 mt-0.5 truncate">ID: {msg.id}</span>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <StatusBadge status={msg.status} />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col space-y-2">
+                    {msg.isHomepageActive ? (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 w-fit">
+                        <CheckCircle2 size={12} className="mr-1" />
+                        Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-400 w-fit">
+                        <XCircle size={12} className="mr-1" />
+                        Inactive
+                      </span>
+                    )}
+                    <span className="text-xs text-zinc-500">
+                      {msg.publishedAt?.toDate ? msg.publishedAt.toDate().toLocaleDateString() : 'Not published'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-end space-x-1">
+                    {msg.isHomepageActive && (
+                      <button 
+                        onClick={() => handleArchive(msg.id)}
+                        className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-orange-600 transition-colors"
+                        title="Archive (Remove from Homepage)"
+                      >
+                        <Archive size={16} />
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => navigate(`/dashboard/from-the-ceo/${msg.id}/edit`)}
+                      className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-colors"
+                      title="Edit Message"
+                    >
+                      <Edit3 size={16} />
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(msg.id)}
+                      className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-red-600 transition-colors"
+                      title="Delete Message"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
