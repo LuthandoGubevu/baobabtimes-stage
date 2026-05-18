@@ -137,7 +137,6 @@ export const CeoMessageEditor = () => {
             },
             authorId: user.uid,
             authorName: user.displayName || 'CEO',
-            views: 0,
           });
         }
         toast.success('Draft saved successfully!');

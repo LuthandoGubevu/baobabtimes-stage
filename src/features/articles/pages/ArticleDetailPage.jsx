@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useArticle } from "../hooks/useArticles";
-import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ArrowLeft, Share2, Bookmark, MessageCircle, ThumbsUp, Eye } from "lucide-react";
+import { ArrowLeft, Share2, Bookmark, MessageCircle, ThumbsUp } from "lucide-react";
 import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
 import CommentsSection from "../components/CommentsSection";
 import { articleService } from "../services/articleService";
@@ -16,26 +15,21 @@ import { cn } from "../../../utils/cn";
 export default function ArticleDetailPage() {
   const { id } = useParams();
   const { user, login } = useAuth();
-  const queryClient = useQueryClient();
   const { data: article, isLoading, error } = useArticle(id);
   const [localArticle, setLocalArticle] = useState(null);
 
   useEffect(() => {
-    if (article) {
+    if (article && !localArticle) {
+      // Subsequent article loads (e.g. auth change) still sync local state
       setLocalArticle(article);
-      // Increment views
-      articleService.incrementViews(id).then(() => {
-        queryClient.invalidateQueries({ queryKey: ["articles", id] });
-        queryClient.invalidateQueries({ queryKey: ["articles", "published"] });
-      });
     }
-  }, [article, id, queryClient]);
+  }, [article, localArticle]);
 
   if (isLoading) return <div className="py-20 text-center">Loading article...</div>;
   if (error) return <div className="py-20 text-center text-red-500">Error loading article.</div>;
   if (!article) return <div className="py-20 text-center">Article not found.</div>;
 
-  const { title, category, authorName, authorAvatar, authorId, createdAt, imageUrl, content, excerpt, likes, likedBy, views, commentsCount } = localArticle || article;
+  const { title, category, authorName, authorAvatar, authorId, createdAt, imageUrl, content, excerpt, likes, likedBy, commentsCount } = localArticle || article;
   const isLiked = user && likedBy?.includes(user.uid);
 
   const formatDate = (date) => {
@@ -81,12 +75,6 @@ export default function ArticleDetailPage() {
             <span className="text-stone-400 text-xs font-medium">
               {formatDate(createdAt)}
             </span>
-          </div>
-          <div className="flex items-center space-x-4 text-stone-400">
-            <div className="flex items-center space-x-1.5">
-              <Eye className="w-4 h-4" />
-              <span className="text-xs font-bold">{views || 0}</span>
-            </div>
           </div>
         </div>
         <h1 className="text-4xl md:text-6xl font-serif font-bold leading-tight mb-6">

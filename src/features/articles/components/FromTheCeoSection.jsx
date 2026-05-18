@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { articleService } from "../services/articleService";
-import { MessageSquare, Loader2, ThumbsUp, Eye } from "lucide-react";
+import { MessageSquare, Loader2, ThumbsUp } from "lucide-react";
 import AuthorMeta from "./AuthorMeta";
 import { cn } from "../../../utils/cn";
 import { ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
@@ -45,7 +45,7 @@ export default function FromTheCeoSection() {
     return null;
   }
 
-  const { title, slug, id, category, author, authorName, authorId, createdAt, imageUrl, excerpt, content, commentsCount, views } = article;
+  const { title, slug, id, category, author, authorName, authorId, createdAt, imageUrl, excerpt, content, commentsCount } = article;
 
   const handleLikeClick = async (e) => {
     e.preventDefault();
@@ -111,10 +111,6 @@ export default function FromTheCeoSection() {
             showAvatar={false}
           />
           <div className="flex items-center space-x-6 text-stone-400">
-            <div className="flex items-center space-x-1.5 text-xs font-bold uppercase tracking-widest">
-              <Eye className="w-4 h-4" />
-              <span>{views || 0}</span>
-            </div>
             <div className="flex items-center space-x-1.5 text-xs font-bold uppercase tracking-widest">
               <MessageSquare className="w-4 h-4" />
               <span>{commentsCount || 0}</span>

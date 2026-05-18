@@ -112,7 +112,6 @@ export const ArticleEditor = () => {
             },
             authorId: user.uid,
             authorName: user.displayName || 'Anonymous',
-            views: 0,
             createdAt: serverTimestamp(),
           });
         } catch (err) {

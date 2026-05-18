@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { cn } from "../../../utils/cn";
 import AuthorMeta from "./AuthorMeta";
 import { ImagePlaceholder } from "../../../components/ui/GenericPlaceholder";
-import { ThumbsUp, MessageCircle, Eye } from "lucide-react";
+import { ThumbsUp, MessageCircle } from "lucide-react";
 import { useAuth } from "../../../hooks/useAuth";
 import { articleService } from "../services/articleService";
 
@@ -17,8 +17,7 @@ import { articleService } from "../services/articleService";
 export default function ArticleCard({ article, className }) {
   const { user, login } = useAuth();
   const {
-    id, title, slug, category, author, authorName, authorId,
-    createdAt, imageUrl, excerpt, content, likes, commentsCount, views, likedBy
+    createdAt, imageUrl, excerpt, content, likes, commentsCount, likedBy
   } = article;
 
   const [localLikes, setLocalLikes] = useState(likes || 0);
@@ -149,10 +148,6 @@ export default function ArticleCard({ article, className }) {
         <div className="pt-5 border-t border-stone-50 flex items-center justify-between">
           <AuthorMeta author={authorData} size="sm" />
           <div className="flex items-center space-x-3 text-stone-400">
-            <div className="flex items-center space-x-1">
-              <Eye className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-bold">{views || 0}</span>
-            </div>
             <div className="flex items-center space-x-1">
               <MessageCircle className="w-3.5 h-3.5" />
               <span className="text-[10px] font-bold">{commentsCount || 0}</span>

@@ -34,7 +34,6 @@ interface Article {
   category: string;
   status: 'PUBLISHED' | 'DRAFT' | 'ARCHIVED';
   createdAt: any;
-  views: number;
 }
 
 export const ArticleList = () => {
@@ -195,7 +194,6 @@ export const ArticleList = () => {
                 <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Category</th>
                 <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-wider">Views</th>
                 <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
@@ -257,7 +255,6 @@ export const ArticleList = () => {
                     <td className="px-6 py-4 text-sm text-zinc-500">
                       {article.createdAt?.toDate ? article.createdAt.toDate().toLocaleDateString() : 'Just now'}
                     </td>
-                    <td className="px-6 py-4 text-sm text-zinc-500 font-medium">{article.views || 0}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-1">
                         <button 

@@ -66,22 +66,6 @@ export const articleService = {
     }
   },
 
-  /**
-   * Increment view count for an article
-   * @param {string} id 
-   */
-  incrementViews: async (id) => {
-    if (!id) return;
-    const path = `articles/${id}`;
-    try {
-      const docRef = doc(db, "articles", id);
-      await updateDoc(docRef, {
-        views: increment(1)
-      });
-    } catch (error) {
-      console.error("Error incrementing views:", error);
-    }
-  },
 
   /**
    * Toggle like for an article
@@ -179,7 +163,6 @@ export const articleService = {
           },
           authorId: user.uid,
           authorName: user.displayName || "CEO",
-          views: 0,
           createdAt: serverTimestamp(),
         });
       }
