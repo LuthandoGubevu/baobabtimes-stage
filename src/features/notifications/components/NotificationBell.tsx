@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useActivity } from "../hooks/useActivity";
 import { ActivityFeedList } from "./ActivityFeedList";
 import { useAuth } from "../../../hooks/useAuth";
+import { Link } from "react-router-dom";
 
 interface NotificationBellProps {
   isPublicOnly?: boolean;
@@ -100,11 +101,15 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ isPublicOnly
             {/* Footer */}
             <div className="px-4 py-3 border-t border-zinc-100 bg-zinc-50/50 flex items-center justify-between">
               <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">
-                {effectivePublicOnly ? "Public Feed" : "Activity Center"}
+                {effectivePublicOnly ? "Public Feed" : "Recent Updates"}
               </p>
-              <button className="text-[10px] font-bold text-zinc-900 hover:underline flex items-center gap-1">
+              <Link 
+                to="/activity"
+                onClick={() => setIsOpen(false)}
+                className="text-[10px] font-bold text-zinc-900 hover:underline flex items-center gap-1"
+              >
                 View All <ExternalLink className="w-2.5 h-2.5" />
-              </button>
+              </Link>
             </div>
           </motion.div>
         )}

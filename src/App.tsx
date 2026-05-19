@@ -32,6 +32,7 @@ import TermsPage from "./pages/TermsPage";
 import HelpPage from "./pages/HelpPage";
 import GuidelinesPage from "./pages/GuidelinesPage";
 import ContactPage from "./pages/ContactPage";
+import ActivityCenterPage from "./features/notifications/pages/ActivityCenterPage";
 
 // Dashboard Imports
 import { DashboardLayout } from './dashboard/layouts/DashboardLayout';
@@ -101,6 +102,7 @@ const AppContent = () => {
             <Route path="guidelines" element={<GuidelinesPage />} />
             <Route path="contact" element={<ContactPage />} />
             <Route path="login" element={<LoginPage />} />
+            <Route path="activity" element={<ActivityCenterPage />} />
             
             {/* Protected Routes */}
             <Route path="contributor" element={

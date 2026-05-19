@@ -150,24 +150,24 @@ export default function GuidelinesPage() {
   return (
     <div className="min-h-screen bg-stone-50 pb-20">
       {/* Hero Header */}
-      <div className="bg-stone-900 text-white py-24 px-4 relative overflow-hidden">
+      <div className="bg-stone-900 text-white py-16 md:py-24 px-4 relative overflow-hidden flex flex-col justify-center min-h-[auto]">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-1/2 translate-y-1/2 blur-3xl" />
         </div>
         
-        <div className="max-w-4xl mx-auto text-center relative z-10 space-y-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl backdrop-blur-sm mb-4">
-            <PenTool className="w-8 h-8 text-white" />
+        <div className="max-w-4xl mx-auto text-center relative z-10 space-y-4 md:space-y-6">
+          <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-2xl backdrop-blur-sm mb-2 md:mb-4">
+            <PenTool className="w-6 h-6 md:w-8 md:h-8 text-white" />
           </div>
-          <h1 className="text-5xl md:text-6xl font-serif font-bold italic tracking-tight">Editorial Guidelines</h1>
-          <p className="text-stone-400 text-xl font-light max-w-2xl mx-auto leading-relaxed">
+          <h1 className="text-4xl md:text-6xl font-serif font-bold italic tracking-tight">Editorial Guidelines</h1>
+          <p className="text-stone-400 text-base md:text-xl font-light max-w-2xl mx-auto leading-relaxed px-2 md:px-0">
             Crafting the voice of The Baobab Times. A guide to clear, human, and impactful communication.
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 lg:-mt-12 relative z-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
           {/* Table of Contents Sidebar */}

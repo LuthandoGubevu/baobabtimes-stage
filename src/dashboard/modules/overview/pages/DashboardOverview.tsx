@@ -126,7 +126,7 @@ export const DashboardOverview = () => {
           <div className="bg-white p-8 rounded-2xl border border-zinc-200 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-zinc-900">Recent Activity</h2>
-              <button className="text-sm font-semibold text-blue-600 hover:underline">View All</button>
+              <button onClick={() => navigate('/activity')} className="text-sm font-semibold text-blue-600 hover:underline">View All</button>
             </div>
             <div className="divide-y divide-zinc-100">
               <p className="text-sm text-zinc-500 py-4 italic">Real-time activity feed coming soon...</p>

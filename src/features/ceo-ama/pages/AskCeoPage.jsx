@@ -10,12 +10,13 @@ import { amaService } from "../services/amaService";
  */
 export default function AskCeoPage() {
   const [questionText, setQuestionText] = useState("");
-  const { user, executeProtectedAction } = useAuth();
+  const [activeFilter, setActiveFilter] = useState("ALL");
+  const { user, executeProtectedAction, hasDashboardAccess } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: questions, isLoading, error } = useQuery({
-    queryKey: ["ceo-questions"],
-    queryFn: amaService.getQuestions
+    queryKey: ["ceo-questions", hasDashboardAccess],
+    queryFn: () => amaService.getQuestions(hasDashboardAccess)
   });
 
   const mutation = useMutation({
@@ -25,6 +26,19 @@ export default function AskCeoPage() {
       queryClient.invalidateQueries({ queryKey: ["ceo-questions"] });
       alert("Your question has been submitted for moderation.");
     }
+  });
+
+  const filteredQuestions = questions?.filter(q => {
+    if (!hasDashboardAccess) {
+      return q.status === "ANSWERED";
+    }
+    if (activeFilter === "ANSWERED") {
+      return q.status === "ANSWERED";
+    }
+    if (activeFilter === "UNANSWERED") {
+      return q.status !== "ANSWERED";
+    }
+    return true;
   });
 
   const handleSubmit = (e) => {
@@ -99,12 +113,42 @@ export default function AskCeoPage() {
 
         {/* Questions Feed */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-stone-100 pb-4 gap-4">
             <h2 className="text-2xl font-serif font-bold italic">Recent Questions & Answers</h2>
-            <div className="flex space-x-2">
-              <button className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest bg-stone-900 text-white rounded-full">All</button>
-              <button className="px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-stone-500 hover:bg-stone-100 rounded-full">Answered</button>
-            </div>
+            {hasDashboardAccess && (
+              <div className="flex flex-wrap gap-2 relative z-20">
+                <button 
+                  onClick={() => setActiveFilter("ALL")}
+                  className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-full transition-colors cursor-pointer ${
+                    activeFilter === "ALL" 
+                      ? "bg-stone-900 text-white" 
+                      : "text-stone-500 hover:bg-stone-100"
+                  }`}
+                >
+                  All
+                </button>
+                <button 
+                  onClick={() => setActiveFilter("ANSWERED")}
+                  className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-full transition-colors cursor-pointer ${
+                    activeFilter === "ANSWERED" 
+                      ? "bg-stone-900 text-white" 
+                      : "text-stone-500 hover:bg-stone-100"
+                  }`}
+                >
+                  Answered
+                </button>
+                <button 
+                  onClick={() => setActiveFilter("UNANSWERED")}
+                  className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-full transition-colors cursor-pointer ${
+                    activeFilter === "UNANSWERED" 
+                      ? "bg-stone-900 text-white" 
+                      : "text-stone-500 hover:bg-stone-100"
+                  }`}
+                >
+                  Unanswered
+                </button>
+              </div>
+            )}
           </div>
 
           {isLoading ? (
@@ -113,10 +157,10 @@ export default function AskCeoPage() {
             <div className="py-20 text-center text-red-500">Error loading questions.</div>
           ) : (
             <div className="space-y-6">
-              {questions?.map((q) => (
+              {filteredQuestions?.map((q) => (
                 <CeoQuestionCard key={q.id} question={q} />
               ))}
-              {questions?.length === 0 && (
+              {filteredQuestions?.length === 0 && (
                 <div className="py-20 text-center text-stone-500">No questions found.</div>
               )}
             </div>

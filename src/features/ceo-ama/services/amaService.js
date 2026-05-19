@@ -19,13 +19,18 @@ export const amaService = {
    * Fetch all approved and answered questions
    * @returns {Promise<Array>}
    */
-  getQuestions: async () => {
+  getQuestions: async (isAdmin = false) => {
     const path = "ama_questions";
     try {
-      const q = query(
-        collection(db, path),
-        where("status", "in", ["APPROVED", "ANSWERED"])
-      );
+      let q;
+      if (isAdmin) {
+        q = query(collection(db, path));
+      } else {
+        q = query(
+          collection(db, path),
+          where("status", "in", ["APPROVED", "ANSWERED"])
+        );
+      }
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs
         .map(doc => ({
