@@ -50,6 +50,11 @@ export const getAdminDb = () => {
   return admin.firestore();
 };
 
+export const getAdminMessaging = () => {
+  initializeFirebaseAdmin();
+  return admin.messaging();
+};
+
 // For backward compatibility while refactoring, but exported as functions to prevent crashes at module load
 export const adminAuth = () => getAdminAuth();
 export const adminDb = () => getAdminDb();

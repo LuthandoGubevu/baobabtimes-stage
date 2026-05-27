@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "../utils/cn";
+import { usePushNotifications } from "../features/notifications/hooks/usePushNotifications";
 
 /**
  * RootLayout component with common navigation
@@ -26,6 +27,7 @@ export default function RootLayout() {
   const { user, logout, isAdmin, isCEO, hasDashboardAccess } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  usePushNotifications(user?.uid ?? null);
 
   const handleLogout = () => {
     logout();

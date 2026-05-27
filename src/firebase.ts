@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import { getMessaging, isSupported } from 'firebase/messaging';
 import { getAuth } from 'firebase/auth';
 import { 
   getFirestore, 
@@ -24,6 +25,14 @@ export const db = initializeFirestore(app, {
 }, databaseId);
 
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+
+// Returns a Firebase Messaging instance only if the browser supports it (requires service workers).
+export async function getClientMessaging() {
+  if (typeof window === 'undefined') return null;
+  const supported = await isSupported();
+  if (!supported) return null;
+  return getMessaging(app);
+}
 
 // Connection test to help diagnose "client is offline" errors
 if (typeof window !== 'undefined') {

@@ -3,9 +3,80 @@ import path from "path";
 import { fileURLToPath } from "url";
 import mediaRouter from "./src/backend/modules/media/media.routes.ts";
 import authRouter from "./src/backend/modules/auth/auth.routes.ts";
+import { getAdminDb, getAdminMessaging } from "./src/backend/firebase-admin.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+function resolveActivityUrl(activity: any): string {
+  if (activity.url) return activity.url;
+  if (activity.entitySlug) return `/articles/${activity.entitySlug}`;
+  if (activity.type === 'recognition_posted') return '/recognition';
+  if (activity.type === 'ceo_message_published') return '/ask-ceo';
+  return '/';
+}
+
+function startPushNotificationSender() {
+  try {
+    const db = getAdminDb();
+    const messaging = getAdminMessaging();
+    let isFirstSnapshot = true;
+
+    db.collection('activity')
+      .orderBy('createdAt', 'desc')
+      .limit(5)
+      .onSnapshot(async (snapshot) => {
+        if (isFirstSnapshot) { isFirstSnapshot = false; return; }
+
+        const newDocs = snapshot.docChanges().filter(c => c.type === 'added');
+        if (newDocs.length === 0) return;
+
+        const tokensSnap = await db.collection('fcm_tokens').get();
+        const tokens = tokensSnap.docs.map(d => d.data().token as string).filter(Boolean);
+        if (tokens.length === 0) return;
+
+        for (const change of newDocs) {
+          const activity = change.doc.data();
+          const url = resolveActivityUrl(activity);
+          try {
+            const response = await messaging.sendEachForMulticast({
+              tokens,
+              notification: {
+                title: activity.title,
+                body: activity.message || '',
+              },
+              data: { url, type: activity.type || '' },
+              webpush: {
+                notification: {
+                  icon: '/icons/android-chrome-192x192.png',
+                  badge: '/icons/android-chrome-192x192.png',
+                }
+              }
+            });
+
+            // Clean up tokens that are no longer valid
+            const staleUserIds: string[] = [];
+            response.responses.forEach((r, i) => {
+              if (!r.success && r.error?.code === 'messaging/registration-token-not-registered') {
+                staleUserIds.push(tokensSnap.docs[i].id);
+              }
+            });
+            for (const uid of staleUserIds) {
+              await db.collection('fcm_tokens').doc(uid).delete();
+            }
+          } catch (err) {
+            console.error('>>> FCM send error:', err);
+          }
+        }
+      }, (err) => {
+        console.error('>>> Activity listener error:', err);
+      });
+
+    console.log('>>> Push notification sender started.');
+  } catch (err) {
+    console.error('>>> Failed to start push notification sender:', err);
+  }
+}
 
 async function startServer() {
   const app = express();
@@ -85,6 +156,7 @@ async function startServer() {
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`>>> THE BAOBAB TIMES server running on http://localhost:${PORT}`);
+    startPushNotificationSender();
   });
 }
 
