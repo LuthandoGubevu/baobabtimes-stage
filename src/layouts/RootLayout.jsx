@@ -19,6 +19,7 @@ import {
 import { useState } from "react";
 import { cn } from "../utils/cn";
 import { usePushNotifications } from "../features/notifications/hooks/usePushNotifications";
+import { NotificationPermissionBanner } from "../features/notifications/components/NotificationPermissionBanner";
 
 /**
  * RootLayout component with common navigation
@@ -27,7 +28,7 @@ export default function RootLayout() {
   const { user, logout, isAdmin, isCEO, hasDashboardAccess } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  usePushNotifications(user?.uid ?? null);
+  const { supportState, enableNotifications } = usePushNotifications(user?.uid ?? null);
 
   const handleLogout = () => {
     logout();
@@ -209,6 +210,13 @@ export default function RootLayout() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Outlet />
       </main>
+
+      {user && (
+        <NotificationPermissionBanner
+          supportState={supportState}
+          onEnable={enableNotifications}
+        />
+      )}
 
       {/* Footer */}
       <footer className="bg-white border-t border-stone-200 py-12 mt-auto">
