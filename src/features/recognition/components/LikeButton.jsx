@@ -18,12 +18,16 @@ export const LikeButton = ({ initialLiked = false, initialCount = 0, onLike, cla
   const [isPending, setIsPending] = useState(false);
 
   // Sync with initial props if they change (e.g. after a full data refresh)
+  // Only sync when there isn't a pending optimistic update in flight.
   useEffect(() => {
     if (!isPending) {
       setIsLiked(initialLiked);
       setCount(initialCount);
     }
-  }, [initialLiked, initialCount, isPending]);
+    // Intentionally do not include isPending in deps to avoid the parent
+    // overwriting optimistic UI while a toggle is inflight. We only want
+    // to respond to fresh prop values when not pending.
+  }, [initialLiked, initialCount]);
 
   const handleToggle = async (e) => {
     e.preventDefault();
@@ -31,9 +35,13 @@ export const LikeButton = ({ initialLiked = false, initialCount = 0, onLike, cla
 
     if (isPending) return;
 
+    // Capture current state for rollback if needed
+    const prevLiked = isLiked;
+    const prevCount = count;
+
     // Optimistic UI update
-    const newLikedState = !isLiked;
-    const newCount = newLikedState ? count + 1 : Math.max(0, count - 1);
+    const newLikedState = !prevLiked;
+    const newCount = newLikedState ? prevCount + 1 : Math.max(0, prevCount - 1);
 
     setIsLiked(newLikedState);
     setCount(newCount);
@@ -42,12 +50,13 @@ export const LikeButton = ({ initialLiked = false, initialCount = 0, onLike, cla
 
     try {
       if (onLike) {
-        await onLike(isLiked); // Pass old state to toggle
+        // Pass the previous state so the handler can toggle server-side
+        await onLike(prevLiked);
       }
     } catch (error) {
-      // Rollback on error
-      setIsLiked(isLiked);
-      setCount(count);
+      // Rollback on error using captured previous values
+      setIsLiked(prevLiked);
+      setCount(prevCount);
       console.error("Failed to toggle like:", error);
     } finally {
       setIsPending(false);
