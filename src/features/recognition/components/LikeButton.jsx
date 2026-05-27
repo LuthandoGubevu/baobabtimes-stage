@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Heart } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../../../utils/cn";
@@ -16,14 +16,19 @@ export const LikeButton = ({ initialLiked = false, initialCount = 0, onLike, cla
   const [count, setCount] = useState(initialCount);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const isPendingRef = useRef(false);
+  isPendingRef.current = isPending;
 
-  // Sync with initial props if they change (e.g. after a full data refresh)
+  // Sync with initial props if they change (e.g. after a full data refresh).
+  // Uses a ref for isPending so this effect only re-runs on prop changes,
+  // not when isPending flips to false after a successful like (which would
+  // reset the optimistic state back to stale server values).
   useEffect(() => {
-    if (!isPending) {
+    if (!isPendingRef.current) {
       setIsLiked(initialLiked);
       setCount(initialCount);
     }
-  }, [initialLiked, initialCount, isPending]);
+  }, [initialLiked, initialCount]);
 
   const handleToggle = async (e) => {
     e.preventDefault();

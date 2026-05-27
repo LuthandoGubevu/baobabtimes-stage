@@ -2,10 +2,7 @@ import { format } from "date-fns";
 import { Award } from "lucide-react";
 import { cn } from "../../../utils/cn";
 import { RecognitionBadge } from "./RecognitionBadge";
-import { LikeButton } from "./LikeButton";
 import { getRecognitionValue } from "../constants/recognitionValues";
-import { useAuth } from "../../../hooks/useAuth";
-import { recognitionService } from "../services/recognitionService";
 import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
 
 /**
@@ -15,21 +12,17 @@ import { AvatarPlaceholder } from "../../../components/ui/GenericPlaceholder";
  * @param {string} props.className
  */
 export default function RecognitionCard({ recognition, className }) {
-  const { user, executeProtectedAction } = useAuth();
-  const { 
-    id, 
-    fromName, 
-    fromAvatar, 
-    toName, 
-    toAvatar, 
-    content, 
-    createdAt, 
-    category, 
-    categories, 
-    isAnonymous, 
+  const {
+    fromName,
+    fromAvatar,
+    toName,
+    toAvatar,
+    content,
+    createdAt,
+    category,
+    categories,
+    isAnonymous,
     dateString,
-    likes = 0,
-    likedBy = []
   } = recognition;
 
   const displayCategories = categories || (category ? [category] : []);
@@ -38,17 +31,6 @@ export default function RecognitionCard({ recognition, className }) {
   const primaryValue = displayCategories[0] || "Excellence";
   const config = getRecognitionValue(primaryValue);
   const Icon = config.icon;
-
-  const isLiked = user ? likedBy.includes(user.uid) : false;
-
-  const handleLike = async (wasLiked) => {
-    // wasLiked = the state BEFORE this click (passed from LikeButton)
-    // We call toggleLike with the NEW desired state
-    await recognitionService.toggleLike(id, user.uid, !wasLiked);
-    // NOTE: do NOT invalidateQueries here — it overwrites the optimistic
-    // state in LikeButton while isPending is true, causing the heart to snap back.
-    // Queries will naturally refresh on next focus/mount.
-  };
 
   const formatDate = (date) => {
     if (dateString) return dateString;
@@ -125,19 +107,7 @@ export default function RecognitionCard({ recognition, className }) {
         })}
       </div>
 
-      <div className="flex justify-between items-center relative z-10 pt-4 border-t border-stone-100">
-        <LikeButton 
-          initialLiked={isLiked} 
-          initialCount={likes} 
-          onLike={(currentlyLiked) => {
-            if (!user) {
-              executeProtectedAction(() => handleLike(currentlyLiked));
-              // Throwing error triggers rollback in LikeButton so heart doesn't stay red while logged out
-              throw new Error("Authentication required");
-            }
-            return handleLike(currentlyLiked);
-          }}
-        />
+      <div className="flex justify-end items-center relative z-10 pt-4 border-t border-stone-100">
         <span className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
           {formatDate(createdAt)}
         </span>
