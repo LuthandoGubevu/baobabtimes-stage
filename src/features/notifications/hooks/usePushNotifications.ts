@@ -1,16 +1,26 @@
-import { useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { onMessage } from 'firebase/messaging';
 import { getClientMessaging } from '../../../firebase';
-import { pushNotificationService } from '../services/pushNotificationService';
+import {
+  pushNotificationService,
+  type NotificationSupportState,
+} from '../services/pushNotificationService';
 
 export function usePushNotifications(userId: string | null) {
-  // Request permission and register FCM token when user logs in
-  useEffect(() => {
-    if (!userId) return;
-    pushNotificationService.requestAndSaveToken(userId);
-  }, [userId]);
+  const [supportState, setSupportState] = useState<NotificationSupportState>('unsupported');
 
-  // Show a system notification for messages received while the app is in the foreground
+  useEffect(() => {
+    setSupportState(pushNotificationService.getSupportState());
+  }, []);
+
+  // Called from a button click — user gesture required by iOS
+  const enableNotifications = useCallback(async () => {
+    if (!userId || supportState !== 'ready') return;
+    await pushNotificationService.requestAndSaveToken(userId);
+    setSupportState(pushNotificationService.getSupportState());
+  }, [userId, supportState]);
+
+  // Handle FCM messages while the app is in the foreground
   useEffect(() => {
     let unsubscribe: (() => void) | null = null;
 
@@ -25,7 +35,7 @@ export function usePushNotifications(userId: string | null) {
           const notif = new Notification(title, {
             body,
             icon: '/icons/android-chrome-192x192.png',
-            tag: 'baobab-foreground'
+            tag: 'baobab-foreground',
           });
           notif.onclick = () => {
             window.focus();
@@ -37,4 +47,6 @@ export function usePushNotifications(userId: string | null) {
 
     return () => unsubscribe?.();
   }, []);
+
+  return { supportState, enableNotifications };
 }
